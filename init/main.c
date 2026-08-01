@@ -41,15 +41,14 @@ int initiateMemoryPtr() {
 
 
 static inline char* giveString(char* string, int startingIndex, int endingIndex) {
-    STR char* finalString = calloc(endingIndex - startingIndex + 1, sizeof(char));
+    int length = endingIndex - startingIndex;
+    char* finalString = calloc(length + 1, sizeof(char));
     if (finalString == NULL) {
         perror("can not allocate memory for the string");
         return NULL;
     }
-    for (register int i = startingIndex; i < endingIndex; i++) {
-        finalString[i - startingIndex] = string[i];
-    }
-    finalString[endingIndex - startingIndex] = '\0';
+    memcpy(finalString, string + startingIndex, length);
+    finalString[length] = '\0';
     return finalString;
 }
 
@@ -72,11 +71,16 @@ int loadServices(service*** services) {
     struct stat st;
     if (fstat(projectsFileFd, &st) != 0) {
         perror("fstat for projects file failed!\n");
+        close(projectsFileFd);
         return -1;
+    }
+    if (st.st_size == 0) {
+        return 0;
     }
     char* data = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, projectsFileFd, 0);
     if (data == MAP_FAILED) {
         perror("map failed for projects file!\n");
+        close(projectsFileFd);
         exit_program(-1)
     }
     int maxProjectsFileLength = st.st_size;
@@ -89,23 +93,23 @@ int loadServices(service*** services) {
     int lastIndex = 0;
     for (register int i = 0; i < maxProjectsFileLength; i++) {
         if (data[i] == '^') {
-            STR char* name = giveString(data, lastIndex, i);
+            char* name = giveString(data, lastIndex, i);
             int initialJ = i + 1;
             for (register int j = initialJ; j < maxProjectsFileLength; j++) {
                 if (data[j] == '#') {
-                    STR char* githubRepo = giveString(data, i+1, j);
-                    printf("githubRepo:%s\n", githubRepo);
+                    char* githubRepo = giveString(data, i+1, j);
                     int initialK = j+1;
                     for (register int k = initialK; k < maxProjectsFileLength; k++) {
                         if (data[k] == '\n') {
-                            STR char* pidStr = giveString(data, j+1, k);
+                            char* pidStr = giveString(data, j+1, k);
                             int pid = atoi(pidStr);
-                            printf("adding %s, %s, %i\n", name, githubRepo, pid);
-                            if(loadProject(services, githubRepo, name) != 0) {
+                            if(loadProject(services, githubRepo, name, pid) != 0) {
                                 fprintf(stderr, "can not load project space empty!\n");
                                 free(githubRepo);
                                 free(name);
                                 free(pidStr);
+                                munmap(data, st.st_size);
+                                close(projectsFileFd);
                                 exit_program(-1)
                             }
                             lastIndex = k+1;
@@ -114,10 +118,12 @@ int loadServices(service*** services) {
                         }
                         continue;
                     }
+                    free(githubRepo);
                     break;
                 }
                 continue;
             }
+            free(name);
         }
         continue;
     }

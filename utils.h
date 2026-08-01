@@ -15,5 +15,6 @@
 
 int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName);
 _Bool fileExists(char* filePath);
-void freeServices(service*** services);
-int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName);
+void freeServices(service*** __restrict__ services);
+int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid);
+int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach);

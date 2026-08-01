@@ -1,2 +1,2 @@
 #pragma once
-int save_services(service** services);
+int save_services(service*** services);
