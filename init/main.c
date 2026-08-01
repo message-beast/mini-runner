@@ -116,16 +116,13 @@ int loadServices(service*** services) {
                             free(pidStr);
                             break;
                         }
-                        continue;
                     }
                     free(githubRepo);
                     break;
                 }
-                continue;
             }
             free(name);
         }
-        continue;
     }
     return 0;
 }
