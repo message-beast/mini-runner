@@ -16,12 +16,12 @@ typedef struct result {
 
 
 static inline __attribute__((always_inline, hot))int sort_results(const void * a, const void* b) {
-    result result1 = *(result *)a;
-    result result2 = *(result *)b;
-    if (result1.score < result2.score) {
+    result* result1 = *(result **)a;
+    result* result2 = *(result **)b;
+    if (result1->score < result2->score) {
         return 1;
     }
-    if (result1.score > result2.score) {
+    if (result1->score > result2->score) {
         return -1;
     }
     return 0;
@@ -146,7 +146,7 @@ __attribute__((hot)) void search(service*** __restrict__ services, char* __restr
         int numberOfResults = 0;
         int resultsCapacity = __INITIAL_SCALE_CAPACITY_OF_RESULTS__;
         DEBUG
-        result* results = malloc( __INITIAL_SCALE_CAPACITY_OF_RESULTS__ * sizeof(result));
+        result** results = malloc( __INITIAL_SCALE_CAPACITY_OF_RESULTS__ * sizeof(result *));
         if (__builtin_expect(results == NULL, 0)) {
             perror("can not allocate memory for results\n");
             return;
@@ -159,7 +159,7 @@ __attribute__((hot)) void search(service*** __restrict__ services, char* __restr
                 }
                 if (__builtin_expect(numberOfResults >= resultsCapacity, 0)) {
                     int newCapacity = resultsCapacity + __INITIAL_SCALE_CAPACITY_OF_RESULTS__;
-                    result * tmp = realloc(results, sizeof(result) * newCapacity);
+                    result** tmp = realloc(results, sizeof(result*) * newCapacity);
                     if (tmp == NULL) {
                         perror("can not reallocate memory for results\n");
                         return;
@@ -168,10 +168,9 @@ __attribute__((hot)) void search(service*** __restrict__ services, char* __restr
                     tmp = NULL;
                     resultsCapacity = newCapacity;
                 }
-                result newResult = {
-                    .service = (*services)[i],
-                    .score = score
-                };
+                result* newResult = malloc(sizeof(result));
+                newResult->service = (*services)[i],
+                newResult->score = score;
                 results[numberOfResults] = newResult;
                 numberOfResults++;
             }
@@ -183,9 +182,9 @@ __attribute__((hot)) void search(service*** __restrict__ services, char* __restr
             return;
         }
 
-        qsort(results, numberOfResults, sizeof(result), sort_results);
+        qsort(results, numberOfResults, sizeof(result*), sort_results);
         for (register int i = 0; i < numberOfResults; ++i) {
-            service* current = results[i].service;
+            service* current = results[i]->service;
             char* firstGap = defineTab(strlen(current->name), 25);
             char* secondGap = defineTab(strlen(current->githubRepo), 100);
             printf("\033[32m%s%s\033[33m%s%s\033[31m%i\033[0m\n", current->name, firstGap, current->githubRepo, secondGap, current->pid);
@@ -193,6 +192,10 @@ __attribute__((hot)) void search(service*** __restrict__ services, char* __restr
             free(secondGap);
             firstGap = NULL;
             secondGap = NULL;
+        }
+        for (register int i = 0; i < numberOfResults; ++i) {
+            free(results[i]);
+            results[i] = NULL;
         }
         free(results);
         results = NULL;
