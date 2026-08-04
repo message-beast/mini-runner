@@ -12,7 +12,10 @@
 #include "basic.h"
 #include <sys/wait.h>
 #include <threads.h>
-
+#include "utils_ops/load_project.h"
+#include "utils_ops/free_services.h"
+#include "utils_ops/load_project.h"
+#include "utils_ops/run_service.h"
 int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName);
 _Bool fileExists(char* filePath);
 void freeServices(service*** __restrict__ services);
