@@ -15,22 +15,22 @@
 #pragma optimize("03")
 int initiateMemoryPtr() {
     int sharedUpdateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644, NULL);
-    if (sharedUpdateStatusFileFd == -1) {
+    if (__builtin_expect(sharedUpdateStatusFileFd == -1, 0)) {
         perror("can not open the update status file!\n");
         exit_program(-1)
     }
     struct stat st;
-    if (fstat(sharedUpdateStatusFileFd, &st) != 0) {
+    if (__builtin_expect(fstat(sharedUpdateStatusFileFd, &st) != 0, 0)) {
         perror("fstat failed!\n");
         exit_program(-1)
     }
 
-    if (ftruncate(sharedUpdateStatusFileFd, strlen("idle")) != 0) {
+    if (__builtin_expect(ftruncate(sharedUpdateStatusFileFd, strlen("idle")) != 0, 0)) {
         printf("ftruncate failed!\n");
         exit_program(-1)
     }
     char* data = mmap(NULL, strlen("idle"), PROT_READ | PROT_WRITE, MAP_SHARED, sharedUpdateStatusFileFd, 0);
-    if (data == MAP_FAILED) {
+    if (__builtin_expect(data == MAP_FAILED, 0)) {
         perror("map failed for shared_update_file\n");
         exit_program(-1)
     }
@@ -46,7 +46,7 @@ int initiateMemoryPtr() {
 static inline char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;
     char* finalString = calloc(length + 1, sizeof(char));
-    if (finalString == NULL) {
+    if (__builtin_expect(finalString == NULL, 0)) {
         perror("can not allocate memory for the string");
         return NULL;
     }
@@ -59,30 +59,30 @@ static inline char* giveString(char* string, int startingIndex, int endingIndex)
 
 __attribute__((hot)) int loadServices(service*** services) {
     clock_t ci = clock();
-    if (services == NULL) {
+    if (__builtin_expect(services == NULL, 0)) {
         service** tmp = calloc(__INITIAL_SCALE_SIZE_OF_SERVICES__, sizeof(service*));
-        if (tmp == NULL) {
+        if (__builtin_expect(tmp == NULL, 0)) {
             perror("memory allocation for services failed!");
             exit_program(-1)
         }
         (*services) = tmp;
     }
     int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644, NULL);
-    if (projectsFileFd == -1) {
+    if (__builtin_expect(projectsFileFd == -1, 0)) {
         perror("can not open the projects file!\n");
         return -1;
     }
     struct stat st;
-    if (fstat(projectsFileFd, &st) != 0) {
+    if (__builtin_expect(fstat(projectsFileFd, &st) != 0, 0)) {
         perror("fstat for projects file failed!\n");
         close(projectsFileFd);
         return -1;
     }
-    if (st.st_size == 0) {
+    if (__builtin_expect(st.st_size == 0, 0)) {
         return 0;
     }
     char* data = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, projectsFileFd, 0);
-    if (data == MAP_FAILED) {
+    if (__builtin_expect(data == MAP_FAILED, 0)) {
         perror("map failed for projects file!\n");
         close(projectsFileFd);
         exit_program(-1)
@@ -103,7 +103,7 @@ __attribute__((hot)) int loadServices(service*** services) {
         if (__builtin_expect((i & 74) == 0, 0)) {
             __builtin_prefetch(&data[i + 75], 0, 3);
         }
-        if (data[i] == '^') {
+        if (__builtin_expect(data[i] == '^', 0)) {
             char* name = giveString(data, lastIndex, i);
             int initialJ = i + 1;
             #pragma omp push
@@ -113,14 +113,14 @@ __attribute__((hot)) int loadServices(service*** services) {
                 if (__builtin_expect((i & 74) == 0, 0)) {
                     __builtin_prefetch(&data[i + 75], 0, 3);
                 }
-                if (data[j] == '#') {
+                if (__builtin_expect(data[j] == '#', 0)) {
                     char* githubRepo = giveString(data, i+1, j);
                     int initialK = j+1;
                     for (register int k = initialK; k < maxProjectsFileLength; k++) {
                         if (__builtin_expect((i & 74) == 0, 0)) {
                             __builtin_prefetch(&data[i + 75], 0, 3);
                         }
-                        if (data[k] == '\n') {
+                        if (__builtin_expect(data[k] == '\n', 0)) {
                             char* pidStr = giveString(data, j+1, k);
                             int pid = atoi(pidStr);
                             if(__builtin_expect(loadProject(services, githubRepo, name, pid) != 0, 0)) {

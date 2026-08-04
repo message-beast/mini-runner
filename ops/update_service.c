@@ -12,7 +12,7 @@
 #include <sys/wait.h>
 static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char* dataToWrite) {
     int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644, NULL);
-    if (updateStatusFileFd == -1) {
+    if (__builtin_expect(updateStatusFileFd == -1, 0)) {
         perror("can not open update status file!\n");
         return -1;
     }
@@ -31,7 +31,7 @@ static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char*
         return -1;
     }
     char* data = mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_SHARED, updateStatusFileFd, 0);
-    if (data == NULL) {
+    if (__builtin_expect(data == MAP_FAILED, 0)) {
         perror("mem map failed on updateStatus file!\n");
         return -1;
     }
@@ -54,7 +54,7 @@ static inline __attribute__((always_inline, hot)) int update_service(service* fo
         return -1;
     }
     if (stop) {
-        if (foundService->pid != 0) {
+        if (__builtin_expect(foundService->pid != 0, 1)) {
             if (__builtin_expect(kill(foundService->pid, SIGINT) != 0, 0)) {
                 fprintf(stderr, "\033[31mcan not stop a service\033[33m\"%s\"\033[0m\n", foundService->name);
             }
@@ -74,13 +74,13 @@ static inline __attribute__((always_inline, hot)) int update_service(service* fo
         }
         char path[size];
         snprintf(path, size, "/var/lib/%s", foundService->name);
-        if (path == NULL) {
+        if (__builtin_expect(path == NULL, 0)) {
             perror("failed to generate path!\n");
             write(pipeFd[1], "f", 2);
             close(pipeFd[1]);
             abort();
         }
-        if (chdir(path) != 0) {
+        if (__builtin_expect(chdir(path) != 0, 0)) {
             fprintf(stderr, "can not change the directory to %s\n", path);
             write(pipeFd[1], "f", 2);
             close(pipeFd[1]);

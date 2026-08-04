@@ -13,7 +13,7 @@ static inline __attribute__((always_inline, hot)) char* concat(char* __restrict_
     size_t secondLen = strlen(secondStr);
     int maxLength = firstLen+ secondLen;
     char* finalString = malloc(maxLength + 1);
-    if (finalString == NULL) {
+    if (__builtin_expect(finalString == NULL, 0)) {
         perror("memory allocation for concatination string failed!\n");
         return NULL;
     }
@@ -24,43 +24,43 @@ static inline __attribute__((always_inline, hot)) char* concat(char* __restrict_
 }
 
 int save_services(service*** services) {
-    if (*services == NULL && numberOfProjects != 0 || services == NULL) {
+    if (__builtin_expect(*services == NULL && numberOfProjects != 0 || services == NULL, 0)) {
         printf("services is actually NULL\n");
         return -1;
     }
     _Bool findToSave = 0;
     for (register int i = 0; i < numberOfProjects; i++) {
-        if ((*services)[i]->cloned == 1) {
+        if (__builtin_expect((*services)[i]->cloned == 1, 1)) {
             findToSave = 1;
             break;
         }
     }
-    if (!findToSave && numberOfProjects > 0) {
+    if (__builtin_expect(!findToSave && numberOfProjects > 0, 0)) {
         return 0;
     }
     int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644, NULL);
-    if (projectsFileFd == -1) {
+    if (__builtin_expect(projectsFileFd == -1, 0)) {
         perror("failed to open projects file!\n");
         exit_program(-1)
     }
     struct stat st;
-    if (fstat(projectsFileFd, &st) != 0) {
+    if (__builtin_expect(fstat(projectsFileFd, &st) != 0, 0)) {
         perror("fstat failed on projects file!");
         close(projectsFileFd); 
         exit_program(-1)  
     }
-    if (numberOfProjects == 0 && st.st_size == 0) {
+    if (__builtin_expect(numberOfProjects == 0 && st.st_size == 0, 0)) {
         return 0;
     }
     char* dataToBeWritten = NULL;
     _Bool first = 1;
     for (register int i = 0; i < numberOfProjects; i++) {
-        if ((*services)[i]->cloned == 0) {
+        if (__builtin_expect((*services)[i]->cloned == 0, 0)) {
             continue;
         }
         char singleData[318];
         snprintf(singleData, sizeof(singleData), "%s^%s#%i\n", (*services)[i]->name, (*services)[i]->githubRepo, (*services)[i]->pid);
-        if (strlen(singleData) <= 0) {
+        if (__builtin_expect(strlen(singleData) <= 0, 0)) {
             perror("can not copy single service data!\n");
             free(dataToBeWritten);
             close(projectsFileFd);
@@ -71,7 +71,7 @@ int save_services(service*** services) {
             first = 0;
         } else {
             char* tmp = concat(dataToBeWritten, singleData);
-            if (tmp == NULL) {
+            if (__builtin_expect(tmp == NULL, 0)) {
                 perror("can not concat data to be written and single data of service!\n");
                 free(dataToBeWritten);
                 close(projectsFileFd);
@@ -81,13 +81,13 @@ int save_services(service*** services) {
             dataToBeWritten = tmp;
         }
     }
-    if (dataToBeWritten == NULL && numberOfProjects > 0) {
+    if (__builtin_expect(dataToBeWritten == NULL && numberOfProjects > 0, 0)) {
         perror("no more memory can be used to concat the services string!\n");
         free(dataToBeWritten);
         close(projectsFileFd);
         exit_program(-1)
     }
-    if (dataToBeWritten != NULL) { 
+    if (__builtin_expect(dataToBeWritten != NULL, 0)) { 
         if (ftruncate(projectsFileFd, strlen(dataToBeWritten)) != 0) {
             perror("ftruncate failed for projects file!\n");
             free(dataToBeWritten);
@@ -96,7 +96,7 @@ int save_services(service*** services) {
         }
     }
     char* data = mmap(NULL, ((dataToBeWritten) != NULL ? strlen(dataToBeWritten) : st.st_size), PROT_READ | PROT_WRITE, MAP_SHARED, projectsFileFd, 0);
-    if (data == MAP_FAILED) {
+    if (__builtin_expect(data == MAP_FAILED, 0)) {
         perror("memory mapping failed for projects file!\n");
         free(dataToBeWritten);
         close(projectsFileFd);

@@ -8,7 +8,7 @@
 #include "../base/config.h"
 #include <string.h>
 static inline __attribute__((always_inline)) int killProcess(pid_t pid) {
-    if (kill(pid, SIGTERM) != 0) {
+    if (__builtin_expect(kill(pid, SIGTERM) != 0, 0)) {
         fprintf(stderr, "\033[31mFailed to kill the process with id of \033[33m%i\033[31mm!\033[0m\n", pid);
         return -1;
     }
@@ -19,7 +19,7 @@ static inline __attribute__((always_inline)) int killProcess(pid_t pid) {
 
 int stopService(service*** __restrict__ services, char* __restrict__ serviceName) {
     for (register int i = 0; i < numberOfProjects; ++i) {
-        if (strcmp((*services)[i]->name, serviceName) == 0) {
+        if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
             DEBUG
             service* currentService = (*services)[i];
             printf("its pid is %i\n", currentService->pid);
@@ -27,7 +27,7 @@ int stopService(service*** __restrict__ services, char* __restrict__ serviceName
             if (currentService->pid == 0) {
                 return 0;
             }
-            if (killProcess(currentService->pid) != 0) {
+            if (__builtin_expect(killProcess(currentService->pid) != 0, 0)) {
                 return -1;
             }
             currentService->pid = 0;

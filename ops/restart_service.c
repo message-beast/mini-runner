@@ -11,7 +11,7 @@
     if (!pid) {
         return 0;
     }
-    if (kill(pid, SIGINT) != 0) {
+    if (__builtin_expect(kill(pid, SIGINT) != 0, 0)) {
         fprintf(stderr, "can not kill service with its pid %i\n", pid);
         return -1;
     }

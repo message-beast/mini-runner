@@ -37,17 +37,17 @@ pthread_mutex_t mutex;
         (*services) = tmp;
     }
     for (register int i = 0; i < numberOfProjects; i++) {
-        if (strcmp(githubRepo, (*services)[i]->githubRepo) == 0) {
+        if (__builtin_expect(strcmp(githubRepo, (*services)[i]->githubRepo) == 0, 0)) {
             printf("\033[33m\tgithub repo already exists!\033[0m\n");
             return -1;
         }
-        if (strcmp(nickName, (*services)[i]->name) == 0) {
+        if (__builtin_expect(strcmp(nickName, (*services)[i]->name) == 0, 0)) {
             fprintf(stderr, "\033[31m|-\033[33m%s \033[0malready exists for another servies of %s\ncode panick!\033[0m\n", nickName, (*services)[i]->githubRepo);
             return -1;
         }
     }
     service* newService = malloc(sizeof(service));
-    if (newService == NULL) {
+    if (__builtin_expect(newService == NULL, 0)) {
         printf("memory allocation for new service failed!\n");
         return -1;
     }
@@ -55,9 +55,9 @@ pthread_mutex_t mutex;
     newService->githubRepo = strdup(githubRepo);
     newService->name = strdup(nickName);
     newService->pid = pid;
-    if (capacityOfServices <= numberOfProjects) {
+    if (__builtin_expect(capacityOfServices <= numberOfProjects, 0)) {
         service** tmp = realloc(*services, (capacityOfServices + __INITIAL_SCALE_SIZE_OF_SERVICES__) * (sizeof(service*)));
-        if (tmp == NULL) {
+        if (__builtin_expect(tmp == NULL, 0)) {
             perror("can not resize memory for additional of services");
             exit_program(-1)
         }
@@ -72,7 +72,7 @@ pthread_mutex_t mutex;
         :
         : "memory"
     );
-    if ((*services)[numberOfProjects]->githubRepo == NULL) {
+    if (__builtin_expect((*services)[numberOfProjects]->githubRepo == NULL, 0)) {
         printf("\033[31mcan not add project!\033[0m\n");
         return -1;
     }
@@ -85,7 +85,7 @@ pthread_mutex_t mutex;
 
 
 [[nodiscard]]int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName) {
-    if (services == NULL) {
+    if (__builtin_expect(services == NULL, 0)) {
         service** tmp = calloc(__INITIAL_SCALE_SIZE_OF_SERVICES__, sizeof(service*));
         if (tmp == NULL) {
             perror("can not allocate memory for services!\n");
@@ -94,17 +94,17 @@ pthread_mutex_t mutex;
         (*services) = tmp;
     }
     for (register int i = 0; i < numberOfProjects; i++) {
-        if (strcmp(githubRepo, (*services)[i]->githubRepo) == 0) {
+        if (__builtin_expect(strcmp(githubRepo, (*services)[i]->githubRepo) == 0, 0)) {
             printf("\033[33m\tgithub repo already exists!\033[0m\n");
             return -1;
         }
-        if (strcmp(nickName, (*services)[i]->name) == 0) {
+        if (__builtin_expect(strcmp(nickName, (*services)[i]->name) == 0, 0)) {
             fprintf(stderr, "\033[31m|-\033[33m%s \033[0malready exists for another servies of %s\033[0m\n", nickName, (*services)[i]->githubRepo);
             return -1;
         }
     }
-    service* newService = calloc(1, sizeof(service));
-    if (newService == NULL) {
+    service* newService = malloc(sizeof(service));
+    if (__builtin_expect(newService == NULL, 0)) {
         printf("memory allocation for new service failed!\n");
         return -1;
     }
@@ -112,9 +112,9 @@ pthread_mutex_t mutex;
     newService->githubRepo = strdup(githubRepo);
     newService->name = strdup(nickName);
     newService->pid = 0;
-    if (capacityOfServices <= numberOfProjects) {
+    if (__builtin_expect(capacityOfServices <= numberOfProjects, 0)) {
         service** tmp = realloc(*services, (capacityOfServices + __INITIAL_SCALE_SIZE_OF_SERVICES__) * sizeof(service*));
-        if (tmp == NULL) {
+        if (__builtin_expect(tmp == NULL, 0)) {
             perror("can not resize memory for additional of services");
             free(newService);
             exit_program(-1)
@@ -129,14 +129,14 @@ pthread_mutex_t mutex;
         :
         : "memory"
     );
-    if ((*services)[numberOfProjects]->githubRepo == NULL || (*services)[numberOfProjects]->pid != 0) {
+    if (__builtin_expect((*services)[numberOfProjects]->githubRepo == NULL || (*services)[numberOfProjects]->pid != 0, 0)) {
         printf("\033[31mcan not add project!\033[0m\n");
         free(newService);
         return -1;
     }
     numberOfProjects++;
     printf("Service info to add\n\t\033[33m|\033[31m-\033[33mname: \033[32m%s\n\t\033[33m|\033[31m-\033[33mgithubRepo: \033[32m%s\n\t\033[33m|\033[31m-\033[33m cloned: \033[32m%i\n\t\033[33m|\033[31m-\033[33mpid: \033[32m%i\033[0m\n", newService->name, newService->githubRepo, newService->cloned, newService->pid);
-    if (cloneRepo((*services)) != 0) {
+    if (__builtin_expect(cloneRepo((*services)) != 0, 0)) {
         fprintf(stderr, "\033[31mcan not clone the repository!\033[0m\n");
         return -1;
     }
@@ -144,19 +144,19 @@ pthread_mutex_t mutex;
 }
 
 int cloneRepo(service** services) {
-    if (services == NULL) {
+    if (__builtin_expect(services == NULL, 0)) {
         perror("services is empty!\n");
         return -1;
     }
     for (register int i = 0; i < numberOfProjects; i++) {
-        if (services[i]->cloned == 0) {
+        if (__builtin_expect(services[i]->cloned == 0, 1)) {
             size_t size = snprintf(NULL, 0, "sudo git clone %s /var/lib/%s", services[i]->githubRepo, services[i]->name);
             if (size <= 0) {
                 exit_program(-1)
             }
             char* command = calloc(size + 1, sizeof(char));
             snprintf(command, size + 1, "sudo git clone %s /var/lib/%s", services[i]->githubRepo, services[i]->name);
-            if (command == NULL) {
+            if (__builtin_expect(command == NULL, 0)) {
                 exit_program(-1)
             }
             int pipeFd[2];
@@ -181,14 +181,14 @@ int cloneRepo(service** services) {
                 #if defined(DEBUG_MODE)
                     printf("cloning exit status: %i\n", WEXITSTATUS(status));
                 #endif
-                if (WEXITSTATUS(status) != 0) {
+                if (__builtin_expect(WEXITSTATUS(status) != 0, 0)) {
                     perror("\n\033[31mcan not clone repository!\033[0m\n");
                     exit_program(-1)
                 }
                 char buff[10];
                 read(pipeFd[0], buff, 10);
                 close(pipeFd[0]);
-                if (strcmp(buff, "failed") == 0) {
+                if (__builtin_expect(strcmp(buff, "failed") == 0, 0)) {
                     return -1;
                 }
                 services[i]->cloned = 1;
@@ -201,7 +201,7 @@ int cloneRepo(service** services) {
 
 
 static inline __attribute__((always_inline)) int writePid(service** __restrict__ services, char* __restrict__ serviceName, int pid) {
-    if (services == NULL || *services == NULL) {
+    if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         fprintf(stderr, "can not run %s\n becuse services are empty!\n", serviceName);
         return -1;
     }
@@ -221,7 +221,7 @@ void* runthread(void* paramss) {
     }
     char path[size + 1];
     snprintf(path, size + 1, "/var/lib/%s", ser->name);
-    if (path == NULL) {
+    if (__builtin_expect(path == NULL, 0)) {
         perror("can not create command to navigate directory!\n");
         atomic_exchange(&pidSet, 1);
         return NULL;
@@ -293,12 +293,12 @@ void* runthread(void* paramss) {
 
 static inline __attribute__((always_inline, hot)) _Bool updateAvialable() {
     int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644, NULL);
-    if (updateStatusFileFd == -1) {
+    if (__builtin_expect(updateStatusFileFd == -1, 0)) {
         perror("can not open data/updateStatus file!\n");
         return 0;
     }
     struct stat st;
-    if (fstat(updateStatusFileFd, &st) != 0) {
+    if (__builtin_expect(fstat(updateStatusFileFd, &st) != 0, 0)) {
         perror("fstat failed on updateStatus!\n");
         return 0;
     }
@@ -328,11 +328,11 @@ static inline __attribute__((always_inline, hot)) void backup(service** foundSer
 
 
 int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach) {
-    if (services == NULL || *services == NULL) {
+    if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         fprintf(stderr, "\033[31mcan not run service \033[33m%s\033[0m, services empty!\n", name);
         return -1;
     }
-    if (name == NULL || strlen(name) <= 0) {
+    if (__builtin_expect(name == NULL || strlen(name) <= 0, 0)) {
         fprintf(stderr, "invalid service name!\n");
         return -1;
     }
@@ -346,12 +346,12 @@ int runService(service*** __restrict__ services, char* __restrict__ name, char* 
     for (register int i = 0; i < numberOfProjects; i++) {
         if (strcmp((*services)[i]->name, name) == 0) {
             size_t size = snprintf(NULL, 0, "/var/lib/%s/%s", name, bash);
-            if (size <= 0) {
+            if (__builtin_expect(size <= 0, 0)) {
                 perror("size can not be dynamically calculate!\n");
                 exit_program(-1)
             }
             char* command = malloc(size + 1);
-            if (command == NULL) {
+            if (__builtin_expect(command == NULL, 0)) {
                 perror("can not allocate memory for command");
                 exit_program(-1)
             }
@@ -370,7 +370,7 @@ int runService(service*** __restrict__ services, char* __restrict__ name, char* 
                 :
                 : "memory"
             );
-            if (pthread_create(&process_thread, NULL, runthread, (void*)params) != 0) {
+            if (__builtin_expect(pthread_create(&process_thread, NULL, runthread, (void*)params) != 0, 0)) {
                 perror("can not run service! failed to create thread!\n");
                 free(params);
                 free(command);
@@ -399,12 +399,12 @@ int runService(service*** __restrict__ services, char* __restrict__ name, char* 
 
 
 int warmService(service** __restrict__ services, char* __restrict__ bash, _Bool attach) {
-    if (services == NULL || *services == NULL) {
+    if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         fprintf(stderr, "\033[31mcan not run service \033[33m%s\033[0m, services empty!\n", (*services)->name);
         return -1;
     }
     char* name = (*services)->name;
-    if (name == NULL || strlen(name) <= 0) {
+    if (__builtin_expect(name == NULL || strlen(name) <= 0, 0)) {
         fprintf(stderr, "invalid service name!\n");
         return -1;
     }
@@ -416,12 +416,12 @@ int warmService(service** __restrict__ services, char* __restrict__ bash, _Bool 
         return -1;
     }
     size_t size = snprintf(NULL, 0, "/var/lib/%s/%s", name, bash);
-    if (size <= 0) {
+    if (__builtin_expect(size <= 0, 0)) {
         perror("size can not be dynamically calculate!\n");
         exit_program(-1)
     }
     char* command = malloc(size + 1);
-    if (command == NULL) {
+    if (__builtin_expect(command == NULL, 0)) {
         perror("can not allocate memory for command");
         exit_program(-1)
     }
@@ -439,7 +439,7 @@ int warmService(service** __restrict__ services, char* __restrict__ bash, _Bool 
         :
         : "memory"
     );
-    if (pthread_create(&process_thread, NULL, runthread, (void*)params) != 0) {
+    if (__builtin_expect(pthread_create(&process_thread, NULL, runthread, (void*)params) != 0, 0)) {
         perror("can not run service! failed to create thread!\n");
         free(params);
         free(command);
@@ -492,17 +492,17 @@ _Bool fileExists(char* filePath) {
 
 
 void freeServices(service*** __restrict__ services) {
-    if (services == NULL || (*services) == NULL) {
+    if (__builtin_expect(services == NULL || (*services) == NULL, 0)) {
         return;
     }
     for (register int i = 0; i < numberOfProjects; i++) {
-        if ((*services)[i] != NULL) {
+        if (__builtin_expect((*services)[i] != NULL, 1)) {
             free((*services)[i]->githubRepo);
             free((*services)[i]->name);
             free((*services)[i]);
         }
     }
-    if (*services != NULL) {
+    if (__builtin_expect(*services != NULL, 1)) {
         free(*services);
     }
     *services = NULL;

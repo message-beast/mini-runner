@@ -123,7 +123,7 @@ __attribute__((hot)) void search(service*** __restrict__ services, char* __restr
     printf("NAME\t\t\t GITHUB-REPO\t\t\t\t\t\t\t\t\t\t\t     PID\n");
     if (!sort) {
         for (register int i = 0; i < numberOfProjects; ++i) {
-            if (findMatch((*services)[i]->name, serviceNameSearch) > 0) {
+            if (__builtin_expect(findMatch((*services)[i]->name, serviceNameSearch) > 0, 1)) {
                 if (__builtin_expect(!foundMatch, 0)) {
                     foundMatch = true;
                 }
@@ -160,7 +160,7 @@ __attribute__((hot)) void search(service*** __restrict__ services, char* __restr
                 if (__builtin_expect(numberOfResults >= resultsCapacity, 0)) {
                     int newCapacity = resultsCapacity + __INITIAL_SCALE_CAPACITY_OF_RESULTS__;
                     result** tmp = realloc(results, sizeof(result*) * newCapacity);
-                    if (tmp == NULL) {
+                    if (__builtin_expect(tmp == NULL, 0)) {
                         perror("can not reallocate memory for results\n");
                         return;
                     }

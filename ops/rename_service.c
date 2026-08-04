@@ -20,7 +20,7 @@ static inline __attribute__((always_inline, hot)) int renameServiceProjectFoler(
         perror("failed to get the string of full path of old/new project directory\n");
         return -1;
     }
-    if (rename(beforeFolderName, newFolderName) != 0) {
+    if (__builtin_expect(rename(beforeFolderName, newFolderName) != 0, 0)) {
         if (errno == ENOENT) {
             fprintf(stderr, "\033[31mcan not find service with folder of /var/lib/%s\n", beforeFolderName);
         } else if (errno == EACCES) {

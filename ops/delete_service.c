@@ -11,13 +11,13 @@
 #include <sys/wait.h>
 static inline char* cutString(char* __restrict__ data, int startingIndex, int endingIndex) {
     int dataLength = strlen(data);
-    if (dataLength <= 0) {
+    if (__builtin_expect(dataLength <= 0, 0)) {
         return NULL;
     }
     //for top removal
     if (startingIndex == 0) {
         char* newString = malloc((dataLength - endingIndex) * sizeof(char));
-        if (newString == NULL) {
+        if (__builtin_expect(newString == NULL, 0)) {
             perror("memory allocation for new string failed on top!\n");
             return NULL;
         }
@@ -35,7 +35,7 @@ static inline char* cutString(char* __restrict__ data, int startingIndex, int en
     //for bottom removal
     if (endingIndex == dataLength - 1) {
         char* newString = malloc((startingIndex + 1) * sizeof(char));
-        if (newString == NULL) {
+        if (__builtin_expect(newString == NULL, 0)) {
             perror("memory allocaton for new string failed for the bottom remoal!\n");
             return NULL;
         }
@@ -49,14 +49,14 @@ static inline char* cutString(char* __restrict__ data, int startingIndex, int en
     // for middle removal
     int newLength  = dataLength - (endingIndex - startingIndex);
     char* newString = malloc((newLength) * sizeof(char));
-    if (newString == NULL) {
+    if (__builtin_expect(newString == NULL, 0)) {
         perror("memory allocation for new string failed!");
         return NULL;
     }
 
 
     for (register int i = 0; i < newLength - 1; i++) {
-        if (i >= startingIndex) {
+        if (__builtin_expect(i >= startingIndex, 1)) {
             newString[i] = data[endingIndex + (i - startingIndex) + 1];
         } else {
             newString[i] = data[i];
@@ -70,13 +70,13 @@ static inline char* cutString(char* __restrict__ data, int startingIndex, int en
 
 
 static inline char* getValue(char* __restrict__ data, int start, int end) {
-    if (data == NULL || start < 0 || end <= 0) {
+    if (__builtin_expect(data == NULL || start < 0 || end <= 0, 0)) {
         fprintf(stderr, "bad parameters!\n");
         return NULL;
     }
     int maxdataLength = strlen(data);
     char* newString = malloc(end - start + 2);
-    if (newString == NULL) {
+    if (__builtin_expect(newString == NULL, 0)) {
         perror("memory allocation for newString to just get value failed!\n");
         exit_program(-1)
     }
@@ -99,13 +99,13 @@ static inline verbose getSeparateValues(char* singleData) {
     int dataLength = strlen(singleData);
     int lastIndex = 0;
     for (register int i = 0; i < dataLength; i++) {
-        if (singleData[i] == '^') {
+        if (__builtin_expect(singleData[i] == '^', 0)) {
             verboseOfProject.name = getValue(singleData, 0, i - 1);
             lastIndex = i + 1;
-        } else if (singleData[i] == '#') {
+        } else if (__builtin_expect(singleData[i] == '#', 0)) {
             verboseOfProject.githubRepo = getValue(singleData, lastIndex, i - 1);
             lastIndex = i + 1;
-        } else if (singleData[i] == '\n') {
+        } else if (__builtin_expect(singleData[i] == '\n', 0)) {
             verboseOfProject.pid = atoi(getValue(singleData, lastIndex, i - 1));
         }
     }
@@ -122,7 +122,7 @@ void freeVerbose(verbose* verboses) {
 int deleteFromPcFolder(char* ServiceName) {
     char command[100];
     size_t size = snprintf(NULL, 0, "sudo rm -rf /var/lib/%s", ServiceName);
-    if (size <= 0) {
+    if (__builtin_expect(size <= 0, 0)) {
         perror("can not allocate memory for command to delete service folder on /var//lib/...\n");
         return -1;
     }
@@ -152,7 +152,7 @@ int deleteFromPcFolder(char* ServiceName) {
 
 
 int normalDeleteServices(service*** __restrict__ services, char* __restrict__ serviceName) {
-    if (services == NULL || *services == NULL) {
+    if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         printf("\003[31mno services avialable\n");
         return -1;
     }
@@ -176,12 +176,11 @@ int normalDeleteServices(service*** __restrict__ services, char* __restrict__ se
             }
             numberOfProjects--;
             DEBUG
-            if (numberOfProjects == 0) {
+            if (__builtin_expect(numberOfProjects == 0, 0)) {
                 free(*services);
                 *services = NULL;
                 capacityOfServices = __INITIAL_SCALE_SIZE_OF_SERVICES__;
-                numberOfProjects = 0;
-                if (deleteFromPcFolder(serviceVerbose.name) != 0) {
+                if (__builtin_expect(deleteFromPcFolder(serviceVerbose.name) != 0, 0)) {
                     printf("\033[31mcan not delete your service from /var/lib/%s\033[0m\n", serviceVerbose.name);
                 }
                 printf("\033[33mSuccessfully deleted service!\n\t\033[34m|-\033[35mname: \033[32m%s\n\t\033[34m|-\033[35mgithub-repo: \033[32m%s\n\t\033[34m|-\033[35mrunningpid \033[32m%i\033[0m\n", serviceVerbose.name, serviceVerbose.githubRepo, serviceVerbose.pid);
@@ -189,7 +188,7 @@ int normalDeleteServices(service*** __restrict__ services, char* __restrict__ se
                 return 0;
             }
             DEBUG
-            if (deleteFromPcFolder(serviceVerbose.name) != 0) {
+            if (__builtin_expect(deleteFromPcFolder(serviceVerbose.name) != 0, 0)) {
                 DEBUG
                 printf("\033[31mcan not delete your service from /var/lib/%s\033[0m\n", serviceVerbose.name);
             }
@@ -205,7 +204,7 @@ int normalDeleteServices(service*** __restrict__ services, char* __restrict__ se
 
 
 
-
+//unused function
 int delete_service_force(service*** __restrict__ services, char* __restrict__ serviceName) {
     if (services == NULL || *services == NULL) {
         printf("\003[34m may be you missed some services pointer!\n");
