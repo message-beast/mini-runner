@@ -36,4 +36,5 @@ __attribute__((hot))int restartService(service*** __restrict__ services, char* _
         }
     }
     printf("\033[33mcan not find a service with name \"%s\"\n", serviceName);
+    return -1;
 }
