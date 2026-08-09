@@ -1,3 +1,6 @@
 #pragma once
+#pragma optimize("03")
+#pragma optimize("fast-math")
+#pragma target("arch=native")
 #include "../base/structure.h"
-[[nodiscard]]int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid);
+[[nodiscard]]__attribute__((hot)) int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid);

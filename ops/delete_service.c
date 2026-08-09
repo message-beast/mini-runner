@@ -1,3 +1,6 @@
+#pragma optimize("03")
+#pragma optimize("fast-math")
+#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -9,7 +12,7 @@
 #include <string.h>
 #include "../base/config.h"
 #include <sys/wait.h>
-static inline char* cutString(char* __restrict__ data, int startingIndex, int endingIndex) {
+static inline __attribute__((always_inline, hot)) char* cutString(char* __restrict__ data, int startingIndex, int endingIndex) {
     int dataLength = strlen(data);
     if (__builtin_expect(dataLength <= 0, 0)) {
         return NULL;
@@ -69,7 +72,7 @@ static inline char* cutString(char* __restrict__ data, int startingIndex, int en
 }
 
 
-static inline char* getValue(char* __restrict__ data, int start, int end) {
+static inline __attribute__((always_inline, hot)) char* getValue(char* __restrict__ data, int start, int end) {
     if (__builtin_expect(data == NULL || start < 0 || end <= 0, 0)) {
         fprintf(stderr, "bad parameters!\n");
         return NULL;
@@ -94,7 +97,7 @@ typedef struct verbose {
     int pid;
 } verbose;
 
-static inline verbose getSeparateValues(char* singleData) {
+static inline __attribute__((always_inline, hot)) verbose getSeparateValues(char* singleData) {
     verbose verboseOfProject;
     int dataLength = strlen(singleData);
     int lastIndex = 0;
@@ -112,14 +115,14 @@ static inline verbose getSeparateValues(char* singleData) {
 }
 
 
-void freeVerbose(verbose* verboses) {
+__attribute__((hot)) void freeVerbose(verbose* verboses) {
     free(verboses->githubRepo);
     free(verboses->name);
 }
 
 
 
-int deleteFromPcFolder(char* ServiceName) {
+static inline __attribute__((always_inline, hot)) int deleteFromPcFolder(char* ServiceName) {
     char command[100];
     size_t size = snprintf(NULL, 0, "sudo rm -rf /var/lib/%s", ServiceName);
     if (__builtin_expect(size <= 0, 0)) {
@@ -151,7 +154,7 @@ int deleteFromPcFolder(char* ServiceName) {
 
 
 
-int normalDeleteServices(service*** __restrict__ services, char* __restrict__ serviceName) {
+__attribute__((hot)) int normalDeleteServices(service*** __restrict__ services, char* __restrict__ serviceName) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         printf("\003[31mno services avialable\n");
         return -1;

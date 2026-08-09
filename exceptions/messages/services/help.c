@@ -1,3 +1,5 @@
+#pragma target("arch=native")
+#pragma optimize("03")
 #include <stdio.h>
 
 #define NAME_HELP \

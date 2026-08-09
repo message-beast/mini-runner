@@ -1,7 +1,9 @@
+#pragma optimize("03")
+#pragma target("arch=native")
 #include "../base/structure.h"
 #include "../base/config.h"
 #include <stdlib.h>
-void freeServices(service*** __restrict__ services) {
+__attribute__((hot)) void freeServices(service*** __restrict__ services) {
     if (__builtin_expect(services == NULL || (*services) == NULL, 0)) {
         return;
     }

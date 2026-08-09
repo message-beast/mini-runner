@@ -1,3 +1,5 @@
 #pragma once
+#pragma optimize("03")
+#pragma target("arch=native")
 #include "../base/structure.h"
-void freeServices(service*** __restrict__ services);
+__attribute__((hot)) void freeServices(service*** __restrict__ services);

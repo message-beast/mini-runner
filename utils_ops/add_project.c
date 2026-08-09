@@ -1,3 +1,6 @@
+#pragma optimize("03")
+#pragma optimize("fast-math")
+#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -13,7 +16,7 @@
 #include <pthread.h>
 #include <stdatomic.h>
 #include <signal.h>
-int cloneRepo(service** services);
+static inline __attribute__((always_inline, hot)) int cloneRepo(service** services);
 [[nodiscard]]int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName) {
     if (__builtin_expect(services == NULL, 0)) {
         service** tmp = calloc(__INITIAL_SCALE_SIZE_OF_SERVICES__, sizeof(service*));
@@ -73,7 +76,7 @@ int cloneRepo(service** services);
     return 0;
 }
 
-int cloneRepo(service** services) {
+static inline __attribute__((always_inline, hot)) int cloneRepo(service** services) {
     if (__builtin_expect(services == NULL, 0)) {
         perror("services is empty!\n");
         return -1;

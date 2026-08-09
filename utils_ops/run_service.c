@@ -1,3 +1,5 @@
+#pragma optimize("03")
+#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -24,7 +26,7 @@ typedef struct param {
 _Atomic _Bool pidSet = 0;
 pthread_mutex_t mutex;
 
-static inline __attribute__((always_inline)) int writePid(service** __restrict__ services, char* __restrict__ serviceName, int pid) {
+static inline __attribute__((always_inline, hot)) int writePid(service** __restrict__ services, char* __restrict__ serviceName, int pid) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         fprintf(stderr, "can not run %s\n becuse services are empty!\n", serviceName);
         return -1;
@@ -34,7 +36,7 @@ static inline __attribute__((always_inline)) int writePid(service** __restrict__
 }
 
 
-void* runthread(void* paramss) {
+static inline __attribute__((always_inline, hot)) void* runthread(void* paramss) {
     param* params = (param*)paramss;
     service* ser = *(params->service);
     size_t size = snprintf(NULL, 0, "/var/lib/%s", ser->name);
@@ -151,7 +153,7 @@ static inline __attribute__((always_inline, hot)) void backup(service** foundSer
 }
 
 
-int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach) {
+__attribute__((hot)) int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         fprintf(stderr, "\033[31mcan not run service \033[33m%s\033[0m, services empty!\n", name);
         return -1;
@@ -222,7 +224,7 @@ int runService(service*** __restrict__ services, char* __restrict__ name, char* 
 }
 
 
-int warmService(service** __restrict__ services, char* __restrict__ bash, _Bool attach) {
+__attribute__((hot)) int warmService(service** __restrict__ services, char* __restrict__ bash, _Bool attach) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         fprintf(stderr, "\033[31mcan not run service \033[33m%s\033[0m, services empty!\n", (*services)->name);
         return -1;

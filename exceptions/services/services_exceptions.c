@@ -1,3 +1,6 @@
+#pragma optimize("fast-math")
+#pragma optimize("03")
+#pragma target("arch=native")
 #include <stdio.h>
 #include <string.h>
 

@@ -1,8 +1,10 @@
 #pragma once
+#pragma optimize("03")
+#pragma target("arch=native")
 #include <stdio.h>
 #include <stdnoreturn.h>
 #include <stdlib.h>
-int exit_process(int i);
+__attribute__((hot)) int exit_process(int i);
 #define exit_program(i) exit_process(i);
 void cleanupStr(char** ptr);
 #define STR __attribute__((cleanup(cleanupStr)))

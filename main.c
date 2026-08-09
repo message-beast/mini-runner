@@ -1,8 +1,10 @@
+#pragma optimize("03")
+#pragma target("arch=native")
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
-#include "init/main.h"
+#include "init/main_init.h"
 #include "basic.h"
 #include "ops/create_service.h"
 #include "ops/delete_service.h"
@@ -21,11 +23,11 @@ struct service** services = NULL;
 
 
 
-
 __attribute__((constructor))
 void init() {
     if (!fileExists("data/updateStatus")) {
         if (initiateMemoryPtr() == 0) {
+            DEBUG
             exit_program(-1)
         }
     }
@@ -37,7 +39,9 @@ void init() {
         }
         services = tmp;
     }
+    DEBUG
     loadServices(&services);
+    DEBUG
 }
 
 

@@ -1,15 +1,17 @@
+#pragma optimize("03")
+#pragma target("arch=native")
 #include <stdio.h>
 #include <stdnoreturn.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include "base/config.h"
-int exit_process(int i) {
+__attribute__((hot))int exit_process(int i) {
     if (i == 0) {
         exit(0);
     } else if (i < 0) {
         printf("error: %s\n", strerror(errno));
-        exit(i);
+        abort();
     }
     abort();
 }

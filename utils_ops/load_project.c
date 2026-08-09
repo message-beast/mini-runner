@@ -1,3 +1,6 @@
+#pragma optimize("03")
+#pragma optimize("fast-math")
+#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -13,7 +16,8 @@
 #include <pthread.h>
 #include <stdatomic.h>
 #include <signal.h>
-[[nodiscard]]int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid) {
+//#define DEBUG_MODE 1
+[[nodiscard]]__attribute__((hot)) int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid) {
     if (services == NULL) {
         service** tmp = malloc(__INITIAL_SCALE_SIZE_OF_SERVICES__ * sizeof(service*));
         if (tmp == NULL) {
@@ -63,7 +67,7 @@
         return -1;
     }
     numberOfProjects++;
-    #if defined(DEBUG_MODE)
+    #ifdef DEBUG_MODE
         printf("loaded\n\tname: %s\n\tgithubRepo: %s\n\t cloned: %i\n\tpid: %i\n", newService->name, newService->githubRepo, newService->cloned, newService->pid);
     #endif
     return 0;

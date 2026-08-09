@@ -1,3 +1,5 @@
+#pragma optimize("03")
+#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -493,7 +495,7 @@ int warmService(service** __restrict__ services, char* __restrict__ bash, _Bool 
 }*/
 
 
-_Bool fileExists(char* filePath) {
+__attribute__((hot)) _Bool fileExists(char* filePath) {
     struct stat st;
     return (stat(filePath, &st) == 0);
 }

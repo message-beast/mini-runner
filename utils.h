@@ -1,4 +1,6 @@
 #pragma once
+#pragma optimize("03")
+#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -17,7 +19,7 @@
 #include "utils_ops/load_project.h"
 #include "utils_ops/run_service.h"
 int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName);
-_Bool fileExists(char* filePath);
+__attribute__((hot)) _Bool fileExists(char* filePath);
 void freeServices(service*** __restrict__ services);
 int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid);
 int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach);

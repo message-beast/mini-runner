@@ -1,3 +1,6 @@
+#pragma optimize("03")
+#pragma optimize("fast-math")
+#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -23,7 +26,7 @@ static inline __attribute__((always_inline, hot)) char* concat(char* __restrict_
     return finalString;
 }
 
-int save_services(service*** services) {
+__attribute__((hot)) int save_services(service*** services) {
     if (__builtin_expect(*services == NULL && numberOfProjects != 0 || services == NULL, 0)) {
         printf("services is actually NULL\n");
         return -1;

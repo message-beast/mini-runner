@@ -1,3 +1,6 @@
+#pragma optimize("03")
+#pragma optimize("fast-math")
+#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <sys/mman.h>
 #include <unistd.h>
@@ -10,10 +13,9 @@
 #include "../base/structure.h"
 #include "../base/config.h"
 #include "../utils.h"
-#pragma optimize("arch=native")
-#pragma optimize("fast-math")
-#pragma optimize("03")
-int initiateMemoryPtr() {
+#include <stdio.h>
+//#define DEBUG_MODE 1
+__attribute__((hot)) int initiateMemoryPtr() {
     int sharedUpdateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644, NULL);
     if (__builtin_expect(sharedUpdateStatusFileFd == -1, 0)) {
         perror("can not open the update status file!\n");
@@ -43,7 +45,7 @@ int initiateMemoryPtr() {
 
 
 
-static inline char* giveString(char* string, int startingIndex, int endingIndex) {
+static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;
     char* finalString = calloc(length + 1, sizeof(char));
     if (__builtin_expect(finalString == NULL, 0)) {
@@ -58,7 +60,6 @@ static inline char* giveString(char* string, int startingIndex, int endingIndex)
 
 
 __attribute__((hot)) int loadServices(service*** services) {
-    clock_t ci = clock();
     if (__builtin_expect(services == NULL, 0)) {
         service** tmp = calloc(__INITIAL_SCALE_SIZE_OF_SERVICES__, sizeof(service*));
         if (__builtin_expect(tmp == NULL, 0)) {
@@ -79,6 +80,7 @@ __attribute__((hot)) int loadServices(service*** services) {
         return -1;
     }
     if (__builtin_expect(st.st_size == 0, 0)) {
+        printf("hey!!\n");
         return 0;
     }
     char* data = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, projectsFileFd, 0);
@@ -95,58 +97,52 @@ __attribute__((hot)) int loadServices(service*** services) {
         : "memory"
     );
     int lastIndex = 0;
-    #pragma target push
-    #pragma target("avx15,fmt")
-    #pragma omp simd
-    #pragma omp parallel num_threads(7)
+    char* name = NULL;
+    char*githubRepo = NULL;
+    enum { FIND_NAME, FIND_REPO, FIND_PID } state = FIND_NAME;
     for (register int i = 0; i < maxProjectsFileLength; i++) {
         if (__builtin_expect((i & 74) == 0, 0)) {
             __builtin_prefetch(&data[i + 75], 0, 3);
         }
-        if (__builtin_expect(data[i] == '^', 0)) {
-            char* name = giveString(data, lastIndex, i);
-            int initialJ = i + 1;
-            #pragma omp push
-            #pragma omp parallel num_threads(7)
-            #pragma omp simd
-            for (register int j = initialJ; j < maxProjectsFileLength; j++) {
-                if (__builtin_expect((i & 74) == 0, 0)) {
-                    __builtin_prefetch(&data[i + 75], 0, 3);
+
+        switch(state) {
+            case FIND_NAME:
+                if (__builtin_expect(data[i] == '^', 0)) {
+                    name = giveString(data, lastIndex, i);
+                    lastIndex = i + 1;
+                    state = FIND_REPO;
                 }
-                if (__builtin_expect(data[j] == '#', 0)) {
-                    char* githubRepo = giveString(data, i+1, j);
-                    int initialK = j+1;
-                    for (register int k = initialK; k < maxProjectsFileLength; k++) {
-                        if (__builtin_expect((i & 74) == 0, 0)) {
-                            __builtin_prefetch(&data[i + 75], 0, 3);
-                        }
-                        if (__builtin_expect(data[k] == '\n', 0)) {
-                            char* pidStr = giveString(data, j+1, k);
-                            int pid = atoi(pidStr);
-                            if(__builtin_expect(loadProject(services, githubRepo, name, pid) != 0, 0)) {
-                                fprintf(stderr, "can not load project space empty!\n");
-                                free(githubRepo);
-                                free(name);
-                                free(pidStr);
-                                munmap(data, st.st_size);
-                                close(projectsFileFd);
-                                exit_program(-1)
-                            }
-                            lastIndex = k+1;
-                            free(pidStr);
-                            break;
-                        }
+            case FIND_REPO:
+                if (__builtin_expect(data[i] == '#', 0)) {
+                    githubRepo = giveString(data, lastIndex, i);
+                    lastIndex = i + 1;
+                    state = FIND_PID;
+                }
+            case FIND_PID:
+                if (__builtin_expect(data[i] == '\n', 0)) {
+                    char* pidStr = giveString(data, lastIndex, i);
+                    int pid = atoi(pidStr);
+                    if(__builtin_expect(loadProject(services, githubRepo, name, pid) != 0, 0)) {
+                        fprintf(stderr, "can not load project space empty!\n");
+                        free(githubRepo);
+                        free(name);
+                        free(pidStr);
+                        name = NULL;
+                        githubRepo = NULL;
+                        munmap(data, st.st_size);
+                        close(projectsFileFd);
+                        exit_program(-1)
                     }
+                    free(pidStr);
+                    free(name);
                     free(githubRepo);
-                    break;
+                    name = NULL;
+                    githubRepo = NULL;
+                    lastIndex = i + 1;
+                    state = FIND_NAME;
                 }
-            }
-            #pragma omp pop
-            free(name);
         }
     }
-    #pragma omp pop
-    #pragma target pop
     return 0;
 }
 
