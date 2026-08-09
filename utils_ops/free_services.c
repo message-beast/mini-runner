@@ -1,5 +1,4 @@
 #pragma optimize("03")
-#pragma target("arch=native")
 #include "../base/structure.h"
 #include "../base/config.h"
 #include <stdlib.h>

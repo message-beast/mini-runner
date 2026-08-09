@@ -1,6 +1,5 @@
 #pragma optimize("03")
 #pragma optimize("fast-math")
-#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -33,6 +32,9 @@ __attribute__((hot)) int save_services(service*** services) {
     }
     _Bool findToSave = 0;
     for (register int i = 0; i < numberOfProjects; i++) {
+        if (__builtin_expect((i & 127) == 0, 0)) {
+            __builtin_prefetch(&(*services)[i + 128], 0, 3);
+        }
         if (__builtin_expect((*services)[i]->cloned == 1, 1)) {
             findToSave = 1;
             break;
@@ -57,7 +59,12 @@ __attribute__((hot)) int save_services(service*** services) {
     }
     char* dataToBeWritten = NULL;
     _Bool first = 1;
+    #pragma GCC push
+    #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; i++) {
+        if (__builtin_expect((i & 63) == 0, 0)) {
+            __builtin_prefetch(&(*services)[i+64], 0, 3);
+        }
         if (__builtin_expect((*services)[i]->cloned == 0, 0)) {
             continue;
         }
@@ -84,6 +91,7 @@ __attribute__((hot)) int save_services(service*** services) {
             dataToBeWritten = tmp;
         }
     }
+    #pragma GCC pop
     if (__builtin_expect(dataToBeWritten == NULL && numberOfProjects > 0, 0)) {
         perror("no more memory can be used to concat the services string!\n");
         free(dataToBeWritten);

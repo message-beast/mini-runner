@@ -1,6 +1,5 @@
 #pragma optimize("03")
 #pragma optimize("fast-math")
-#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -24,9 +23,9 @@ static inline __attribute__((always_inline, hot)) char* cutString(char* __restri
             perror("memory allocation for new string failed on top!\n");
             return NULL;
         }
+        #pragma GCC unroll 4
         for (register int i = 0; i < dataLength - endingIndex - 1; i++) {
             newString[i] = data[endingIndex + i + 1];
-
         }
         newString[dataLength - endingIndex - 1] = '\0';
 
@@ -42,7 +41,12 @@ static inline __attribute__((always_inline, hot)) char* cutString(char* __restri
             perror("memory allocaton for new string failed for the bottom remoal!\n");
             return NULL;
         }
+        #pragma GCC ivdep
+        #pragma GCC unroll 4
         for (register int i = 0; i < startingIndex; i++) {
+            if (__builtin_expect((i & 511) == 0, 0)) {
+                __builtin_prefetch(&data[i + 512], 0, 3);
+            }
             newString[i] = data[i];
         }
         newString[startingIndex] = '\0';
@@ -57,8 +61,13 @@ static inline __attribute__((always_inline, hot)) char* cutString(char* __restri
         return NULL;
     }
 
-
+    #pragma omp simd
     for (register int i = 0; i < newLength - 1; i++) {
+        if (__builtin_expect((i & 127) == 0 && i >= startingIndex, 1)) {
+            __builtin_prefetch(&data[endingIndex + (i - startingIndex) + 129], 0, 3);
+        } else if (__builtin_expect((i & 511) == 0 && i < startingIndex, 0)) {
+            __builtin_prefetch(&data[i + 512], 0, 3);
+        }
         if (__builtin_expect(i >= startingIndex, 1)) {
             newString[i] = data[endingIndex + (i - startingIndex) + 1];
         } else {
@@ -83,6 +92,7 @@ static inline __attribute__((always_inline, hot)) char* getValue(char* __restric
         perror("memory allocation for newString to just get value failed!\n");
         exit_program(-1)
     }
+    #pragma GCC unroll 4
     for (register int i = start; i <= end; i++) {
         newString[i - start] = data[i];
     }
@@ -161,6 +171,9 @@ __attribute__((hot)) int normalDeleteServices(service*** __restrict__ services, 
     }
     DEBUG
     for (register int x = 0; x < numberOfProjects; x++) {
+        if (__builtin_expect((x & 511) == 0 || x == 0, 0)) {
+            __builtin_prefetch(&(*services)[x + 512], 0, 3);
+        }
         verbose serviceVerbose;
         if (strcmp((*services)[x]->name, serviceName) == 0) {
             serviceVerbose.githubRepo = strdup((*services)[x]->githubRepo);

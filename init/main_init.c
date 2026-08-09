@@ -1,6 +1,5 @@
 #pragma optimize("03")
 #pragma optimize("fast-math")
-#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <sys/mman.h>
 #include <unistd.h>
@@ -80,7 +79,6 @@ __attribute__((hot)) int loadServices(service*** services) {
         return -1;
     }
     if (__builtin_expect(st.st_size == 0, 0)) {
-        printf("hey!!\n");
         return 0;
     }
     char* data = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, projectsFileFd, 0);
@@ -100,6 +98,8 @@ __attribute__((hot)) int loadServices(service*** services) {
     char* name = NULL;
     char*githubRepo = NULL;
     enum { FIND_NAME, FIND_REPO, FIND_PID } state = FIND_NAME;
+    #pragma GCC push
+    #pragma GCC unroll 4
     for (register int i = 0; i < maxProjectsFileLength; i++) {
         if (__builtin_expect((i & 74) == 0, 0)) {
             __builtin_prefetch(&data[i + 75], 0, 3);
@@ -143,6 +143,7 @@ __attribute__((hot)) int loadServices(service*** services) {
                 }
         }
     }
+    #pragma GCC pop
     return 0;
 }
 

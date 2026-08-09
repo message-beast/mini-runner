@@ -1,6 +1,5 @@
 #pragma optimize("03")
 #pragma optimize("fast-math")
-#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>

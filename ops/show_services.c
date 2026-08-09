@@ -1,6 +1,5 @@
 #pragma optimize("03")
 #pragma optimize("fast-math")
-#pragma target("arch=native")
 #define _POSIX_C_SOURCE 200809L
 #include "../base/structure.h"
 #include "../base/config.h"
@@ -18,7 +17,7 @@ typedef struct result {
 } result;
 
 
-static inline __attribute__((always_inline, hot))int sort_results(const void * a, const void* b) {
+static inline __attribute__((always_inline, hot))int sort_results(const void * __restrict__ a, const void* __restrict__ b) {
     result* result1 = *(result **)a;
     result* result2 = *(result **)b;
     if (result1->score < result2->score) {

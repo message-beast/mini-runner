@@ -1,5 +1,4 @@
 #pragma optimize("03")
-#pragma target("arch=native")
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
