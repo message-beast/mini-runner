@@ -13,7 +13,7 @@
 static inline __attribute__((always_inline, hot)) char* concat(char* __restrict__ firstStr, char* __restrict__ secondStr) {
     size_t firstLen = strlen(firstStr);
     size_t secondLen = strlen(secondStr);
-    int maxLength = firstLen+ secondLen;
+    int maxLength = firstLen + secondLen;
     char* finalString = malloc(maxLength + 1);
     if (__builtin_expect(finalString == NULL, 0)) {
         perror("memory allocation for concatination string failed!\n");
@@ -32,7 +32,7 @@ __attribute__((hot)) int save_services(service*** services) {
     }
     _Bool findToSave = 0;
     for (register int i = 0; i < numberOfProjects; i++) {
-        if (__builtin_expect((i & 127) == 0, 0)) {
+        if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
             __builtin_prefetch(&(*services)[i + 128], 0, 3);
         }
         if (__builtin_expect((*services)[i]->cloned == 1, 1)) {
@@ -59,17 +59,17 @@ __attribute__((hot)) int save_services(service*** services) {
     }
     char* dataToBeWritten = NULL;
     _Bool first = 1;
-    #pragma GCC push
     #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; i++) {
-        if (__builtin_expect((i & 63) == 0, 0)) {
-            __builtin_prefetch(&(*services)[i+64], 0, 3);
+        if (__builtin_expect((i & 15) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&(*services)[i+16], 0, 3);
         }
         if (__builtin_expect((*services)[i]->cloned == 0, 0)) {
             continue;
         }
         char singleData[318];
-        snprintf(singleData, sizeof(singleData), "%s^%s#%i\n", (*services)[i]->name, (*services)[i]->githubRepo, (*services)[i]->pid);
+        service* currentService = (*services)[i];
+        snprintf(singleData, sizeof(singleData), "%s^%s#%i\n", currentService->name, currentService->githubRepo, currentService->pid);
         if (__builtin_expect(strlen(singleData) <= 0, 0)) {
             perror("can not copy single service data!\n");
             free(dataToBeWritten);
@@ -91,7 +91,6 @@ __attribute__((hot)) int save_services(service*** services) {
             dataToBeWritten = tmp;
         }
     }
-    #pragma GCC pop
     if (__builtin_expect(dataToBeWritten == NULL && numberOfProjects > 0, 0)) {
         perror("no more memory can be used to concat the services string!\n");
         free(dataToBeWritten);

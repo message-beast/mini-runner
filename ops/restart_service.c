@@ -24,7 +24,11 @@ __attribute__((hot)) int restartService(service*** __restrict__ services, char* 
     if (bash == NULL) {
         bash = "run.sh";
     }
+    #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
+        if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&(*services)[i + 128], 0, 3);
+        }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
             service* currentService = (*services)[i];
             if (__builtin_expect(killService(currentService->pid) != 0, 0)) {

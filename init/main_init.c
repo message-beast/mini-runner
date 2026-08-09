@@ -46,7 +46,7 @@ __attribute__((hot)) int initiateMemoryPtr() {
 
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;
-    char* finalString = calloc(length + 1, sizeof(char));
+    char* finalString = malloc(length + 1);
     if (__builtin_expect(finalString == NULL, 0)) {
         perror("can not allocate memory for the string");
         return NULL;
@@ -60,7 +60,7 @@ static inline __attribute__((always_inline, hot)) char* giveString(char* string,
 
 __attribute__((hot)) int loadServices(service*** services) {
     if (__builtin_expect(services == NULL, 0)) {
-        service** tmp = calloc(__INITIAL_SCALE_SIZE_OF_SERVICES__, sizeof(service*));
+        service** tmp = malloc(__INITIAL_SCALE_SIZE_OF_SERVICES__ * sizeof(service*));
         if (__builtin_expect(tmp == NULL, 0)) {
             perror("memory allocation for services failed!");
             exit_program(-1)
@@ -98,11 +98,10 @@ __attribute__((hot)) int loadServices(service*** services) {
     char* name = NULL;
     char*githubRepo = NULL;
     enum { FIND_NAME, FIND_REPO, FIND_PID } state = FIND_NAME;
-    #pragma GCC push
     #pragma GCC unroll 4
     for (register int i = 0; i < maxProjectsFileLength; i++) {
-        if (__builtin_expect((i & 74) == 0, 0)) {
-            __builtin_prefetch(&data[i + 75], 0, 3);
+        if (__builtin_expect((i & 63) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&data[i + 64], 0, 3);
         }
 
         switch(state) {
@@ -143,7 +142,6 @@ __attribute__((hot)) int loadServices(service*** services) {
                 }
         }
     }
-    #pragma GCC pop
     return 0;
 }
 

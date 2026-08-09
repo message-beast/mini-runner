@@ -17,15 +17,19 @@
 #include <signal.h>
 //#define DEBUG_MODE 1
 [[nodiscard]]__attribute__((hot)) int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid) {
-    if (services == NULL) {
+    if (__builtin_expect(services == NULL, 0)) {
         service** tmp = malloc(__INITIAL_SCALE_SIZE_OF_SERVICES__ * sizeof(service*));
-        if (tmp == NULL) {
+        if (__builtin_expect(tmp == NULL, 0)) {
             perror("can not allocate memory for services!\n");
             exit_program(-1)
         }
         (*services) = tmp;
     }
+    #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; i++) {
+        if (__builtin_expect((i & 63) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&(*services)[i + 64], 0, 3);
+        }
         if (__builtin_expect(strcmp(githubRepo, (*services)[i]->githubRepo) == 0, 0)) {
             printf("\033[33m\tgithub repo already exists!\033[0m\n");
             return -1;

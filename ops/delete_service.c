@@ -25,6 +25,9 @@ static inline __attribute__((always_inline, hot)) char* cutString(char* __restri
         }
         #pragma GCC unroll 4
         for (register int i = 0; i < dataLength - endingIndex - 1; i++) {
+            if (__builtin_expect((i & 512) == 0 || i == 0, 0)) {
+                __builtin_prefetch(&data[endingIndex + i + 513]);
+            }
             newString[i] = data[endingIndex + i + 1];
         }
         newString[dataLength - endingIndex - 1] = '\0';
@@ -44,7 +47,7 @@ static inline __attribute__((always_inline, hot)) char* cutString(char* __restri
         #pragma GCC ivdep
         #pragma GCC unroll 4
         for (register int i = 0; i < startingIndex; i++) {
-            if (__builtin_expect((i & 511) == 0, 0)) {
+            if (__builtin_expect((i & 511) == 0 || i == 0, 0)) {
                 __builtin_prefetch(&data[i + 512], 0, 3);
             }
             newString[i] = data[i];
@@ -65,7 +68,7 @@ static inline __attribute__((always_inline, hot)) char* cutString(char* __restri
     for (register int i = 0; i < newLength - 1; i++) {
         if (__builtin_expect((i & 127) == 0 && i >= startingIndex, 1)) {
             __builtin_prefetch(&data[endingIndex + (i - startingIndex) + 129], 0, 3);
-        } else if (__builtin_expect((i & 511) == 0 && i < startingIndex, 0)) {
+        } else if (__builtin_expect((i & 511) == 0 && i < startingIndex || i == 0, 0)) {
             __builtin_prefetch(&data[i + 512], 0, 3);
         }
         if (__builtin_expect(i >= startingIndex, 1)) {
@@ -94,6 +97,9 @@ static inline __attribute__((always_inline, hot)) char* getValue(char* __restric
     }
     #pragma GCC unroll 4
     for (register int i = start; i <= end; i++) {
+        if (__builtin_expect((i & 511) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&data[i + 512], 0, 3);
+        }
         newString[i - start] = data[i];
     }
     newString[end - start + 1] = '\0';
@@ -111,7 +117,11 @@ static inline __attribute__((always_inline, hot)) verbose getSeparateValues(char
     verbose verboseOfProject;
     int dataLength = strlen(singleData);
     int lastIndex = 0;
+    #pragma GCC unroll 4
     for (register int i = 0; i < dataLength; i++) {
+        if (__builtin_expect((i & 63) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&singleData[i + 64], 0, 3);
+        }
         if (__builtin_expect(singleData[i] == '^', 0)) {
             verboseOfProject.name = getValue(singleData, 0, i - 1);
             lastIndex = i + 1;
@@ -170,26 +180,47 @@ __attribute__((hot)) int normalDeleteServices(service*** __restrict__ services, 
         return -1;
     }
     DEBUG
+    enum {FIND_SERVICE, FREE_SERVICES, FMT_SERVICES, DEL_SERVICE} state = FIND_SERVICE;
+    int lastIndex = 0;
+    verbose serviceVerbose;
     for (register int x = 0; x < numberOfProjects; x++) {
         if (__builtin_expect((x & 511) == 0 || x == 0, 0)) {
             __builtin_prefetch(&(*services)[x + 512], 0, 3);
         }
-        verbose serviceVerbose;
-        if (strcmp((*services)[x]->name, serviceName) == 0) {
-            serviceVerbose.githubRepo = strdup((*services)[x]->githubRepo);
-            serviceVerbose.name = strdup((*services)[x]->name);
-            serviceVerbose.pid = (*services)[x]->pid;
+        if (state == FIND_SERVICE) {
+            if (__builtin_expect(strcmp((*services)[x]->name, serviceName) == 0, 0)) {
+                lastIndex = x;
+                state = FREE_SERVICES;
+                printf("CATCH1!\n");
+            }
+        }
+        if (state == FREE_SERVICES) {
+            printf("CATCH!\n");
+            service* curSer = (*services)[x];
+            serviceVerbose.githubRepo = strdup(curSer->githubRepo);
+            serviceVerbose.name = strdup(curSer->name);
+            serviceVerbose.pid = curSer->pid;
             printf("it was in index %i\n", x);
             /*
                 stopService(pid=serviceVerbose.pid);
             */
-            free((*services)[x]->githubRepo);
-            free((*services)[x]->name);
-            free((*services)[x]);
+            free(curSer->githubRepo);
+            free(curSer->name);
+            free(curSer);
+            state = FMT_SERVICES;
+        }
+        if (state == FMT_SERVICES) {
+            
             //(*services)[numberOfProjects - 1] = NULL;
-            for (register int y = x; y < numberOfProjects - 1; y++) {
-                (*services)[y] = (*services)[y + 1];
+            if (x == numberOfProjects - 1) {
+                lastIndex = x;
+                state = DEL_SERVICE;
+            } else {
+                (*services)[x] = (*services)[x + 1];
             }
+            
+        }
+        if (state == DEL_SERVICE) {
             numberOfProjects--;
             DEBUG
             if (__builtin_expect(numberOfProjects == 0, 0)) {
@@ -213,9 +244,13 @@ __attribute__((hot)) int normalDeleteServices(service*** __restrict__ services, 
             printf("\n\tfriendly reminder: if the deleted service have pid greater than 0, just run \t\033[32mmrn stop <pid>\033[0m\n");
             freeVerbose(&serviceVerbose);
             return 0;
-
         }
-    }   
+    }
+    if (state == FIND_SERVICE) {
+        printf("can not find any service with name of that!\n");
+        return -1;
+    }
+    return -1;
 }
 
 

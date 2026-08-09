@@ -11,6 +11,7 @@
 #include <signal.h>
 #include "../base/config.h"
 #include <sys/wait.h>
+#include "../basic.h"
 static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char* dataToWrite) {
     int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644, NULL);
     if (__builtin_expect(updateStatusFileFd == -1, 0)) {
@@ -113,18 +114,22 @@ void updateService(service*** __restrict__ services, char* __restrict__ serviceN
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         return;
     }
+    #pragma omp parallel for num_threads(8)
     for (register int i = 0; i < numberOfProjects; ++i) {
+        if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&(*services)[i + 128], 0, 3);
+        }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
             if (__builtin_expect(writeUpdateAvialable("updating") != 0, 0)) {
-                return;
+                exit_program(-1)
             }
             if (__builtin_expect(update_service((*services)[i], stop) != 0, 0)) {
-                return;
+                exit_program(-1)
             }
             if (__builtin_expect(writeUpdateAvialable("idle") != 0, 0)) {
-                return;
+                exit_program(-1)
             }
-            return;
+            exit_program(0);
         }
     }
 }

@@ -168,8 +168,12 @@ __attribute__((hot)) int runService(service*** __restrict__ services, char* __re
         printf("\033[33mplease stay tuned! your services are being updated right now!\033[0m\n");
         return -1;
     }
+    #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; i++) {
-        if (strcmp((*services)[i]->name, name) == 0) {
+        if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&(*services)[i + 128], 0, 3);
+        }
+        if (__builtin_expect(strcmp((*services)[i]->name, name) == 0, 0)) {
             size_t size = snprintf(NULL, 0, "/var/lib/%s/%s", name, bash);
             if (__builtin_expect(size <= 0, 0)) {
                 perror("size can not be dynamically calculate!\n");
@@ -202,7 +206,10 @@ __attribute__((hot)) int runService(service*** __restrict__ services, char* __re
                 return -1;
             }
             if (!attach) {
-                pthread_detach(process_thread);
+                if (__builtin_expect(pthread_detach(process_thread) != 0, 0)) {
+                    perror("Failed to create a detached pthread!\n");
+                    return -1;
+                }
             } else {
                 signal(SIGINT, returnServicePid);
                 while (!running) {
@@ -271,7 +278,10 @@ __attribute__((hot)) int warmService(service** __restrict__ services, char* __re
         return -1;
     }
     if (!attach) {
-        pthread_detach(process_thread);
+        if(__builtin_expect(pthread_detach(process_thread) != 0, 0)) {
+            perror("Failed to create a detached pthread!\n");
+            return -1;
+        }
     } else {
         signal(SIGINT, returnServicePid);
         while (!running) {

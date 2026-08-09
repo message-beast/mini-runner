@@ -45,7 +45,11 @@ void renameService(service*** __restrict__ services, char* __restrict__ serviceN
         fprintf(stderr, "\033[31mservice name or new service name not provided!\033[0m\n");
         return;
     }
+    #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
+        if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&(*services)[i + 128], 0, 3);   
+        }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
             service* currentService = (*services)[i];
             char* beforeName = currentService->name;

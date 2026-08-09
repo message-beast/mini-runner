@@ -19,7 +19,12 @@ static inline __attribute__((always_inline)) int killProcess(pid_t pid) {
 
 
 int stopService(service*** __restrict__ services, char* __restrict__ serviceName) {
+    #pragma GCC ivdep
+    #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; ++i) {
+        if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&(*services)[i + 128], 0, 3);
+        }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
             DEBUG
             service* currentService = (*services)[i];
