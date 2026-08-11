@@ -1,0 +1,1 @@
+__attribute__((hot)) int basic_v1_setup(char* serviceName);
