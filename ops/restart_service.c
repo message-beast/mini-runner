@@ -1,4 +1,4 @@
-#pragma optimize("03")
+#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include "../base/structure.h"

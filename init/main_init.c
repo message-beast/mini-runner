@@ -1,5 +1,4 @@
-#pragma optimize("03")
-#pragma optimize("fast-math")
+#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <sys/mman.h>
 #include <unistd.h>
@@ -15,7 +14,7 @@
 #include <stdio.h>
 //#define DEBUG_MODE 1
 __attribute__((hot)) int initiateMemoryPtr() {
-    int sharedUpdateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644, NULL);
+    int sharedUpdateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(sharedUpdateStatusFileFd == -1, 0)) {
         perror("can not open the update status file!\n");
         exit_program(-1)
@@ -67,7 +66,7 @@ __attribute__((hot)) int loadServices(service*** services) {
         }
         (*services) = tmp;
     }
-    int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644, NULL);
+    int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(projectsFileFd == -1, 0)) {
         perror("can not open the projects file!\n");
         return -1;
@@ -111,12 +110,14 @@ __attribute__((hot)) int loadServices(service*** services) {
                     lastIndex = i + 1;
                     state = FIND_REPO;
                 }
+                break;
             case FIND_REPO:
                 if (__builtin_expect(data[i] == '#', 0)) {
                     githubRepo = giveString(data, lastIndex, i);
                     lastIndex = i + 1;
                     state = FIND_PID;
                 }
+                break;
             case FIND_PID:
                 if (__builtin_expect(data[i] == '\n', 0)) {
                     char* pidStr = giveString(data, lastIndex, i);
@@ -137,11 +138,17 @@ __attribute__((hot)) int loadServices(service*** services) {
                     free(githubRepo);
                     name = NULL;
                     githubRepo = NULL;
+                    pidStr = NULL;
                     lastIndex = i + 1;
                     state = FIND_NAME;
                 }
+                break;
         }
     }
+    name = NULL;
+    githubRepo = NULL;
+    munmap(data, st.st_size);
+    close(projectsFileFd);
     return 0;
 }
 

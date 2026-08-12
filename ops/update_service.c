@@ -1,4 +1,4 @@
-#pragma optimize("03")
+#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -12,8 +12,9 @@
 #include "../base/config.h"
 #include <sys/wait.h>
 #include "../basic.h"
+#include "../checks_for_pr/write_chk.h"
 static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char* dataToWrite) {
-    int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644, NULL);
+    int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(updateStatusFileFd == -1, 0)) {
         perror("can not open update status file!\n");
         return -1;
@@ -63,14 +64,18 @@ static inline __attribute__((always_inline, hot)) int update_service(service* fo
         }
     }
     int pipeFd[2];
-    pipe(pipeFd);
+    if(__builtin_expect(pipe(pipeFd) != 0, 0)) {
+        perror("can't create a pipe!\n");
+        return -1;
+    }
     pid_t updatePid = fork();
     if (updatePid == 0) {
         close(pipeFd[0]);
         size_t size = snprintf(NULL, 0, "/var/lib/%s", foundService->name) + 1;
         if (__builtin_expect(size <= 0, 0)) {
             perror("command size failed to calculate!\n");
-            write(pipeFd[1], "f", 2);
+            ssize_t written = write(pipeFd[1], "f", 1);
+            CHECK_WRITE_PR(pipeFd[1], written, 1)
             close(pipeFd[1]);
             abort();
         }
@@ -78,21 +83,25 @@ static inline __attribute__((always_inline, hot)) int update_service(service* fo
         snprintf(path, size, "/var/lib/%s", foundService->name);
         if (__builtin_expect(path == NULL, 0)) {
             perror("failed to generate path!\n");
-            write(pipeFd[1], "f", 2);
+            ssize_t written = write(pipeFd[1], "f", 1);
+            CHECK_WRITE_PR(pipeFd[1], written, 1)
             close(pipeFd[1]);
             abort();
         }
         if (__builtin_expect(chdir(path) != 0, 0)) {
             fprintf(stderr, "can not change the directory to %s\n", path);
-            write(pipeFd[1], "f", 2);
+            ssize_t written = write(pipeFd[1], "f", 1);
+            CHECK_WRITE_PR(pipeFd[1], written, 1)
             close(pipeFd[1]);
             abort();
         }
         if (__builtin_expect(system("sudo git pull") != 0, 0)) {
-            write(pipeFd[1], "f", 2);
+            ssize_t written = write(pipeFd[1], "f", 1);
+            CHECK_WRITE_PR(pipeFd[1], written, 1)
             fprintf(stderr, "\033[31mupdate failed!\033[0m\n");
         } else {
-            write(pipeFd[1], "s", 2);
+            ssize_t written = write(pipeFd[1], "s", 1);
+            CHECK_WRITE_PR(pipeFd[1], written, 1);
         }
         close(pipeFd[1]);
         abort();
@@ -100,7 +109,8 @@ static inline __attribute__((always_inline, hot)) int update_service(service* fo
         wait(NULL);
         close(pipeFd[1]);
         char buff[2];
-        read(pipeFd[0], buff, 2);
+        ssize_t readSize = read(pipeFd[0], buff, 2);
+        buff[readSize] = '\0';
         if (__builtin_expect(strcmp(buff, "s") != 0, 0)) {
             return -1;
         }

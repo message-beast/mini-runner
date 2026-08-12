@@ -1,7 +1,7 @@
 set-executable:
 	echo "export PATH=$PATH:/home/ano/Desktop/mini-runner/" > ~/.bashrc && source ~/.bashrc
 compile:
-	gcc -oo *.c */*.c */*/*.c */*/*/*.c -march=native -fopenmp -pthread -o mrn
+	gcc -oo *.c */*.c */*/*.c */*/*/*.c -march=native -fopenmp -pthread -lm -O3 -o mrn
 run:
 	./mrn
 get-assembly:

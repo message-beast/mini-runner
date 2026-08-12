@@ -1,5 +1,4 @@
-#pragma optimize("03")
-#pragma optimize("fast-math")
+#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -43,7 +42,7 @@ __attribute__((hot)) int save_services(service*** services) {
     if (__builtin_expect(!findToSave && numberOfProjects > 0, 0)) {
         return 0;
     }
-    int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644, NULL);
+    int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(projectsFileFd == -1, 0)) {
         perror("failed to open projects file!\n");
         exit_program(-1)
@@ -122,7 +121,9 @@ __attribute__((hot)) int save_services(service*** services) {
         memcpy(data, dataToBeWritten, strlen(dataToBeWritten));
         msync(data, strlen(dataToBeWritten), MS_SYNC);
     } else {
-        ftruncate(projectsFileFd, 0);
+        if(__builtin_expect(ftruncate(projectsFileFd, 0), 0)) {
+            perror("an eror occured while trying to delete the data!\n");
+        }
     }
     munmap(data, (dataToBeWritten != NULL ? strlen(dataToBeWritten) : st.st_size));
     close(projectsFileFd);

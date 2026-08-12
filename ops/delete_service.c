@@ -1,5 +1,4 @@
-#pragma optimize("03")
-#pragma optimize("fast-math")
+#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -286,7 +285,7 @@ int delete_service_force(service*** __restrict__ services, char* __restrict__ se
         }
     }
     deleteFromDisk:
-        int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644, NULL);
+        int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644);
         if (projectsFileFd == -1) {
             perror("failed to open projects file!\n");
             exit_program(-1)

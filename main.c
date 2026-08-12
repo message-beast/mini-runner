@@ -1,4 +1,4 @@
-#pragma optimize("03")
+#pragma optimize("O3")
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +15,7 @@
 #include "exceptions/messages/services/help.h"
 #include "ops/rename_service.h"
 #include "res_man/cpu/cpu_limit.h"
+#include "exceptions/resources/cpu_violations.h"
 #define true 1
 #define false 0
 struct service** services = NULL;
@@ -203,8 +204,11 @@ int main(int argc, char* argv[]) {
                         fprintf(stderr, "cpu limitation number (from 1 - 100) is required!\n");
                         return 1;
                     }
-                    char* end;
-                    float cpuLimit = strtof(limitStr, &end);
+                    int errD = 0;
+                    float cpuLimit = convertToFloat(limitStr, &errD);
+                    if (__builtin_expect(errD != 0, 0)) {
+                        return 1;
+                    }
                     printf("cpu: %.2f\n", cpuLimit);
                     if (__builtin_expect(setCpuResourceLimit(&services, serviceName, cpuLimit, 0, "0") != 0, 0)) {
                         return 1;

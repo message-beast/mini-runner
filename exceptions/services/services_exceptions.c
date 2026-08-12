@@ -1,5 +1,4 @@
-#pragma optimize("fast-math")
-#pragma optimize("03")
+#pragma optimize("O3")
 #include <stdio.h>
 #include <string.h>
 

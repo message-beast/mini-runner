@@ -1,3 +1,3 @@
 #pragma once
-#pragma optimize("03")
+#pragma optimize("O3")
 void displayServiceRules();

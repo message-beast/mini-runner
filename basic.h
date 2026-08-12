@@ -1,5 +1,5 @@
 #pragma once
-#pragma optimize("03")
+#pragma optimize("O3")
 #include <stdio.h>
 #include <stdnoreturn.h>
 #include <stdlib.h>

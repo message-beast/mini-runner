@@ -1,5 +1,4 @@
-#pragma optimize("03")
-#pragma optimize("fast-math")
+#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -15,6 +14,7 @@
 #include <pthread.h>
 #include <stdatomic.h>
 #include <signal.h>
+#include "../checks_for_pr/write_chk.h"
 static inline __attribute__((always_inline, hot)) int cloneRepo(service** services);
 [[nodiscard]]int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName) {
     if (__builtin_expect(services == NULL, 0)) {
@@ -95,15 +95,20 @@ static inline __attribute__((always_inline, hot)) int cloneRepo(service** servic
             exit_program(-1)
         }
         int pipeFd[2];
-        pipe(pipeFd);
+        if(__builtin_expect(pipe(pipeFd) != 0, 0)) {
+            perror("pipe failed!\n");
+            exit_program(-1)
+        }
         int pid = fork();
         if (pid == 0) {
             close(pipeFd[0]);
             printf("command to run: %s\n", command);
             if(system(command) != 0) {
-                write(pipeFd[1], "failed", 7);
+                ssize_t written = write(pipeFd[1], "f", 1);
+                CHECK_WRITE_PR(pipeFd[1], written, 7)
             } else {
-                write(pipeFd[1], "success", 8);    
+                ssize_t written = write(pipeFd[1], "s", 1);
+                CHECK_WRITE_PR(pipeFd[1], written, 8)    
             }
             close(pipeFd[1]);
             free(command);
@@ -120,10 +125,11 @@ static inline __attribute__((always_inline, hot)) int cloneRepo(service** servic
                 perror("\n\033[31mcan not clone repository!\033[0m\n");
                 exit_program(-1)
             }
-            char buff[10];
-            read(pipeFd[0], buff, 10);
+            char buff[2];
+            ssize_t readBytes = read(pipeFd[0], buff, 1);
+            buff[readBytes] = '\0';
             close(pipeFd[0]);
-            if (__builtin_expect(strcmp(buff, "failed") == 0, 0)) {
+            if (__builtin_expect(strcmp(buff, "f") == 0, 0)) {
                 return -1;
             }
             (*services)->cloned = 1;

@@ -1,4 +1,4 @@
-#pragma optimize("03")
+#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <stdatomic.h>
 #include <signal.h>
+#include "../checks_for_pr/write_chk.h"
 #define true 1
 #define false 0
 typedef struct param {
@@ -53,20 +54,26 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
     }
     printf("passed\n");
     int pipeFd[2];
-    pipe(pipeFd);
+    if(__builtin_expect(pipe(pipeFd) != 0, 0)) {
+        perror("pipe failed!\n");
+        atomic_exchange(&pidSet, 1);
+        return NULL;
+    }
     int pid = fork();
     if (pid == 0) {
         close(pipeFd[0]);
         if (chdir(path) != 0) {
             perror("failed to change directory!\n");
-            write(pipeFd[1], "0", 2);
+            ssize_t written = write(pipeFd[1], "0", 1);
+            CHECK_WRITE_PR(pipeFd[1], written, 1)
             close(pipeFd[1]);
             atomic_exchange(&pidSet, 1);
             return NULL;
         }
         char response[10];
-        snprintf(response, 10, "%i", getpid());
-        write(pipeFd[1], response, 10);
+        size_t size = snprintf(response, 10, "%i", getpid());
+        ssize_t written = write(pipeFd[1], response, size);
+        CHECK_WRITE_PR(pipeFd[1], written , size)
         close(pipeFd[1]);
         DEBUG
         __asm__ volatile (
@@ -87,8 +94,8 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
         free(params->command);
         printf("child failed!\n");
         close(pipeFd[0]);
-        snprintf(response, 10, "%i", 0);
-        write(pipeFd[1], response, 10);
+        written = write(pipeFd[1], "0", 1);
+        CHECK_WRITE_PR(pipeFd[1], written, 1)
         close(pipeFd[1]);
         free(params);
         abort();
@@ -97,7 +104,11 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
         __asm__ volatile ("sfence" ::: "memory");
         close(pipeFd[1]);
         char buff[10];
-        read(pipeFd[0], buff, 10);
+        size_t size = read(pipeFd[0], buff, 10);
+        if (__builtin_expect(size <= 0, 0)) {
+            exit_program(-1)
+        }
+        buff[size] = '\0';
         int newPid = atoi(buff);
         if (__builtin_expect(newPid != 0, 1)) {
             printf("\033[32mservice \"\033[33m%s\033[0m\"\033[32m running successfully...\033[0m\n", params->name);
@@ -117,7 +128,7 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
 
 
 static inline __attribute__((always_inline, hot)) _Bool updateAvialable() {
-    int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644, NULL);
+    int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(updateStatusFileFd == -1, 0)) {
         perror("can not open data/updateStatus file!\n");
         return 0;

@@ -1,4 +1,4 @@
-#pragma optimize("03")
+#pragma optimize("O3")
 #include "../base/structure.h"
 #include "../base/config.h"
 #include <stdlib.h>

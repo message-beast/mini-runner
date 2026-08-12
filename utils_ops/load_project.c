@@ -1,5 +1,4 @@
-#pragma optimize("03")
-#pragma optimize("fast-math")
+#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>

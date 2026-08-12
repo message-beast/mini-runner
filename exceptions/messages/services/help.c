@@ -1,4 +1,4 @@
-#pragma optimize("03")
+#pragma optimize("O3")
 #include <stdio.h>
 
 #define NAME_HELP \
