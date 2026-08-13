@@ -1,0 +1,1 @@
+__attribute__((hot)) int convertToByte(char* size);

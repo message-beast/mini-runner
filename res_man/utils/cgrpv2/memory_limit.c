@@ -76,6 +76,7 @@ __attribute__((hot)) int memoryLimit(char* serviceName, int memBytes) {
             return -1;
         }
         int wanted_length = strlen(memBuff);
+        printf("writing: %s\n", memBuff);
         ssize_t written = write(fd, memBuff, wanted_length);
         CHECK_WRITE(fd, written, wanted_length);
         close(fd);

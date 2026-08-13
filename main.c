@@ -16,6 +16,8 @@
 #include "ops/rename_service.h"
 #include "res_man/cpu/cpu_limit.h"
 #include "exceptions/resources/cpu_violations.h"
+#include "base/config.h"
+#include "res_format/mem_types.h"
 #define true 1
 #define false 0
 struct service** services = NULL;
@@ -189,31 +191,56 @@ int main(int argc, char* argv[]) {
             renameService(&services, oldName, newName);
             
         } else if (strcmp(argv[i], "set-limit") == 0) {
-            printf("CATCH!\n");
-            int cpuLimit;
             char* serviceName = argv[i + 1];
             if (__builtin_expect(serviceName == NULL, 0)) {
                 fprintf(stderr, "service-name expected!\n");
                 return 1;
             }
+            float cpuLimit = 0.0;
+            int errD = 0;
+            int memBytes = 0;
+            __uint64_t memBytes_lrg;
             for (register int j = i; j < argc; ++j) {
-                
                 if (strcmp(argv[j], "-cpu") == 0) {
                     char* limitStr = argv[j + 1];
                     if (__builtin_expect(limitStr == NULL, 0)) {
-                        fprintf(stderr, "cpu limitation number (from 1 - 100) is required!\n");
+                        fprintf(stderr, "cpu limitation number (from 0 - (you want probably 1 for single for usage) is required!\n");
                         return 1;
                     }
-                    int errD = 0;
-                    float cpuLimit = convertToFloat(limitStr, &errD);
+                    cpuLimit = convertToFloat(limitStr, &errD);
                     if (__builtin_expect(errD != 0, 0)) {
                         return 1;
                     }
-                    printf("cpu: %.2f\n", cpuLimit);
-                    if (__builtin_expect(setCpuResourceLimit(&services, serviceName, cpuLimit, 0, "0") != 0, 0)) {
+
+                } else if (strcmp(argv[j], "-mem") == 0) {
+                    char* memLimit = argv[j + 1];
+                    if (__builtin_expect(memLimit == NULL, 0)) {
+                        fprintf(stderr, "memory limit in size is required either one of ways of doing it [x]k, [x]m, [x]g, [x]t for doing it!\n");
+                        return 1;
+                    }
+                    memBytes = convertToByte(memLimit);
+                    if (__builtin_expect(memBytes == 0, 0)) {
+                        fprintf(stderr, "invalid memory size!\n");
                         return 1;
                     }
                 }
+            }
+            max_core_violation(cpuLimit, errD)
+            if (__builtin_expect(errD == __MAX_CORE_VIOLATION, 0)) {
+                char conformationToContinue[2];
+                printf("Do you want to continue to use above 10 cores of cpu (y/n)?: ");
+                if(__builtin_expect(scanf("%s", conformationToContinue) != 1, 0)) {
+                    perror("corrupted input!\n");
+                    return 1;
+                }
+                if (strcmp(conformationToContinue, "n") == 0 || strcmp(conformationToContinue, "N") == 0) {
+                    return 1;
+                }
+            }
+            printf("cpu: %.2f\n", cpuLimit);
+            printf("mem: %i\n", memBytes);
+            if (__builtin_expect(setCpuResourceLimit(&services, serviceName, cpuLimit, (!!(memBytes)), memBytes) != 0, 0)) {
+                return 1;
             }
         }
 

@@ -17,11 +17,10 @@
     }\
 
 
-#define max_violation(num, flag, e_f)\
+#define max_core_violation(num, e_f)\
     if (__builtin_expect(num > MAX_CPU_CORE, 0)) {\
-        flag = true;\
         e_f = __MAX_CORE_VIOLATION;\
-    }\
+    }
 
 #define check_error(cpuBuff, endPtr, e_f)\
     if (__builtin_expect(errno == ERANGE, 0)) {\
@@ -53,15 +52,4 @@ __attribute__((hot)) float convertToFloat(char* cpuLimit, int* err_flg) {
     check_error(cpuLimit, end, *err_flg)
     cpuLimitInFloat = roundTo2(cpuLimitInFloat);
     return cpuLimitInFloat;
-}
-
-
-
-
-__attribute__((hot)) int isValidCpuValue(float cpuCore, int* err_flg) {
-    _Bool violated = false;
-    max_violation(cpuCore, violated, (*err_flg))
-    return_result(violated)
-    return 0;
-
 }

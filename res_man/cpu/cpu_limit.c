@@ -252,7 +252,6 @@ __attribute__((hot)) int limitCpuAndMemory(char* serviceName, __uint32_t service
             perror("can not open the cpu path file!\n");
             return -1;
         }
-        printf("REACHED! %s: %i\n", __FILE__, __LINE__);
         size = snprintf(NULL, 0, "%i 100000", (int)(cpuLimit * 100000));
         if (__builtin_expect(size <= 0, 0)) {
             perror("failed to calculate the pid length in string!\n");
@@ -380,7 +379,7 @@ __attribute__((hot)) int limitCpuAndMemory(char* serviceName, __uint32_t service
 
 
 
-__attribute__((hot)) int setCpuResourceLimit(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, char* __restrict__  memBytesStr) {
+__attribute__((hot)) int setCpuResourceLimit(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, int memBytesStr) {
     
     #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
@@ -388,8 +387,8 @@ __attribute__((hot)) int setCpuResourceLimit(service*** __restrict__ services, c
             __builtin_prefetch(&(*services)[i + 128], 0, 3);
         }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
-            printf("name: %s, pid: %i, numberofCpu: %.2f, limitMemory: %i, memBytes: %i\n", serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, atoi(memBytesStr));
-            if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, atoi(memBytesStr)) != 0, 0)) {
+            printf("name: %s, pid: %i, numberofCpu: %.2f, limitMemory: %i, memBytes: %i\n", serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, memBytesStr);
+            if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, memBytesStr) != 0, 0)) {
                 return -1;
             }
             return 0;
