@@ -20,7 +20,7 @@ __attribute__((hot)) int basic_v1_setup(char* serviceName) {
         }
     }
     if (__builtin_expect(access("/sys/fs/cgroup/memory", F_OK) != 0, 0)) {
-        if (__builtin_expect(mkdir("/sysfs/cgroup/memory", DIRECTORY) != 0, 0)) {
+        if (__builtin_expect(mkdir("/sys/fs/cgroup/memory", DIRECTORY) != 0, 0)) {
             perror("failed to create a directory /sys/fs/cgroup/memory!\n");
             return -1;
         }

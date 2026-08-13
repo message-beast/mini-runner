@@ -3,3 +3,4 @@
 #include <stdio.h>
 __attribute__((hot)) int memoryLimit_F_LRG(char* serviceName, __uint64_t memBytes);
 __attribute__((hot)) int memoryLimit(char* serviceName, int memBytes);
+__attribute__((hot)) int memoryLimit_F_EXTR(char* serviceName, __uint128_t memBytes);

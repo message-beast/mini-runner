@@ -18,6 +18,8 @@
 #include "exceptions/resources/cpu_violations.h"
 #include "base/config.h"
 #include "res_format/mem_types.h"
+#include "exceptions/messages/mem_type/help.h"
+#include "res_man/mem/mem_limit.h"
 #define true 1
 #define false 0
 struct service** services = NULL;
@@ -199,7 +201,13 @@ int main(int argc, char* argv[]) {
             float cpuLimit = 0.0;
             int errD = 0;
             int memBytes = 0;
-            __uint64_t memBytes_lrg;
+            __uint64_t memBytes_lrg = 0;
+            char* memBytesStr = NULL;
+            _Bool useLarge = false;
+            _Bool useExtreme = false;
+            __uint128_t memBytesExtr = 0;
+            _Bool doCpuLimit = false;
+            _Bool doMemLimit = false;
             for (register int j = i; j < argc; ++j) {
                 if (strcmp(argv[j], "-cpu") == 0) {
                     char* limitStr = argv[j + 1];
@@ -211,36 +219,122 @@ int main(int argc, char* argv[]) {
                     if (__builtin_expect(errD != 0, 0)) {
                         return 1;
                     }
-
+                    doCpuLimit = true;
                 } else if (strcmp(argv[j], "-mem") == 0) {
-                    char* memLimit = argv[j + 1];
-                    if (__builtin_expect(memLimit == NULL, 0)) {
+                    memBytesStr = argv[j + 1];
+                    if (__builtin_expect(memBytesStr == NULL, 0)) {
                         fprintf(stderr, "memory limit in size is required either one of ways of doing it [x]k, [x]m, [x]g, [x]t for doing it!\n");
                         return 1;
                     }
-                    memBytes = convertToByte(memLimit);
-                    if (__builtin_expect(memBytes == 0, 0)) {
-                        fprintf(stderr, "invalid memory size!\n");
+                    for (register int k = j; k < argc; ++k) {
+                        if (strcmp(argv[k], "-t") == 0 || strcmp(argv[k], "--type") == 0) {
+                            char* type = argv[k + 1];
+                            if (type == NULL) {
+                                fprintf(stderr, "type value required!\n");
+                                return 1;
+                            }
+                            if (strcmp(type, "standard") == 0) {
+                                useLarge = false;
+                            } else if (strcmp(type, "custom") == 0) {
+                                useLarge = true;
+                            } else if (strcmp(type, "extreme") == 0) {
+                                useExtreme = true;
+                            } else {
+                                fprintf(stderr, "unknown type \"%s\"!\n", type);
+                                displayMemTypeHelp();
+                                return 1;
+                            }
+                        }
+                    }
+                    doMemLimit = true;
+                }
+            }
+            if (doCpuLimit) {
+                max_core_violation(cpuLimit, errD)
+                if (__builtin_expect(errD == __MAX_CORE_VIOLATION, 0)) {
+                    char conformationToContinue[2];
+                    printf("Do you want to continue to use above 10 cores of cpu (y/n)?: ");
+                    if(__builtin_expect(scanf("%s", conformationToContinue) != 1, 0)) {
+                        perror("corrupted input!\n");
+                        return 1;
+                    }
+                    if (strcmp(conformationToContinue, "n") == 0 || strcmp(conformationToContinue, "N") == 0) {
                         return 1;
                     }
                 }
             }
-            max_core_violation(cpuLimit, errD)
-            if (__builtin_expect(errD == __MAX_CORE_VIOLATION, 0)) {
-                char conformationToContinue[2];
-                printf("Do you want to continue to use above 10 cores of cpu (y/n)?: ");
-                if(__builtin_expect(scanf("%s", conformationToContinue) != 1, 0)) {
-                    perror("corrupted input!\n");
-                    return 1;
-                }
-                if (strcmp(conformationToContinue, "n") == 0 || strcmp(conformationToContinue, "N") == 0) {
-                    return 1;
-                }
-            }
             printf("cpu: %.2f\n", cpuLimit);
-            printf("mem: %i\n", memBytes);
-            if (__builtin_expect(setCpuResourceLimit(&services, serviceName, cpuLimit, (!!(memBytes)), memBytes) != 0, 0)) {
-                return 1;
+            if (doCpuLimit) {
+                if (!useLarge && !useExtreme) {
+                    if (memBytesStr != NULL) {
+                        memBytes = convertToByte(memBytesStr);
+                        if (__builtin_expect(memBytes == 0, 0)) {
+                            fprintf(stderr, "invalid memory size!\n");
+                            displayMemManVerbose();
+                            return 1;
+                        }
+                    }
+                    if (__builtin_expect(setCpuResourceLimit(&services, serviceName, cpuLimit, (!!(memBytes)), memBytes) != 0, 0)) {
+                        return 1;
+                    }
+                } else if (useLarge && !useExtreme) {
+                    memBytes_lrg = convertToByte_F_LRG(memBytesStr);
+                    if (__builtin_expect(memBytes_lrg == 0, 0)) {
+                        fprintf(stderr, "invalid memory size!\n");
+                        displayMemManVerbose();
+                        return 1;
+                    }
+                    printf("custom mem: %li\n", memBytes_lrg);
+                    if (__builtin_expect(setCpuResourceLimit_F_LRG(&services, serviceName, cpuLimit, (!!(memBytes_lrg)), memBytes_lrg) != 0, 0)) {
+                        return 1;
+                    }
+                } else {
+                    memBytesExtr = convertToByte_F_EXTR(memBytesStr);
+                    if (__builtin_expect(memBytesExtr == 0, 0)) {
+                        fprintf(stderr, "invalid memory size!\n");
+                        displayMemManVerbose();
+                        return 1;
+                    }
+                    if (__builtin_expect(setCpuResourceLimit_F_EXTR(&services, serviceName, cpuLimit, (!!(memBytesExtr)), memBytesExtr) != 0, 0)) {
+                        return 1;
+                    }
+                }
+            } else if (doMemLimit) {
+                if (!useLarge && !useExtreme) {
+                    if (memBytesStr != NULL) {
+                        memBytes = convertToByte(memBytesStr);
+                        if (__builtin_expect(memBytes == 0, 0)) {
+                            fprintf(stderr, "invalid memory size!\n");
+                            displayMemManVerbose();
+                            return 1;
+                        }
+                    }
+                    if (__builtin_expect(setMemoryLimit(&services, serviceName, memBytes) != 0, 0)) {
+                        return 1;
+                    }
+                } else if (!useExtreme && useLarge) {
+                    printf("this!\n");
+                    memBytes_lrg = convertToByte_F_LRG(memBytesStr);
+                    printf("mem cus mem: %li\n", memBytes_lrg);
+                    if (__builtin_expect(memBytes_lrg == 0, 0)) {
+                        fprintf(stderr, "invalid memory size!\n");
+                        displayMemManVerbose();
+                        return 1;
+                    }
+                    if (__builtin_expect(setMemoryLimit_F_LRG(&services, serviceName, memBytes_lrg) != 0, 0)) {
+                        return 1;
+                    }
+                } else {
+                    memBytesExtr = convertToByte_F_EXTR(memBytesStr);
+                    if (__builtin_expect(memBytesExtr == 0, 0)) {
+                        fprintf(stderr, "invalid memory size!\n");
+                        displayMemManVerbose();
+                        return 1;
+                    }
+                    if (__builtin_expect(setMemoryLimit_F_EXTR(&services, serviceName, memBytesExtr) != 0, 0)) {
+                        return 1;
+                    }
+                }
             }
         }
 

@@ -1,0 +1,2 @@
+void displayMemTypeHelp();
+void displayMemManVerbose();
