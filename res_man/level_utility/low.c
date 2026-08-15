@@ -25,7 +25,7 @@ CREATE_PROCESS__F_V1
 
 
 __attribute__((hot)) int limitCpuAndMemory(char* serviceName, __uint32_t servicePid, float cpuLimit, _Bool limitMemory, int memBytes) {
-    printf("runned!\n");
+    printf("running!\n");
     if (access("/sys/fs/cgroup/cgroup.controllers", F_OK) == 0) {
         if(__builtin_expect(basic_v2_setup(serviceName) != 0, 0)) {
             return -1;
@@ -72,6 +72,7 @@ __attribute__((hot)) int limitCpuAndMemory(char* serviceName, __uint32_t service
         if (__builtin_expect(memoryLimit(serviceName, memBytes) != 0, 0)) {
             return -1;
         }
+        printf("finsished writing cpu: %s\n mem: %i\n", cpuBuff, memBytes);
         return 0;
     } else {
         if (__builtin_expect(basic_v1_setup(serviceName) != 0, 0)) {

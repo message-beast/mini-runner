@@ -577,7 +577,12 @@ __attribute__((hot)) int limitCpuAndMemory(char* serviceName, __uint32_t service
 
 
 __attribute__((hot)) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint128_t memBytes) {
-    
+    __asm__ volatile (
+        "sfence"
+        :
+        :
+        : "memory"
+    );
     #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
@@ -585,12 +590,18 @@ __attribute__((hot)) int setCpuResourceLimit_F_EXTR(service*** __restrict__ serv
         }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
             printf("name: %s, pid: %i, numberofCpu: %.2f, limitMemory: %i, memBytes: %s\n", serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, format_128_t(memBytes));
-            if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, memBytes) != 0, 0)) {
+            __uint32_t pid = (*services)[i]->pid;
+            if (__builtin_expect(pid == 0, 0)) {
+                printf("\033[33mservice %s is not running\033[0m\n", serviceName);
+                return 0;
+            }
+            if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, pid, numberOfCpu, limitMemory, memBytes) != 0, 0)) {
                 return -1;
             }
             return 0;
         }
     }
+    fprintf(stderr, "can not find any service with name %s\n", serviceName);
     return -1;
     
 }
@@ -600,7 +611,12 @@ __attribute__((hot)) int setCpuResourceLimit_F_EXTR(service*** __restrict__ serv
 
 
 __attribute__((hot)) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint64_t memBytes) {
-    
+    __asm__ volatile (
+        "sfence"
+        :
+        :
+        : "memory"
+    );
     #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
@@ -608,12 +624,18 @@ __attribute__((hot)) int setCpuResourceLimit_F_LRG(service*** __restrict__ servi
         }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
             printf("name: %s, pid: %i, numberofCpu: %.2f, limitMemory: %i, memBytes: %li\n", serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, memBytes);
-            if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, memBytes) != 0, 0)) {
+            __uint32_t pid = (*services)[i]->pid;
+            if (__builtin_expect(pid == 0, 0)) {
+                printf("\033[33mservice %s is not running\033[0m\n", serviceName);
+                return 0;
+            }
+            if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, pid, numberOfCpu, limitMemory, memBytes) != 0, 0)) {
                 return -1;
             }
             return 0;
         }
     }
+    fprintf(stderr, "can not find any service with name %s\n", serviceName);
     return -1;
     
 }
@@ -624,7 +646,12 @@ __attribute__((hot)) int setCpuResourceLimit_F_LRG(service*** __restrict__ servi
 
 
 __attribute__((hot)) int setCpuResourceLimit(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, int memBytesStr) {
-    
+    __asm__ volatile (
+        "sfence"
+        :
+        :
+        : "memory"
+    );
     #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
@@ -632,12 +659,18 @@ __attribute__((hot)) int setCpuResourceLimit(service*** __restrict__ services, c
         }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
             printf("name: %s, pid: %i, numberofCpu: %.2f, limitMemory: %i, memBytes: %i\n", serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, memBytesStr);
-            if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, (*services)[i]->pid, numberOfCpu, limitMemory, memBytesStr) != 0, 0)) {
+            __uint32_t pid = (*services)[i]->pid;
+            if (__builtin_expect(pid == 0, 0)) {
+                printf("\033[33mservice %s is not running\033[0m\n", serviceName);
+                return 0;
+            }
+            if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, pid, numberOfCpu, limitMemory, memBytesStr) != 0, 0)) {
                 return -1;
             }
             return 0;
         }
     }
+    fprintf(stderr, "can not find any service with name %s\n", serviceName);
     return -1;
     
 }

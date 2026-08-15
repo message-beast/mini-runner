@@ -25,12 +25,12 @@ __attribute__((hot)) int basic_v1_setup(char* serviceName) {
             return -1;
         }
     }
-    size_t cpuPathLen = snprintf(NULL, 0, "/sys/fs/cgroup/cpu/%s", serviceName);
-    if (__builtin_expect(cpuPathLen <= 0, 0)) {
+    size_t size = snprintf(NULL, 0, "/sys/fs/cgroup/cpu/%s", serviceName);
+    if (__builtin_expect(size <= 0, 0)) {
         perror("failed to calcultae the cpu path string length!\n");
         return -1;
     }
-    char cpuPath[cpuPathLen + 1];
+    char cpuPath[size + 1];
     snprintf(cpuPath, sizeof(cpuPath), "/sys/fs/cgroup/cpu/%s", serviceName);
     if (__builtin_expect(invalidString(cpuPath), 0)) {
         perror("failed to create the cpu path string!\n");
@@ -38,6 +38,24 @@ __attribute__((hot)) int basic_v1_setup(char* serviceName) {
     }
     if (__builtin_expect(access(cpuPath, F_OK) != 0, 0)) {
         if (__builtin_expect(mkdir(cpuPath, DIRECTORY) != 0, 0)) {
+            perror("failed to create a cpu cgroup!\n");
+            return -1;
+        }
+    }
+    size = snprintf(NULL, 0, "/sys/fs/cgroup/memory/%s", serviceName);
+    if (__builtin_expect(size <= 0, 0)) {
+        perror("failed to calculate cgroupv1 memory path string length!\n");
+        return -1;
+    }
+    char memoryPath[size + 1];
+    snprintf(memoryPath, size + 1, "/sys/fs/cgroup/memory/%s", serviceName);
+    if (__builtin_expect(strlen(memoryPath) <= 0, 0)) {
+        perror("failed to create memory path string!\n");
+        return -1;
+    }
+    if (__builtin_expect(access(memoryPath, F_OK) != 0, 0)) {
+        if (__builtin_expect(mkdir(memoryPath, DIRECTORY) != 0, 0)) {
+            perror("failed to create a memory cgroup!\n");
             return -1;
         }
     }

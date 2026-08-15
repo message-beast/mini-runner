@@ -15,7 +15,6 @@
 #include "../utils/cgrpv1/setup.h"
 #include "../utils/cgrpv1/memory_limit.h"
 #include "../utils/helper.h"
-#include <string.h>
 #include "./limiter.h"
 
 
@@ -36,13 +35,24 @@
 
 
 __attribute__((hot)) int setMemoryLimit(service*** __restrict__ services, char* __restrict__ serviceName, int memBytes) {
+    __asm__ volatile (
+        "sfence"
+        :
+        :
+        : "memory"
+    );
     #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
             __builtin_prefetch(&(*services)[i + 128], 0, 3);
         }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
-            if (__builtin_expect(SET_MEM_LIMIT(serviceName, (*services)[i]->pid, memBytes) != 0, 0)) {
+            __uint32_t pid = (*services)[i]->pid;
+            if (__builtin_expect(pid == 0, 0)) {
+                printf("\033[33mservice %s is not running\033[0m\n", serviceName);
+                return 0;
+            }
+            if (__builtin_expect(SET_MEM_LIMIT(serviceName, pid, memBytes) != 0, 0)) {
                 return -1;
             }
             return 0;
@@ -52,13 +62,24 @@ __attribute__((hot)) int setMemoryLimit(service*** __restrict__ services, char* 
 
 
 __attribute__((hot)) int setMemoryLimit_F_LRG(service*** __restrict__ services, char* __restrict__ serviceName, __uint64_t memBytes) {
+    __asm__ volatile (
+        "sfence"
+        :
+        :
+        : "memory"
+    );
     #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
             __builtin_prefetch(&(*services)[i + 128], 0, 3);
         }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
-            if (__builtin_expect(SET_MEM_LIMIT(serviceName, (*services)[i]->pid, memBytes) != 0, 0)) {
+            __uint32_t pid = (*services)[i]->pid;
+            if (__builtin_expect(pid == 0, 0)) {
+                printf("\033[33mservice %s is not running\033[0m\n", serviceName);
+                return 0;
+            }
+            if (__builtin_expect(SET_MEM_LIMIT(serviceName, pid, memBytes) != 0, 0)) {
                 return -1;
             }
             return 0;
@@ -68,13 +89,24 @@ __attribute__((hot)) int setMemoryLimit_F_LRG(service*** __restrict__ services, 
 
 
 __attribute__((hot)) int setMemoryLimit_F_EXTR(service*** __restrict__ services, char* __restrict__ serviceName, __uint128_t memBytes) {
+    __asm__ volatile (
+        "sfence"
+        :
+        :
+        : "memory"
+    );
     #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
             __builtin_prefetch(&(*services)[i + 128], 0, 3);
         }
         if (__builtin_expect(strcmp((*services)[i]->name, serviceName) == 0, 0)) {
-            if (__builtin_expect(SET_MEM_LIMIT(serviceName, (*services)[i]->pid, memBytes) != 0, 0)) {
+            __uint32_t pid = (*services)[i]->pid;
+            if (__builtin_expect(pid == 0, 0)) {
+                printf("\033[33mservice %s is not running\033[0m\n", serviceName);
+                return 0;
+            }
+            if (__builtin_expect(SET_MEM_LIMIT(serviceName, pid, memBytes) != 0, 0)) {
                 return -1;
             }
             return 0;

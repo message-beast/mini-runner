@@ -80,7 +80,7 @@ __attribute__((hot)) int limitMm_F_LRG(char* serviceName, __uint32_t servicePid,
 }
 
 
-__attribute__((hot)) int limitMm_F_EXTR(char* serviceName, __uint32_t servicePid, __uint64_t memBytes) {
+__attribute__((hot)) int limitMm_F_EXTR(char* serviceName, __uint32_t servicePid, __uint128_t memBytes) {
     if (access("/sys/fs/cgroup/cgroup.controllers", F_OK) == 0) {
         if (__builtin_expect(basic_v2_setup(serviceName) != 0, 0)) {
             return -1;
