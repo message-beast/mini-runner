@@ -69,6 +69,9 @@ static inline __attribute__((always_inline, hot)) int renameCgrp(char* __restric
             perror("cgroup for this service not found!\n");
             return 0;
         }
+        if (__builtin_expect(basic_v2_setup(newName) != 0, 0)) {
+            return -1;
+        }
         size = snprintf(NULL, 0, "/sys/fs/cgroup/%s/cgroup.procs", newName);
         if (__builtin_expect(size <= 0, 0)) {
             perror("failed to calculate the old process cgroup path string length!\n");
@@ -145,6 +148,7 @@ static inline __attribute__((always_inline, hot)) int renameCgrp(char* __restric
         return 0;
 
     } else {
+        printf("v1???????\n");
         size_t size = snprintf(NULL, 0, "/sys/fs/cgroup/cpu/%s", serviceName);
         if (__builtin_expect(size <= 0, 0)) {
             perror("failed to calculate the string length of cpu cgroupv1 path");
@@ -280,6 +284,9 @@ void renameService(service*** __restrict__ services, char* __restrict__ serviceN
                 return;
             }
             if (__builtin_expect(renameCgrp(serviceName, newName, currentService->pid) != 0, 0)) {
+                if (__builtin_expect(renameServiceProjectFoler(newName, serviceName) != 0, 0)) {
+                    perror("failed to undo changes!\n");
+                }
                 perror("renaming cgroup failed!\n");
                 beforeName = NULL;
                 return;
