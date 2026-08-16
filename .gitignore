@@ -2,3 +2,5 @@ secret
 data/*
 !data/.gitkeep
 mrn
+test.*
+test

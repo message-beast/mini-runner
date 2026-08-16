@@ -20,6 +20,7 @@
 #include "res_format/mem_types.h"
 #include "exceptions/messages/mem_type/help.h"
 #include "res_man/mem/mem_limit.h"
+#include "res_man/usage/show_usage.h"
 #define true 1
 #define false 0
 struct service** services = NULL;
@@ -335,6 +336,15 @@ int main(int argc, char* argv[]) {
                         return 1;
                     }
                 }
+            }
+        } else if (strcmp(argv[i], "res-usage") == 0) {
+            char* serviceName = argv[i + 1];
+            if (__builtin_expect(serviceName == NULL, 0)) {
+                printf("service name i required!\n");
+                return 1;
+            }
+            if (__builtin_expect(showRsUsage(&services, serviceName) != 0, 0)) {
+                return 1;
             }
         }
 

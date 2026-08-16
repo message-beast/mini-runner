@@ -1,0 +1,1 @@
+__attribute__((hot)) float numOfCores(char* __restrict__ data, char* __restrict__ uptimeData);

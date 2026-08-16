@@ -15,3 +15,16 @@ typedef struct job {
     time_t lastTimeRunned;
     __uint32_t pid;
 } job;
+
+typedef struct meminfo {
+    char* stack;
+    char* heap;
+    char* vmrss;
+    char* disk;
+    int numThreads;
+} meminfo;
+
+typedef struct resource {
+    meminfo* mem;
+    float numOfCores;
+} resource;
