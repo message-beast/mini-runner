@@ -6,6 +6,10 @@
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
+#include "../../utils.h"
+
+DECLARE_ROUND_2
+
 #define true 1
 #define false 0
 #define MAX_CPU_CORE 10
@@ -36,9 +40,7 @@
     }\
 
 
-static inline __attribute__((always_inline, hot)) float roundTo2(float num) {
-    return (roundf((num * 100)) / 100) ? ((roundf((num * 100)) / 100)) : 0.0;
-}
+
 
 
 

@@ -5,4 +5,4 @@ compile:
 run:
 	./mrn
 get-assembly:
-	gcc -S *.c */*.c */*/*.c */*/*/*.c mrn.s
+	gcc -S -masm=intel *.c */*.c */*/*.c */*/*/*.c mrn.s

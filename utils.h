@@ -23,3 +23,12 @@ void freeServices(service*** __restrict__ services);
 int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid);
 int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach);
 int warmService(service** __restrict__ services, char* __restrict__ bash, _Bool attach);
+
+
+
+#define DECLARE_ROUND_2\
+    static inline __attribute__((always_inline, hot)) float roundTo2(float num) {\
+        return (roundf((num * 100)) / 100) ? ((roundf((num * 100)) / 100)) : 0.0;\
+    }\
+
+    

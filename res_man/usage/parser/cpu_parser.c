@@ -101,3 +101,11 @@ __attribute__((hot)) float numOfCores(char* __restrict__ data, char* __restrict_
     float cpuCore = (float)(utime + stime) / (nowInJiffies - startTime);
     return cpuCore;
 }
+
+
+__attribute__((hot)) float formatCpu(int a, int b) {
+    if (__builtin_expect(b == 0, 0)) {
+        return 0.0f;
+    }
+    return (float)a / b;
+}

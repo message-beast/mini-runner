@@ -1,4 +1,4 @@
-
+#include <stdlib.h>
 #define DECLARE_128_T\
     static inline __attribute__((always_inline, hot)) char* uint128_to_chars(__uint128_t num) {\
     static char buffer[65];\
@@ -24,6 +24,15 @@
 #define format_128_t(n) uint128_to_chars(n)
 
 
+#define DECLARE_CHARS_128_T\
+    static inline __attribute__((always_inline, hot)) __uint128_t chars_to_uint_128(char* numBuff) {\
+        long long loaded = atoll(numBuff);\
+        __uint128_t res = loaded;\
+        return res;\
+    }\
+
+
+#define format_128_char(x) chars_to_uint_128(x);
 
 
 #define CHECK_WRITE(fd, _w, len)\
@@ -34,3 +43,5 @@
     }
 
 #define invalidString(x) strlen(x) <= 0
+
+

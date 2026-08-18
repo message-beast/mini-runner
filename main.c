@@ -21,6 +21,7 @@
 #include "exceptions/messages/mem_type/help.h"
 #include "res_man/mem/mem_limit.h"
 #include "res_man/usage/show_usage.h"
+#include "res_man/usage/show_limit.h"
 #define true 1
 #define false 0
 struct service** services = NULL;
@@ -107,8 +108,9 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "run") == 0) {
             char* name = argv[i + 1];
             char* bash = argv[i + 2];
-            if (__builtin_expect(strlen(name) <= 0 || name == NULL, 0)) {
+            if (__builtin_expect(name == NULL || strlen(name) <= 0, 0)) {
                 fprintf(stderr, "invalid name argument\n");
+                return 1;
             }
             _Bool attach = false;
             for (register int j = i + 1; j < argc; j++) {
@@ -344,6 +346,15 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
             if (__builtin_expect(showRsUsage(&services, serviceName) != 0, 0)) {
+                return 1;
+            }
+        } else if (strcmp(argv[i], "res-limit") == 0) {
+            char* serviceName = argv[i + 1];
+            if (__builtin_expect(serviceName == NULL, 0)) {
+                fprintf(stderr, "service name required!\n");
+                return 1;
+            }
+            if (__builtin_expect(showRsLimit(&services, serviceName) != 0, 0)) {
                 return 1;
             }
         }
