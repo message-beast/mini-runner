@@ -1,0 +1,1 @@
+__attribute__((hot)) int syncJob(_Bool lock);

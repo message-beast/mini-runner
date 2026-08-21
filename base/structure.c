@@ -13,6 +13,7 @@ typedef struct job {
     char* runnableFile;
     time_t lastTimeRunned;
     __uint32_t pid;
+    __uint64_t secondsInterval;
 } job;
 
 typedef struct meminfo {

@@ -1,0 +1,1 @@
+__attribute__((hot)) _Bool isJobFree();

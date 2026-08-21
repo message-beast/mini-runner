@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include "utils.h"
 #include "init/main_init.h"
 #include "basic.h"
@@ -22,9 +23,21 @@
 #include "res_man/mem/mem_limit.h"
 #include "res_man/usage/show_usage.h"
 #include "res_man/usage/show_limit.h"
+#include "init/job_init.h"
+#include "fini/save_jobs.h"
+#include "job_ops/free_jobs.h"
+#include "job_format/format_time.h"
+#include "job_ops/create_job.h"
+#include "job_ops/delete_job.h"
+#include "job_ops/run_jobs.h"
+#include "job_ops/show_jobs.h"
+
 #define true 1
 #define false 0
+
+
 struct service** services = NULL;
+struct job** jobs = NULL;
 
 
 
@@ -38,17 +51,34 @@ void init() {
             exit_program(-1)
         }
     }
-    if (services == NULL) {
-        service** tmp = calloc(__INITIAL_SCALE_SIZE_OF_SERVICES__, sizeof(service*));
-        if (tmp == NULL) {
+    if (__builtin_expect(services == NULL, 1)) {
+        service** tmp = malloc(__INITIAL_SCALE_SIZE_OF_SERVICES__ * sizeof(service*));
+        if (__builtin_expect(tmp == NULL, 0)) {
             perror("memory allocation for services failed!\n");
             exit_program(-1)
         }
         services = tmp;
+        tmp = NULL;
     }
     DEBUG
-    loadServices(&services);
+    if(__builtin_expect(loadServices(&services) != 0, 0)) {
+        perror("loading service failed!\n");
+        exit_program(-1)
+    }
     DEBUG
+    if (__builtin_expect(jobs == NULL, 1)) {
+        job** tmp = malloc(__INITIAL_SCALE_SIZE_OF_JOBS__ * sizeof(service*));
+        if (__builtin_expect(tmp == NULL, 0)) {
+            perror("memory allocation for jobs failed!\n");
+            exit_program(-1)
+        }
+        jobs = tmp;
+        tmp = NULL;
+    }
+    if(__builtin_expect(loadJobs(&jobs) != 0, 0)) {
+        perror("loading job failed!\n");
+        exit_program(-1)
+    }
 }
 
 
@@ -59,10 +89,14 @@ void closeProcess() {
     #if defined(DEBUG_MODE)
         printf("destructor called!\n");
     #endif
-    if (save_services(&services) != 0) {
+    if (__builtin_expect(save_services(&services) != 0, 0)) {
         printf("save_service is not healthy!");
     }
+    if (__builtin_expect(save_jobs(&jobs) != 0, 0)) {
+        printf("jobs is not healthy!\n");
+    }
     freeServices(&services);
+    freeJobs(&jobs);
 }
 
 static inline __attribute((always_inline)) void displayHelp() {
@@ -357,6 +391,54 @@ int main(int argc, char* argv[]) {
             if (__builtin_expect(showRsLimit(&services, serviceName) != 0, 0)) {
                 return 1;
             }
+        } else if (strcmp(argv[i], "add-job") == 0) {
+            char* jobName = argv[i + 1];
+            if (__builtin_expect(jobName == NULL, 0)) {
+                fprintf(stderr, "job name is required!\n");
+                return 1;
+            }
+            char* runnableFile = argv[i + 2];
+            if (__builtin_expect(runnableFile == NULL, 0)) {
+                fprintf(stderr, "runnable file is required!\n");
+                return 1;
+            }
+            char* timeBuff = argv[i + 3];
+            if (__builtin_expect(timeBuff == NULL, 0)) {
+                fprintf(stderr, "tim eintervl is required!\n");
+                return 1;
+            }
+            __uint64_t timeInSeconds = 0;
+            if (__builtin_expect((timeInSeconds = formatTime(timeBuff)) <= 0, 0)) {
+                fprintf(stderr, "formating time interval failed!\n");
+                return 1;
+            }
+            _Bool runNow = false;
+            for (register int j = i + 4; j < argc; ++j) {
+                if (strcmp(argv[j], "--run-now") == 0) {
+                    runNow = true;
+                }
+            }
+            if (__builtin_expect(createJob(&jobs, jobName, runnableFile, timeInSeconds, runNow) != 0, 0)) {
+                return 1;
+            }
+
+        } else if (strcmp(argv[i], "remove-job") == 0) {
+            char* jobName = argv[i + 1];
+            if (__builtin_expect(jobName == NULL, 0)) {
+                fprintf(stderr, "job name is required!\n");
+                return 1;
+            }
+            if (__builtin_expect(removeJob(&jobs, jobName) != 0, 0)) {
+                return 1;
+            }
+        } else if (strcmp(argv[i], "warmup-jobs") == 0) {
+            if (__builtin_expect(launchDaemon() != 0, 0)) {
+                fprintf(stderr, "warming up failed!\n");
+                return 1;
+            }
+            printf("daemon launched!\n");
+        } else if (strcmp(argv[i], "list-jobs") == 0) {
+            showJobs(&jobs);
         }
 
 
