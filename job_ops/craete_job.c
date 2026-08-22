@@ -10,7 +10,7 @@
 #define false 0
 
 
-__attribute__((hot)) int createJob(job*** __restrict__ jobs, char* __restrict__ jobName, char* __restrict__ runnableFile, __uint64_t secondsInterval, _Bool runNow) {
+__attribute__((hot)) int createJob(job*** __restrict__ jobs, char* __restrict__ jobName, char* __restrict__ runnableFile, __uint64_t secondsInterval) {
     if (__builtin_expect(jobs == NULL && *jobs == NULL, 0)) {
         job** tmp = malloc(__INITIAL_SCALE_SIZE_OF_JOBS__ * sizeof(job*));
         if (__builtin_expect(tmp == NULL, 0)) {
@@ -44,12 +44,7 @@ __attribute__((hot)) int createJob(job*** __restrict__ jobs, char* __restrict__ 
     newJob->runnableFile = strdup(runnableFile);
     newJob->pid = 0;
     newJob->secondsInterval = secondsInterval;
-    if (runNow == true) {
-        newJob->lastTimeRunned = time(NULL) - secondsInterval;
-    } else {
-        newJob->lastTimeRunned = time(NULL);
-    }
-
+    newJob->lastTimeRunned = time(NULL) + 1;
     if (__builtin_expect(numberOfJobs >= capacityOfJobs, 0)) {
         int newSize = numberOfJobs + __INITIAL_SCALE_SIZE_OF_JOBS__;
         job** tmp = realloc(*jobs, newSize * sizeof(job*));

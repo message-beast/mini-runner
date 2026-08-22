@@ -1,0 +1,2 @@
+void displayJobRules();
+void displayJobRsLimithelp();

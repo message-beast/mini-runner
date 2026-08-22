@@ -19,7 +19,8 @@ __attribute__((hot)) __uint128_t convertToByte_F_EXTR(char* size) {
             char memSize[i + 2];
             memcpy(memSize, size, i);
             memSize[i] = '\0';
-            int memSizeInt = atoi(memSize);
+            double memSizeInt = atof(memSize);
+            #pragma STDC FP_CONTRACT ON
             memBytes = (__uint128_t)memSizeInt * (__uint64_t)1024 * 1024 * 1024 * 1024;
             break;
         }
@@ -41,7 +42,8 @@ __attribute__((hot)) __uint64_t convertToByte_F_LRG(char* size) {
             char memSize[i + 2];
             memcpy(memSize, size, i);
             memSize[i] = '\0';
-            int memSizeInt = atoi(memSize);
+            double memSizeInt = atof(memSize);
+            #pragma STDC FP_CONTRACT ON
             memBytes = (__uint64_t)memSizeInt * (__uint32_t)1024 * 1024 * 1024;
             break;
         }
@@ -65,21 +67,24 @@ __attribute__((hot)) int convertToByte(char* size) {
             char memSize[i + 2];
             memcpy(memSize, size, i);
             memSize[i] = '\0';
-            int memSizeInt = atoi(memSize);
+            double memSizeInt = atof(memSize);
+            #pragma STDC FP_CONTRACT ON
             memBytes = memSizeInt * 1024;
             break;
         } else if (__builtin_expect(size[i] == 'm', 0)) {
             char memSize[i + 2];
             memcpy(memSize, size, i);
             memSize[i] = '\0';
-            int memSizeInt = atoi(memSize);
+            double memSizeInt = atof(memSize);
+            #pragma STDC FP_CONTRACT ON
             memBytes = memSizeInt * (1024 * 1024);
             break;
         } else if (__builtin_expect(size[i] == 'g', 0)) {
             char memSize[i + 2];
             memcpy(memSize, size, i);
             memSize[i] = '\0';
-            int memSizeInt = atoi(memSize);
+            double memSizeInt = atof(memSize);
+            #pragma STDC FP_CONTRACT ON
             memBytes = memSizeInt * (1024 * 1024 * 1024);
             break;
         }
@@ -90,8 +95,8 @@ __attribute__((hot)) int convertToByte(char* size) {
 
 __attribute__((hot)) char* formatByte(__uint128_t bytes) {
     char* formatedString = NULL;
-    if (((float)bytes / ((__uint64_t) 1024 * 1024 * 1024* 1024)) >= 1) {
-        float amount = (float)bytes / ((__uint64_t) 1024 * 1024 * 1024* 1024);
+    if (((double)bytes / ((__uint64_t) 1024 * 1024 * 1024* 1024)) >= 1) {
+        double amount = (double)bytes / ((__uint64_t) 1024 * 1024 * 1024* 1024);
         size_t size = snprintf(NULL, 0, "%2.f TB", amount);
         if (__builtin_expect(size <= 0, 0)) {
             perror("failed to calculate size!\n");
@@ -104,8 +109,8 @@ __attribute__((hot)) char* formatByte(__uint128_t bytes) {
         }
         snprintf(formatedString, size + 1, "%2.f TB", amount);
         formatedString[size] = '\0';
-    } else if (((float) bytes / ((__uint32_t) 1024 * 1024 * 1024)) >= 1) {
-        float amount = (float) bytes / ((__uint64_t) 1024 * 1024 * 1024);
+    } else if (((double) bytes / ((__uint32_t) 1024 * 1024 * 1024)) >= 1) {
+        double amount = (double) bytes / ((__uint64_t) 1024 * 1024 * 1024);
         size_t size = snprintf(NULL, 0, "%.2f GB", amount);
         if (__builtin_expect(size <= 0, 0)) {
             perror("failed to calculate size!\n");
@@ -118,8 +123,8 @@ __attribute__((hot)) char* formatByte(__uint128_t bytes) {
         }
         snprintf(formatedString, size + 1, "%.2f GB", amount);
         formatedString[size] = '\0';
-    } else if (((float) bytes / ((__uint32_t) 1024 * 1024)) >= 1) {
-        float amount = (float) bytes / ((__uint64_t) 1024 * 1024);
+    } else if (((double) bytes / ((__uint32_t) 1024 * 1024)) >= 1) {
+        double amount = (double) bytes / ((__uint64_t) 1024 * 1024);
         size_t size = snprintf(NULL, 0, "%.2f MB", amount);
         if (__builtin_expect(size <= 0, 0)) {
             perror("failed to calculate size!\n");
@@ -132,8 +137,8 @@ __attribute__((hot)) char* formatByte(__uint128_t bytes) {
         }
         snprintf(formatedString, size + 1, "%.2f MB", amount);
         formatedString[size] = '\0';
-    } else if (((float) bytes / 1024) >= 1) {
-        float amount = (float) bytes / 1024;
+    } else if (((double) bytes / 1024) >= 1) {
+        double amount = (double) bytes / 1024;
         size_t size = snprintf(NULL, 0, "%.2f KB", amount);
         if (__builtin_expect(size <= 0, 0)) {
             perror("failed to calculate size!\n");

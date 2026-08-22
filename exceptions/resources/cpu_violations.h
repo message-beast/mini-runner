@@ -1,6 +1,6 @@
 #include "../../base/config.h"
 #define MAX_CPU_CORE 10
-__attribute__((hot)) float convertToFloat(char* cpuLimit, int* err_flg);
+__attribute__((hot)) double convertToFloat(char* cpuLimit, int* err_flg);
 
 
 

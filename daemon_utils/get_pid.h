@@ -1,0 +1,1 @@
+__attribute__((hot)) __uint32_t getDaemonPid();

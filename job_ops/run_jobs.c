@@ -12,10 +12,15 @@
 #include <pthread.h>
 #include <string.h>
 #include <fcntl.h>
+#include "../base/structure.h"
+#include "../daemon_utils/save_pid.h"
+#include "../job_res_man/get_limit.h"
+#include "../job_res_man/res_limit.h"
+#include "../fini/daemon_save_jobs.h"
+
 
 #define check_write(_fd, _len, _wanted_length)\
     if (__builtin_expect(_len < _wanted_length || _len != _wanted_length, 0)) {\
-        perror("write to pipe failed!");\
         close(_fd);\
         abort();\
     }\
@@ -30,7 +35,6 @@ static inline __attribute__((always_inline, hot)) char* giveString(char* string,
     int length = endingIndex - startingIndex;
     char* finalString = malloc(length + 1);
     if (__builtin_expect(finalString == NULL, 0)) {
-        perror("can not allocate memory for the string");
         return NULL;
     }
     memcpy(finalString, string + startingIndex, length);
@@ -82,22 +86,40 @@ static inline __attribute__((always_inline, hot)) void freeJobs(job*** jobs) {
 static inline __attribute__((always_inline, hot)) void* runJobsDaemon() {
     job** _jobs = malloc(sizeof(job*) * __INITIAL_SCALE_SIZE_OF_JOBS__);
     while(_jobs == NULL) {
-        perror("failed to allocate memory for jobs retrying!\n");
         sleep(5);
         job** _jobs = malloc(sizeof(job*) * __INITIAL_SCALE_SIZE_OF_JOBS__);
     }
     job*** jobs = &_jobs;
     time_t wastedTime = 0;
     __uint64_t waitedTime = 0;
+    __uint32_t pid = getpid();
+    if (__builtin_expect(setPid(pid) != 0, 0)) {
+        while (setPid(pid) != 0) {
+            sleep(5);
+        }
+    }
+    job_rs_limit* limit = getLimit();
+    if (__builtin_expect(limit == NULL, 0)) {
+        while ((limit = getLimit()) == NULL) {
+            sleep(5);
+        }
+    }
+    if (__builtin_expect(limit->cpuLimit || limit->memoryLimit, 1)) {
+        if (__builtin_expect(setLimit(limit->memoryLimit, limit->cpuLimit, !!(limit->memoryLimit), !!(limit->cpuLimit)) != 0, 0)) {
+            while (setLimit(limit->memoryLimit, limit->cpuLimit, !!(limit->memoryLimit), !!(limit->cpuLimit)) != 0) {
+                sleep(5);
+            }
+        }
+    }
+    free(limit);
+
     while (1) {
         time_t now = time(NULL);
         if(__builtin_expect(loadJobsDaemon(jobs) != 0, 0)) {
-            perror("\033[33mloading jobs failed!\033[0m\n");
             sleep(5);
             freeJobs(jobs);
             job** newJobMemory = malloc(sizeof(job*) * __INITIAL_SCALE_SIZE_OF_JOBS__);
             if (__builtin_expect(newJobMemory == NULL, 0)) {
-                perror("memory allocation for jobs failed!\n");
                 sleep(3);
                 continue;
             }
@@ -109,12 +131,9 @@ static inline __attribute__((always_inline, hot)) void* runJobsDaemon() {
                 __builtin_prefetch(&(*jobs)[i + 128], 0, 3);
             }
             job* currentJob = (*jobs)[i];
-            printf("waited time: %li, interval: %li\n", waitedTime, currentJob->secondsInterval);
             if (is_divisible(currentJob->secondsInterval, waitedTime)) {
-                printf("found match!\n");
                 int pipeFd[2];
                 if (__builtin_expect(pipe(pipeFd) != 0, 0)) {
-                    perror("pipe failed!\n");
                     continue;
                 }
                 char res[13];
@@ -130,7 +149,6 @@ static inline __attribute__((always_inline, hot)) void* runJobsDaemon() {
                         abort();
                     }
                     if (__builtin_expect(chdir(path) != 0, 0)) {
-                        perror("failed to change directory!\n");
                         ssize_t written = write(pipeFd[1], "0\0", 2);
                         check_write(pipeFd[1], written, 2)
                         close(pipeFd[1]);
@@ -156,7 +174,6 @@ static inline __attribute__((always_inline, hot)) void* runJobsDaemon() {
                     char resBuff[13];
                     ssize_t readBytes = read(pipeFd[0], resBuff, 13);
                     if (__builtin_expect(readBytes <= 0, 0)) {
-                        perror("read on pipe failed!\n");
                         continue;
                     }
                     __uint32_t pid = atoi(resBuff);
@@ -167,12 +184,18 @@ static inline __attribute__((always_inline, hot)) void* runJobsDaemon() {
                 wastedTime = t1 - t0;
             }
         }
+        if(__builtin_expect(save_jobs_daemon(jobs) != 0, 0)) {
+            int rs = -1;
+            while (rs != 0) {
+                rs = save_jobs_daemon(jobs);
+                sleep(1);
+            }
+        }
         sleep(1);
         waitedTime++;
         freeJobs(jobs);
         job** newJobMemory = malloc(sizeof(job*) * __INITIAL_SCALE_SIZE_OF_JOBS__);
         if (__builtin_expect(newJobMemory == NULL, 0)) {
-            perror("memory allocation for jobs failed!\n");
             return NULL;
         }
         (*jobs) = newJobMemory;
@@ -190,11 +213,9 @@ __attribute__((hot)) int launchDaemon() {
     pthread_t daemon;
     if (pid == 0) {
         if(__builtin_expect(pthread_create(&daemon, NULL, runJobsDaemon, NULL) != 0, 0)) {
-            perror("failed to create daemon!\n");
             abort();
         }
         if(__builtin_expect(pthread_detach(daemon) != 0, 0)) {
-            perror("failed to detach the daemon!\n");
             abort();
         }
     }
@@ -202,6 +223,15 @@ __attribute__((hot)) int launchDaemon() {
         return 0;
     }
     setsid();
+    int devNull = open("/dev/null", O_RDWR);
+    if (__builtin_expect(devNull == -1, 0)) {
+        perror("failed to open /dev/null\n");
+        return -1;
+    }
+    dup2(devNull, STDOUT_FILENO);
+    dup2(devNull, STDIN_FILENO);
+    dup2(devNull, STDERR_FILENO);
+    close(devNull);
     close(STDERR_FILENO);
     close(STDOUT_FILENO);
     close(STDIN_FILENO);

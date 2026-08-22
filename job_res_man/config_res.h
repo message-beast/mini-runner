@@ -1,0 +1,1 @@
+__attribute__((hot)) int configJobRes(__uint128_t memLimit, __uint64_t cpuLimit, _Bool limitMemory, _Bool limitCpu);

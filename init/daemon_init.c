@@ -36,7 +36,9 @@ __attribute__((hot)) int loadJobsDaemon(job*** jobs) {
         (*jobs) = tmp;
         tmp = NULL;
     }
-    while(!isJobFree());
+    while(!isJobFree()) {
+        sleep(1);
+    }
     int jobsFileFd = open("data/jobs", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(jobsFileFd == -1, 0)) {
         perror("failed to open data/jobs file!\n");

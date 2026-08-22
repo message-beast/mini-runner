@@ -24,7 +24,7 @@ CREATE_PROCESS__F_V1
 
 
 
-__attribute__((hot)) int limitCpuAndMemory(char* serviceName, __uint32_t servicePid, float cpuLimit, _Bool limitMemory, int memBytes) {
+__attribute__((hot)) int limitCpuAndMemory(char* serviceName, __uint32_t servicePid, double cpuLimit, _Bool limitMemory, int memBytes) {
     printf("running!\n");
     if (access("/sys/fs/cgroup/cgroup.controllers", F_OK) == 0) {
         if(__builtin_expect(basic_v2_setup(serviceName) != 0, 0)) {

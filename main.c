@@ -31,10 +31,21 @@
 #include "job_ops/delete_job.h"
 #include "job_ops/run_jobs.h"
 #include "job_ops/show_jobs.h"
+#include "job_res_man/config_res.h"
+#include "res_man/utils/helper.h"
+#include "res_format/cpu_format.h"
+#include "res_format/job_mem_format.h"
+#include "exceptions/messages/jobs/help.h"
+#include "exceptions/jobs/job_exceptions.h"
+#include "daemon_ops/show_limit.h"
+#include "daemon_ops/restart_daemon.h"
+#include "daemon_ops/stop_daemon.h"
+#include "daemon_ops/show_status.h"
 
 #define true 1
 #define false 0
 
+DECLARE_128_T
 
 struct service** services = NULL;
 struct job** jobs = NULL;
@@ -235,7 +246,7 @@ int main(int argc, char* argv[]) {
                 fprintf(stderr, "service-name expected!\n");
                 return 1;
             }
-            float cpuLimit = 0.0;
+            double cpuLimit = 0.0;
             int errD = 0;
             int memBytes = 0;
             __uint64_t memBytes_lrg = 0;
@@ -397,14 +408,28 @@ int main(int argc, char* argv[]) {
                 fprintf(stderr, "job name is required!\n");
                 return 1;
             }
+            if (__builtin_expect(!isValidJobName(jobName), 0)) {
+                printf("\033[31mRule Violated\033[0m\n");
+                displayJobRules();
+                return 1;
+            }
             char* runnableFile = argv[i + 2];
             if (__builtin_expect(runnableFile == NULL, 0)) {
                 fprintf(stderr, "runnable file is required!\n");
                 return 1;
             }
+            if (__builtin_expect(!isValidJobPath(runnableFile), 0)) {
+                fprintf(stderr, "rule violated or %s is not found!\n", runnableFile);
+                displayJobRules();
+                return 1;
+            }
+            if (__builtin_expect(!fileExists(runnableFile), 0)) {
+                fprintf(stderr, "%s not found!\n", runnableFile);
+                return 1;
+            }
             char* timeBuff = argv[i + 3];
             if (__builtin_expect(timeBuff == NULL, 0)) {
-                fprintf(stderr, "tim eintervl is required!\n");
+                fprintf(stderr, "time interval is required!\n");
                 return 1;
             }
             __uint64_t timeInSeconds = 0;
@@ -412,13 +437,7 @@ int main(int argc, char* argv[]) {
                 fprintf(stderr, "formating time interval failed!\n");
                 return 1;
             }
-            _Bool runNow = false;
-            for (register int j = i + 4; j < argc; ++j) {
-                if (strcmp(argv[j], "--run-now") == 0) {
-                    runNow = true;
-                }
-            }
-            if (__builtin_expect(createJob(&jobs, jobName, runnableFile, timeInSeconds, runNow) != 0, 0)) {
+            if (__builtin_expect(createJob(&jobs, jobName, runnableFile, timeInSeconds) != 0, 0)) {
                 return 1;
             }
 
@@ -439,6 +458,54 @@ int main(int argc, char* argv[]) {
             printf("daemon launched!\n");
         } else if (strcmp(argv[i], "list-jobs") == 0) {
             showJobs(&jobs);
+        } else if (strcmp(argv[i], "config") == 0) {
+            if (strcmp(argv[i + 1], "job") == 0) {
+                __uint64_t cpuLimit = 0;
+                __uint128_t memLimit = 0;
+                for (register int j = i + 1; j < argc; ++j) {
+                    if (strcmp(argv[j], "--max-cpu") == 0 || strcmp(argv[j], "-mc") == 0) {
+                        char* cpulimitBuff = argv[j + 1];
+                        if (__builtin_expect(cpulimitBuff == NULL, 0)) {
+                            fprintf(stderr, "cpuLimit range required!\n");
+                            return 1;
+                        }
+                        cpuLimit = convertToSeconds(cpulimitBuff);
+                        if (__builtin_expect(cpuLimit == 0, 0)) {
+                            fprintf(stderr, "failed to parse cpu core amount or you just passed 0 cores?\n");
+                            displayJobRsLimithelp();
+                            return 1;
+                        }
+                    } else if (strcmp(argv[j], "--max-memory") == 0 || strcmp(argv[j], "-mm") == 0) {
+                        char* memLimitBuff = argv[j + 1];
+                        if (__builtin_expect(memLimitBuff == NULL, 0)) {
+                            fprintf(stderr, "memory limit is required!\n");
+                            return 1;
+                        }
+                        memLimit = convertToBytes_JOB(memLimitBuff);
+                        if (__builtin_expect(memLimit == 0, 0)) {
+                            fprintf(stderr, "failed to parse memory limit or you just passed 0 bytes?\n");
+                            displayJobRsLimithelp();
+                            return 1;
+                        }
+                    }
+                }
+                if (__builtin_expect(configJobRes(memLimit, cpuLimit, !!(memLimit), !!(cpuLimit)) != 0, 0)) {
+                    return 1;
+                }
+            }
+        } else if (strcmp(argv[i], "show-job-limit") == 0) {
+            showJobDaemonRsLimits();
+        } else if (strcmp(argv[i], "restart-jobs") == 0) {
+            if (__builtin_expect(restartJobDaemon(&jobs) != 0, 0)) {
+                return 1;
+            }
+        } else if (strcmp(argv[i], "stop-jobs") == 0) {
+            if (__builtin_expect(stopJobDaemon(&jobs) != 0, 0)) {
+                return 1;
+            }
+
+        } else if (strcmp(argv[i], "job-status") == 0) {
+            showDaemonStatus();
         }
 
 

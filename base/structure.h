@@ -29,3 +29,8 @@ typedef struct resource {
     meminfo* mem;
     float numOfCores;
 } resource;
+
+typedef struct job_rs_limit {
+    __uint128_t memoryLimit;
+    __uint64_t cpuLimit;
+} job_rs_limit;

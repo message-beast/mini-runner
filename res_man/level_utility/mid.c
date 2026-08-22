@@ -24,7 +24,7 @@ CREATE_PROCESS_REG_F
 CREATE_PROCESS__F_V1
 
 
-__attribute__((hot)) int limitCpuAndMemory_F_LRG(char* serviceName, __uint32_t servicePid, float cpuLimit, _Bool limitMemory, __uint64_t memBytes) {
+__attribute__((hot)) int limitCpuAndMemory_F_LRG(char* serviceName, __uint32_t servicePid, double cpuLimit, _Bool limitMemory, __uint64_t memBytes) {
     if (access("/sys/fs/cgroup/cgroup.controllers", F_OK) == 0) {
         if(__builtin_expect(basic_v2_setup(serviceName) != 0, 0)) {
             return -1;
