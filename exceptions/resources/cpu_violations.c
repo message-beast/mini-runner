@@ -1,5 +1,3 @@
-#pragma optimize("O3")
-#pragma optimize("fast-math")
 #include <stdio.h>
 #include "../../base/config.h"
 #include <string.h>
@@ -7,6 +5,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "../../utils.h"
+#include "../../arch/fma.h"
 
 DECLARE_ROUND_2
 
@@ -38,7 +37,7 @@ DECLARE_ROUND_2
 
 
 
-__attribute__((hot)) double convertToFloat(char* cpuLimit, int* err_flg) {
+FMA(hot) double convertToFloat(char* cpuLimit, int* err_flg) {
     double cpuLimitInFloat = atof(cpuLimit);
     if (__builtin_expect(cpuLimitInFloat == 0.0, 0)) {
         fprintf(stderr, "you just give 0.0 on purpose or failed to convert!\n");

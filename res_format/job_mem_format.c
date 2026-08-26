@@ -1,10 +1,9 @@
-#pragma optimize("O3")
-#pragma optimize("fast-math")
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-__attribute__((hot)) __uint128_t convertToBytes_JOB(char* memLimitBuff) {
+#include "../arch/fma.h"
+FMA(hot) __uint128_t convertToBytes_JOB(char* memLimitBuff) {
     double memLimit = atof(memLimitBuff);
     int size = strlen(memLimitBuff);
     if (__builtin_expect(size <= 0, 0)) {

@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <signal.h>
@@ -7,7 +6,7 @@
 #include "../base/structure.h"
 #include "../base/config.h"
 #include <signal.h>
-
+#include "../arch/opt.h"
 
 static inline __attribute__((always_inline, hot)) int killJob(int pid) {
     if (__builtin_expect(kill(pid, 0) != 0, 1)) {
@@ -21,7 +20,7 @@ static inline __attribute__((always_inline, hot)) int killJob(int pid) {
     return 0;
 }   
 
-__attribute__((hot)) int stopJobDaemon(job*** jobs) {
+OPT(hot) int stopJobDaemon(job*** jobs) {
     __uint32_t pid = getDaemonPid();
     if (__builtin_expect(pid == 0, 0)) {
         fprintf(stderr, "either job daemon is not running or it can not be parsed! try again!\n");

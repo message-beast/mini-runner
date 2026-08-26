@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/stat.h>
@@ -6,7 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
-
+#include "../arch/opt.h"
 #define DECLARE_FILE_COPY_F\
     static inline __attribute__((always_inline, hot)) int fileCopy(char* __restrict__ oldFile, char* __restrict__ newFile) {\
     int __fd_s = open(oldFile, O_RDONLY);\

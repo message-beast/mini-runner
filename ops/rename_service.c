@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include "../base/structure.h"
@@ -148,7 +147,6 @@ static inline __attribute__((always_inline, hot)) int renameCgrp(char* __restric
         return 0;
 
     } else {
-        printf("v1???????\n");
         size_t size = snprintf(NULL, 0, "/sys/fs/cgroup/cpu/%s", serviceName);
         if (__builtin_expect(size <= 0, 0)) {
             perror("failed to calculate the string length of cpu cgroupv1 path");
@@ -262,7 +260,7 @@ static inline __attribute__((always_inline, hot)) int renameCgrp(char* __restric
 
 
 
-void renameService(service*** __restrict__ services, char* __restrict__ serviceName, char* __restrict__ newName) {
+OPT() void renameService(service*** __restrict__ services, char* __restrict__ serviceName, char* __restrict__ newName) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         return;
     }

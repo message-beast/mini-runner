@@ -1,12 +1,12 @@
-#pragma optimiez("O3")
 #include <stdio.h>
 #include <stdlib.h>
 #include "../base/structure.h"
 #include "../base/config.h"
 #include <string.h>
+#include "../arch/opt.h"
 
 
-__attribute__((hot)) int loadJob(job*** jobs, job* newJOb) {
+OPT(hot) int loadJob(job*** jobs, job* newJOb) {
     if (__builtin_expect(numberOfJobs >= capacityOfJobs, 0)) {
         int newSize = capacityOfJobs + __INITIAL_SCALE_SIZE_OF_JOBS__;
         job** tmp = realloc((*jobs), sizeof(job*) * newSize);

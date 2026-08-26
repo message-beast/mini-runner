@@ -3,10 +3,12 @@
 #include "../base/structure.h"
 #include "../base/config.h"
 
-
 __attribute__((hot)) void freeJobs(job*** jobs) {
     if (__builtin_expect(jobs != NULL && *jobs != NULL, 1)) {
         for (register int i = 0; i < numberOfJobs; ++i) {
+            if (__builtin_expect((i & 31) == 0 || i == 0, 0)) {
+                __builtin_prefetch(&(*jobs)[i + 32], 0, 3);
+            }
             if (__builtin_expect((*jobs)[i] != NULL, 1)) {
                 job* currentJob = (*jobs)[i];
                 free(currentJob->name);

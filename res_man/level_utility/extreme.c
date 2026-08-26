@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <errno.h>
@@ -15,7 +14,6 @@
 #include "../utils/cgrpv1/setup.h"
 #include "../utils/cgrpv1/memory_limit.h"
 #include "../utils/helper.h"
-#include <string.h>
 #include "../utils/cgrpv2/utils.h"
 #include "../utils/cgrpv1/utils.h"
 

@@ -34,3 +34,17 @@ typedef struct job_rs_limit {
     __uint128_t memoryLimit;
     __uint64_t cpuLimit;
 } job_rs_limit;
+
+
+typedef struct verbose {
+    char* name;
+    char* githubRepo;
+    int pid;
+} verbose;
+
+typedef struct param {
+    service** service;
+    char* command;
+    char* name;
+    _Bool attach;
+} param;

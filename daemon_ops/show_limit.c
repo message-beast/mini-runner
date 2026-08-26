@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #include <stdio.h>
 #include "../base/structure.h"
 #include "../job_res_man/get_limit.h"
@@ -6,8 +5,10 @@
 #include "../res_format/cpu_format.h"
 #include "../res_format/mem_types.h"
 #include "../res_man/utils/helper.h"
+#include "../arch/opt.h"
 DECLARE_128_T
-__attribute__((hot)) void showJobDaemonRsLimits() {
+
+OPT(hot) void showJobDaemonRsLimits() {
     job_rs_limit* limit = getLimit();
     if (__builtin_expect(limit == NULL, 0)) {
         perror("failed to allocate memory for limit!\n");

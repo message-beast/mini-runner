@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <sys/mman.h>
 #include <unistd.h>
@@ -12,8 +11,9 @@
 #include "../base/config.h"
 #include "../utils.h"
 #include <stdio.h>
+#include "../arch/opt.h"
 //#define DEBUG_MODE 1
-__attribute__((hot)) int initiateMemoryPtr() {
+__attribute__((cold)) int initiateMemoryPtr() {
     int sharedUpdateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(sharedUpdateStatusFileFd == -1, 0)) {
         perror("can not open the update status file!\n");
@@ -57,7 +57,7 @@ static inline __attribute__((always_inline, hot)) char* giveString(char* string,
 
 
 
-__attribute__((hot)) int loadServices(service*** services) {
+OPT(hot) int loadServices(service*** services) {
     if (__builtin_expect(services == NULL, 0)) {
         service** tmp = malloc(__INITIAL_SCALE_SIZE_OF_SERVICES__ * sizeof(service*));
         if (__builtin_expect(tmp == NULL, 0)) {
@@ -69,13 +69,13 @@ __attribute__((hot)) int loadServices(service*** services) {
     int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(projectsFileFd == -1, 0)) {
         perror("can not open the projects file!\n");
-        return -1;
+        exit_program(-1)
     }
     struct stat st;
     if (__builtin_expect(fstat(projectsFileFd, &st) != 0, 0)) {
         perror("fstat for projects file failed!\n");
         close(projectsFileFd);
-        return -1;
+        exit_program(-1)
     }
     if (__builtin_expect(st.st_size == 0, 0)) {
         return 0;

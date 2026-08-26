@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-
+#include "../arch/opt.h"
 static inline __attribute__((always_inline, hot)) char* defineTab(int x, int y) {
     if (x == y) {
         return "";
@@ -26,7 +26,7 @@ static inline __attribute__((always_inline, hot)) char* defineTab(int x, int y) 
 
 
 
-__attribute__((hot)) void showJobs(job*** jobs) {
+void showJobs(job*** jobs) {
     if (__builtin_expect(numberOfJobs == 0, 0)) {
         printf("\033[33mthere is no jobs!\n");
         return;

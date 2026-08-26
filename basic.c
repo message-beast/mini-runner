@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #include <stdio.h>
 #include <stdnoreturn.h>
 #include <stdlib.h>
@@ -18,7 +17,7 @@ __attribute__((hot))int exit_process(int i) {
 #define exit_program(i) exit_process(i);
 
 
-void cleanupStr(char** ptr) {
+__attribute__((hot)) void cleanupStr(char** ptr) {
     if (*ptr) {
         free(*ptr);
     }

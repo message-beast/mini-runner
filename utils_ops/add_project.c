@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -14,11 +13,12 @@
 #include <pthread.h>
 #include <stdatomic.h>
 #include <signal.h>
+#include "../arch/opt.h"
 #include "../checks_for_pr/write_chk.h"
 static inline __attribute__((always_inline, hot)) int cloneRepo(service** services);
-[[nodiscard]]int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName) {
+[[nodiscard]] OPT() int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName) {
     if (__builtin_expect(services == NULL, 0)) {
-        service** tmp = calloc(__INITIAL_SCALE_SIZE_OF_SERVICES__, sizeof(service*));
+        service** tmp = malloc(__INITIAL_SCALE_SIZE_OF_SERVICES__ * sizeof(service*));
         if (__builtin_expect(tmp == NULL, 0)) {
             perror("can not allocate memory for services!\n");
             exit_program(-1)

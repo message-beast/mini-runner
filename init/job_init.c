@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -11,6 +10,7 @@
 #include "../job_ops/load_job.h"
 #include "../basic.h"
 #include <string.h>
+#include "../arch/opt.h"
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;
     char* finalString = malloc(length + 1);
@@ -25,7 +25,7 @@ static inline __attribute__((always_inline, hot)) char* giveString(char* string,
 
 
 
-__attribute__((hot)) int loadJobs(job*** jobs) {
+OPT(hot) int loadJobs(job*** jobs) {
     if (__builtin_expect(jobs == NULL, 0)) {
         job** tmp = malloc(sizeof(job*) * __INITIAL_SCALE_SIZE_OF_JOBS__);
         if (__builtin_expect(tmp == NULL, 0)) {
@@ -38,12 +38,12 @@ __attribute__((hot)) int loadJobs(job*** jobs) {
     int jobsFileFd = open("data/jobs", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(jobsFileFd == -1, 0)) {
         perror("failed to open data/jobs file!\n");
-        return -1;
+        exit_program(-1)
     }
     struct stat st;
     if (__builtin_expect(fstat(jobsFileFd, &st) != 0, 0)) {
         perror("fstat failed on jobs file!\n");
-        return -1;
+        exit_program(-1)
     }
     if (__builtin_expect(st.st_size == 0, 0)) {
         return 0;
@@ -51,7 +51,7 @@ __attribute__((hot)) int loadJobs(job*** jobs) {
     char* data = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, jobsFileFd, 0);
     if (__builtin_expect(data == MAP_FAILED, 0)) {
         perror("mmap faled on jobs file!\n");
-        return -1;
+        exit_program(-1)
     }
     enum State {FIND_NAME, FIND_RUNNABLE, FIND_TIME, FIND_INTERVAL, FIND_PID} state = FIND_NAME;
     int lastIndex = 0;

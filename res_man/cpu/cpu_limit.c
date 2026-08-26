@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <errno.h>
@@ -19,6 +18,7 @@
 #include "../level_utility/extreme.h"
 #include "../level_utility/mid.h"
 #include "../level_utility/low.h"
+#include "../../arch/opt.h"
 
 
 DECLARE_128_T
@@ -575,8 +575,7 @@ __attribute__((hot)) int limitCpuAndMemory(char* serviceName, __uint32_t service
 
 
 
-
-__attribute__((hot)) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint128_t memBytes) {
+OPT(hot) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint128_t memBytes) {
     __asm__ volatile (
         "sfence"
         :
@@ -610,7 +609,7 @@ __attribute__((hot)) int setCpuResourceLimit_F_EXTR(service*** __restrict__ serv
 
 
 
-__attribute__((hot)) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint64_t memBytes) {
+OPT(hot) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint64_t memBytes) {
     __asm__ volatile (
         "sfence"
         :
@@ -645,7 +644,7 @@ __attribute__((hot)) int setCpuResourceLimit_F_LRG(service*** __restrict__ servi
 
 
 
-__attribute__((hot)) int setCpuResourceLimit(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, int memBytesStr) {
+OPT(hot) int setCpuResourceLimit(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, int memBytesStr) {
     __asm__ volatile (
         "sfence"
         :

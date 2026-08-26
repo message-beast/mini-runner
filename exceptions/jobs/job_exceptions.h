@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #include <stdio.h>
 #include <string.h>
 #define true 1
@@ -34,6 +33,6 @@
 
 
 
-__attribute__((hot)) _Bool isValidJobName(char* name);
+_Bool isValidJobName(char* name);
 
-__attribute__((hot)) _Bool isValidJobPath(char* path);
+_Bool isValidJobPath(char* path);

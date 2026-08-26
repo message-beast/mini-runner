@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -6,11 +5,12 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <string.h>
+#include "../arch/opt.h"
 #define true 1
 #define false 0
 
 
-__attribute__((hot)) int isJobFree() {
+OPT(hot) int isJobFree() {
     int fd = open("data/jobs_sync", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("filed to open jobs sync file!\n");

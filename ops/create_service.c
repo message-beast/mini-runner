@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -9,6 +8,7 @@
 #include "../base/config.h"
 #include "../basic.h"
 #include <string.h>
+#include "../arch/opt.h"
 static inline __attribute__((always_inline, hot)) char* concat(char* __restrict__ firstStr, char* __restrict__ secondStr) {
     size_t firstLen = strlen(firstStr);
     size_t secondLen = strlen(secondStr);
@@ -24,7 +24,7 @@ static inline __attribute__((always_inline, hot)) char* concat(char* __restrict_
     return finalString;
 }
 
-__attribute__((hot)) int save_services(service*** services) {
+OPT(hot) int save_services(service*** services) {
     if (__builtin_expect(*services == NULL && numberOfProjects != 0 || services == NULL, 0)) {
         printf("services is actually NULL\n");
         return -1;

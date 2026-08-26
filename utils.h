@@ -1,5 +1,4 @@
 #pragma once
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -17,8 +16,9 @@
 #include "utils_ops/free_services.h"
 #include "utils_ops/load_project.h"
 #include "utils_ops/run_service.h"
+#include "arch/fma.h"
 int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName);
-__attribute__((hot)) _Bool fileExists(char* filePath);
+__attribute__((hot)) _Bool fileExists(const char* filePath);
 void freeServices(service*** __restrict__ services);
 int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid);
 int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach);
@@ -27,8 +27,9 @@ int warmService(service** __restrict__ services, char* __restrict__ bash, _Bool 
 
 
 #define DECLARE_ROUND_2\
-    static inline __attribute__((always_inline, hot)) float roundTo2(float num) {\
+    static inline FMA(hot) float roundTo2(float num) {\
         return (roundf((num * 100)) / 100) ? ((roundf((num * 100)) / 100)) : 0.0;\
     }\
 
-    
+__attribute__((hot)) _Bool folderExists(const char* path);
+__attribute__((hot)) int deleteFolderRecursievly(const char* folderPath);

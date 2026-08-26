@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -148,7 +147,7 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "remove") == 0) {
             char* serviceName = argv[i + 1];
             if (__builtin_expect(normalDeleteServices(&services, serviceName) != 0, 0)) {
-                fprintf(stderr, "\033[31mcan't delete %s\033[0m\n]", serviceName);
+                fprintf(stderr, "\033[31mcan't delete %s\033[0m\n", serviceName);
             }
         } else if (strcmp(argv[i], "run") == 0) {
             char* name = argv[i + 1];

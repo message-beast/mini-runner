@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <string.h>
@@ -8,6 +7,7 @@
 #include "../../../base/structure.h"
 #include <stdlib.h>
 #include "../../../basic.h"
+#include "../../../arch/opt.h"
 
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startIndex, int endingIndex) {
     int length = endingIndex - startIndex;
@@ -61,7 +61,7 @@ static inline __attribute__((always_inline, hot)) int giveStart(char* data, int 
 
 
 
-__attribute__((hot)) meminfo* memoryParse(char* data) {
+OPT(hot) meminfo* memoryParse(char* data) {
     enum {FIND_NAME, FIND_VALUE} state = FIND_NAME;
     int dataLen = strlen(data);
     if (__builtin_expect(dataLen == 0, 0)) {

@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -8,7 +7,7 @@
 #include "../res_man/utils/helper.h"
 #include "../res_format/cpu_format.h"
 #include "../res_format/mem_types.h"
-
+#include "../arch/opt.h"
 DECLARE_128_T
 
 static inline __attribute__((always_inline, hot)) int limitCpuOnly(__uint64_t cpuLimit) {
@@ -87,7 +86,7 @@ static inline __attribute__((always_inline, hot)) int limitMemOnly(__uint128_t m
 
 
 
-__attribute__((hot)) int configJobRes(__uint128_t memLimit, __uint64_t cpuLimit, _Bool limitMemory, _Bool limitCpu) {
+int configJobRes(__uint128_t memLimit, __uint64_t cpuLimit, _Bool limitMemory, _Bool limitCpu) {
     if (limitCpu && !limitMemory) {
         if (__builtin_expect(limitCpuOnly(cpuLimit) != 0, 0)) {
             printf("try again!\n");

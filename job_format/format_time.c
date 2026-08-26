@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "../arch/fma.h"
 
-__attribute__((hot)) __uint64_t formatTime(char* timeBuff) {
+FMA(hot) __uint64_t formatTime(char* timeBuff) {
     int size = strlen(timeBuff);
     __uint64_t formatedTimeSeconds = 0;
     for (register int i = 0; i < size; ++i) {

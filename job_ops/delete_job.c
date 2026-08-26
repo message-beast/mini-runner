@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include "../base/structure.h"
 #include "../base/config.h"
+#include "../arch/opt.h"
 
-
-__attribute__((hot)) int removeJob(job*** __restrict__ jobs, char* __restrict__ jobName) {
+OPT() int removeJob(job*** __restrict__ jobs, char* __restrict__ jobName) {
     if (__builtin_expect(jobs == NULL || *jobs == NULL && numberOfJobs == 0, 0)) {
         return 0;
     }

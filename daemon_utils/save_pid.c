@@ -1,13 +1,12 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include "../arch/opt.h"
 
-
-__attribute__((hot)) int setPid(__uint32_t pid) {
+OPT(hot) int setPid(__uint32_t pid) {
     int fd = open("data/job_daemon_pid", O_CREAT | O_WRONLY, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open job daemon pid file!\n");

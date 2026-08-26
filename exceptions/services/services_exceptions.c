@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #include <stdio.h>
 #include <string.h>
 
@@ -49,7 +48,7 @@ while(*srr) {\
 #define __MAXIMUM_CHAR_FOR_SERVICE_GITHUB_REPO__ 100
 
 
-__attribute__((hot)) int isValidName(char* __restrict__ name) {
+int isValidName(char* __restrict__ name) {
     int check = 0;
     space_available(name, check)
     return_result(check)
@@ -62,7 +61,7 @@ __attribute__((hot)) int isValidName(char* __restrict__ name) {
     return 0;   
 }
 
-__attribute__((hot)) int isValidGithubRepo(char* __restrict__ name) {
+int isValidGithubRepo(char* __restrict__ name) {
     int check = 0;
     space_available(name, check)
     return_result(check)

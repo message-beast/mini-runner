@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <ctype.h>
@@ -17,6 +16,7 @@
 #include "../job_res_man/get_limit.h"
 #include "../job_res_man/res_limit.h"
 #include "../fini/daemon_save_jobs.h"
+#include "../arch/opt.h"
 
 
 #define check_write(_fd, _len, _wanted_length)\
@@ -68,6 +68,9 @@ static inline __attribute__((always_inline, hot)) void freeJobs(job*** jobs) {
     job** _jobs = (*jobs);
     if (__builtin_expect(_jobs != NULL, 1)) {
         for (register int i = 0; i < numberOfJobsDaemon; ++i) {
+            if (__builtin_expect((i & 63) == 0 || i == 0, 0)) {
+                __builtin_prefetch(&_jobs[i + 64], 0, 3);
+            }
             job* currentJob = _jobs[i];
             free(currentJob->name);
             free(currentJob->runnableFile);
@@ -208,7 +211,7 @@ static inline __attribute__((always_inline, hot)) void* runJobsDaemon() {
 
 
 
-__attribute__((hot)) int launchDaemon() {
+int launchDaemon() {
     pid_t pid = fork();
     pthread_t daemon;
     if (pid == 0) {

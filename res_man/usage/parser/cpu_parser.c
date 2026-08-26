@@ -1,11 +1,11 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "../../../base/structure.h"
 #include "../../../basic.h"
-
+#include "../../../arch/fma.h"
+#include "../../../arch/opt.h"
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startIndex, int endingIndex) {
     int length = endingIndex - startIndex;
     char* newString = malloc(length + 1);
@@ -22,7 +22,7 @@ static inline __attribute__((always_inline, hot)) char* giveString(char* string,
 
 
 
-__attribute__((hot)) float numOfCores(char* __restrict__ data, char* __restrict__ uptimeData) {
+OPT(hot) FMA() double numOfCores(char* __restrict__ data, char* __restrict__ uptimeData) {
     int lastIndex = 0;
     int utime = 0;
     int stime = 0;
@@ -103,9 +103,9 @@ __attribute__((hot)) float numOfCores(char* __restrict__ data, char* __restrict_
 }
 
 
-__attribute__((hot)) float formatCpu(int a, int b) {
+FMA(hot) double formatCpu(int a, int b) {
     if (__builtin_expect(b == 0, 0)) {
         return 0.0f;
     }
-    return (float)a / b;
+    return (double)a / b;
 }

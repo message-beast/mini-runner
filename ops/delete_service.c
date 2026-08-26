@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -10,6 +9,11 @@
 #include <string.h>
 #include "../base/config.h"
 #include <sys/wait.h>
+#include "../arch/opt.h"
+#include "../file_sys_ops/file_system.h"
+#include "../utils.h"
+#include <signal.h>
+
 static inline __attribute__((always_inline, hot)) char* cutString(char* __restrict__ data, int startingIndex, int endingIndex) {
     int dataLength = strlen(data);
     if (__builtin_expect(dataLength <= 0, 0)) {
@@ -106,11 +110,7 @@ static inline __attribute__((always_inline, hot)) char* getValue(char* __restric
 }
 
 
-typedef struct verbose {
-    char* name;
-    char* githubRepo;
-    int pid;
-} verbose;
+
 
 static inline __attribute__((always_inline, hot)) verbose getSeparateValues(char* singleData) {
     verbose verboseOfProject;
@@ -134,7 +134,7 @@ static inline __attribute__((always_inline, hot)) verbose getSeparateValues(char
 }
 
 
-__attribute__((hot)) void freeVerbose(verbose* verboses) {
+static inline __attribute__((always_inline, hot)) void freeVerbose(verbose* verboses) {
     free(verboses->githubRepo);
     free(verboses->name);
 }
@@ -143,37 +143,37 @@ __attribute__((hot)) void freeVerbose(verbose* verboses) {
 
 static inline __attribute__((always_inline, hot)) int deleteFromPcFolder(char* ServiceName) {
     char command[100];
-    size_t size = snprintf(NULL, 0, "sudo rm -rf /var/lib/%s", ServiceName);
+    size_t size = snprintf(NULL, 0, "/var/lib/%s", ServiceName);
     if (__builtin_expect(size <= 0, 0)) {
         perror("can not allocate memory for command to delete service folder on /var//lib/...\n");
         return -1;
     }
-    snprintf(command, size + 1, "sudo rm -rf /var/lib/%s", ServiceName);
-    pid_t pid = fork();
-    if (pid == 0) {
-        printf("running command: %s\n", command);
-        if (system(command) != 0) {
-            printf("\033[31mcan not delete the service directory in your machine so run\n\t\033[33msudo rm -rf /var/lib/<your service directory / service name>\033[0m\n");
-        }
-        printf("delete ran successfully!\n");
-        abort();
-    } else {
-        int status;
-        waitpid(pid, &status, 0);
-        if (WEXITSTATUS(status) != 0) {
-            printf("\033[31mcan not delete the service directory in your machine so run\n\t\033[33msudo rm -rf /var/lib/<your service directory / service name>\033[0m\n");
-        }
-        DEBUG
+    snprintf(command, size + 1, "/var/lib/%s", ServiceName);
+    if (__builtin_expect(!folderExists(command), 0)) {
         return 0;
     }
+    if (__builtin_expect(deleteFolderRecursievly(command) != 0, 0)) {
+        perror("deleted service directory failed!\n");
+        fprintf(stderr, "try to delete %s\n", command);
+        return -1;
+    }
     DEBUG
-    printf("deleted! from pc\n");
     return 0;
 }
 
+static inline __attribute__((always_inline)) int killProcess(pid_t pid) {
+    if (__builtin_expect(pid == 0, 0)) return 0;
+    if (__builtin_expect(kill(pid, 0) != 0, 0)) { 
+        return 0;
+    }
+    if (__builtin_expect(kill(pid, SIGKILL) != 0, 0)) {
+        fprintf(stderr, "\033[31mFailed to kill the process with id of \033[33m%i\033[31mm!\033[0m\n", pid);
+        return -1;
+    }
+    return 0;
+}
 
-
-__attribute__((hot)) int normalDeleteServices(service*** __restrict__ services, char* __restrict__ serviceName) {
+OPT(hot) int normalDeleteServices(service*** __restrict__ services, char* __restrict__ serviceName) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         printf("\003[31mno services avialable\n");
         return -1;
@@ -181,6 +181,7 @@ __attribute__((hot)) int normalDeleteServices(service*** __restrict__ services, 
     DEBUG
     enum {FIND_SERVICE, FREE_SERVICES, FMT_SERVICES, DEL_SERVICE} state = FIND_SERVICE;
     int lastIndex = 0;
+    service* foundService = NULL;
     verbose serviceVerbose;
     for (register int x = 0; x < numberOfProjects; x++) {
         if (__builtin_expect((x & 511) == 0 || x == 0, 0)) {
@@ -189,20 +190,21 @@ __attribute__((hot)) int normalDeleteServices(service*** __restrict__ services, 
         if (state == FIND_SERVICE) {
             if (__builtin_expect(strcmp((*services)[x]->name, serviceName) == 0, 0)) {
                 lastIndex = x;
+                foundService = (*services)[x];
+                if (__builtin_expect(deleteFromPcFolder(foundService->name) != 0, 0)) {
+                    printf("\033[31mcan not delete your service from /var/lib/%s\033[0m\n", foundService->name);
+                    printf("\033[33mmay be re run it with sudo!\033[0m\n");
+                    return -1;
+                }
+                serviceVerbose.pid = 0;
                 state = FREE_SERVICES;
-                printf("CATCH1!\n");
             }
         }
         if (state == FREE_SERVICES) {
-            printf("CATCH!\n");
             service* curSer = (*services)[x];
             serviceVerbose.githubRepo = strdup(curSer->githubRepo);
             serviceVerbose.name = strdup(curSer->name);
             serviceVerbose.pid = curSer->pid;
-            printf("it was in index %i\n", x);
-            /*
-                stopService(pid=serviceVerbose.pid);
-            */
             free(curSer->githubRepo);
             free(curSer->name);
             free(curSer);
@@ -226,19 +228,17 @@ __attribute__((hot)) int normalDeleteServices(service*** __restrict__ services, 
                 free(*services);
                 *services = NULL;
                 capacityOfServices = __INITIAL_SCALE_SIZE_OF_SERVICES__;
-                if (__builtin_expect(deleteFromPcFolder(serviceVerbose.name) != 0, 0)) {
-                    printf("\033[31mcan not delete your service from /var/lib/%s\033[0m\n", serviceVerbose.name);
+                if(__builtin_expect(killProcess(serviceVerbose.pid) == 0, 1)) {
+                    serviceVerbose.pid = 0;
                 }
                 printf("\033[33mSuccessfully deleted service!\n\t\033[34m|-\033[35mname: \033[32m%s\n\t\033[34m|-\033[35mgithub-repo: \033[32m%s\n\t\033[34m|-\033[35mrunningpid \033[32m%i\033[0m\n", serviceVerbose.name, serviceVerbose.githubRepo, serviceVerbose.pid);
                 printf("\n\tfriendly reminder: if the deleted service have pid greater than 0, just run \t\033[32mmrn stop <pid>\033[0m\n");
                 return 0;
             }
             DEBUG
-            if (__builtin_expect(deleteFromPcFolder(serviceVerbose.name) != 0, 0)) {
-                DEBUG
-                printf("\033[31mcan not delete your service from /var/lib/%s\033[0m\n", serviceVerbose.name);
+            if(__builtin_expect(killProcess(serviceVerbose.pid) == 0, 1)) {
+                serviceVerbose.pid = 0;
             }
-            DEBUG
             printf("\033[33mSuccessfully deleted service!\n\t\033[34m|-\033[35mname: \033[32m%s\n\t\033[34m|-\033[35mgithub-repo: \033[32m%s\n\t\033[34m|-\033[35mrunningpid \033[32m%i\033[0m\n", serviceVerbose.name, serviceVerbose.githubRepo, serviceVerbose.pid);
             printf("\n\tfriendly reminder: if the deleted service have pid greater than 0, just run \t\033[32mmrn stop <pid>\033[0m\n");
             freeVerbose(&serviceVerbose);

@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -13,21 +12,10 @@
 #include <stdarg.h>
 #include "../sync/sync.h"
 #include "../sync/check.h"
+#include "../arch/opt.h"
 #define true 1
 #define false 0
 
-static inline __attribute__((hot)) char* m_snprintf(int max_bytes, const char* __restrict__ data, ...) {
-    char* result = malloc(max_bytes + 1);
-    if (__builtin_expect(result == NULL, 0)) {
-        perror("failed to allocate memory for result!\n");
-        return NULL;
-    }
-    va_list args;
-    va_start(args, data);
-    vsnprintf(result, max_bytes + 1, data, args);
-    va_end(args);
-    return result;
-}
 
 
 
@@ -99,7 +87,7 @@ static inline __attribute__((always_inline, hot)) int removeContentFromJobsFile(
 
 
 
-__attribute__((hot)) int save_jobs(job*** jobs) {
+OPT() int save_jobs(job*** jobs) {
     if (__builtin_expect(jobs == NULL, 0)) {
         perror("failed invalid memory on jobs!\n");
         return -1;

@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/mman.h>
@@ -15,14 +14,13 @@
 #include <stdatomic.h>
 #include <signal.h>
 #include "../checks_for_pr/write_chk.h"
+#include "../arch/opt.h"
+#include "../utils.h"
+
+
 #define true 1
 #define false 0
-typedef struct param {
-    service** service;
-    char* command;
-    char* name;
-    _Bool attach;
-} param;
+
 _Atomic _Bool pidSet = 0;
 pthread_mutex_t mutex;
 
@@ -89,7 +87,14 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
             close(STDOUT_FILENO);
             close(STDERR_FILENO);
             close(STDIN_FILENO);
-        } 
+        }
+        if (__builtin_expect(!fileExists(params->command), 0)) {
+            fprintf(stderr, "%s not found!\n", params->command);
+            written = write(pipeFd[1], "0", 1);
+            CHECK_WRITE_PR(pipeFd[1], written, 1)
+            close(pipeFd[1]);
+            abort();
+        }
         execlp("bash", "bash", params->command, NULL);
         free(params->command);
         printf("child failed!\n");
@@ -163,7 +168,7 @@ static inline __attribute__((always_inline, hot)) void backup(service** foundSer
 }
 
 
-__attribute__((hot)) int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach) {
+OPT(hot) int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         fprintf(stderr, "\033[31mcan not run service \033[33m%s\033[0m, services empty!\n", name);
         return -1;

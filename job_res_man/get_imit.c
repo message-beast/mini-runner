@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -7,8 +6,7 @@
 #include "../base/structure.h"
 #include <stdlib.h>
 #include <sys/stat.h>
-
-job_rs_limit* getLimit() {
+__attribute__((hot)) job_rs_limit* getLimit() {
     int fd = open("data/job_mem_limit", O_CREAT | O_RDONLY, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open job memory limit file!\n");

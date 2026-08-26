@@ -1,13 +1,12 @@
-#pragma optimize("O3")
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "../res_man/utils/helper.h"
+#include "../arch/fma.h"
 
 DECLARE_128_T
 
-
-__attribute__((hot)) __uint128_t convertToByte_F_EXTR(char* size) {
+FMA(hot) __uint128_t convertToByte_F_EXTR(char* size) {
     int size_len = strlen(size);
     __uint128_t memBytes = 0;
     #pragma GCC unroll 4
@@ -30,7 +29,7 @@ __attribute__((hot)) __uint128_t convertToByte_F_EXTR(char* size) {
 
 
 
-__attribute__((hot)) __uint64_t convertToByte_F_LRG(char* size) {
+FMA(hot) __uint64_t convertToByte_F_LRG(char* size) {
     int size_len = strlen(size);
     __uint64_t memBytes = 0;
     #pragma GCC unroll 4
@@ -55,7 +54,7 @@ __attribute__((hot)) __uint64_t convertToByte_F_LRG(char* size) {
 
 
 
-__attribute__((hot)) int convertToByte(char* size) {
+FMA(hot) int convertToByte(char* size) {
     int size_len = strlen(size);
     int memBytes = 0;
     #pragma GCC unroll 4
@@ -93,7 +92,7 @@ __attribute__((hot)) int convertToByte(char* size) {
 }
 
 
-__attribute__((hot)) char* formatByte(__uint128_t bytes) {
+FMA(hot) char* formatByte(__uint128_t bytes) {
     char* formatedString = NULL;
     if (((double)bytes / ((__uint64_t) 1024 * 1024 * 1024* 1024)) >= 1) {
         double amount = (double)bytes / ((__uint64_t) 1024 * 1024 * 1024* 1024);

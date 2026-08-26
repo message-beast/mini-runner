@@ -1,7 +1,8 @@
 #pragma once
 #include <stdlib.h>
+#include "../../arch/opt.h"
 #define DECLARE_128_T\
-    static inline __attribute__((always_inline, hot)) char* uint128_to_chars(__uint128_t num) {\
+    static inline OPT(hot) char* uint128_to_chars(__uint128_t num) {\
     static char buffer[65];\
     char temp[65];\
     int i = 0, j = 0;\
@@ -27,9 +28,7 @@
 
 #define DECLARE_CHARS_128_T\
     static inline __attribute__((always_inline, hot)) __uint128_t chars_to_uint_128(char* numBuff) {\
-        long long loaded = atoll(numBuff);\
-        __uint128_t res = loaded;\
-        return res;\
+        return (__uint128_t)atoll(numBuff);\
     }\
 
 

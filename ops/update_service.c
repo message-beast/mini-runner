@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -13,6 +12,7 @@
 #include <sys/wait.h>
 #include "../basic.h"
 #include "../checks_for_pr/write_chk.h"
+#include "../arch/opt.h"
 static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char* dataToWrite) {
     int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(updateStatusFileFd == -1, 0)) {
@@ -120,7 +120,7 @@ static inline __attribute__((always_inline, hot)) int update_service(service* fo
 
 
 
-void updateService(service*** __restrict__ services, char* __restrict__ serviceName, _Bool stop) {
+OPT() void updateService(service*** __restrict__ services, char* __restrict__ serviceName, _Bool stop) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         return;
     }
@@ -144,7 +144,7 @@ void updateService(service*** __restrict__ services, char* __restrict__ serviceN
     }
 }
 
-__attribute__((hot)) void neglectUpdate() {
+void neglectUpdate() {
     if (__builtin_expect(writeUpdateAvialable("idle") != 0, 0)) {
         fprintf(stderr, "\033[31mfailed to neglect updates!\n");
         return;

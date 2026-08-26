@@ -1,1 +1,1 @@
-__attribute__((hot)) int removeJob(job*** __restrict__ jobs, char* __restrict__ jobName);
+int removeJob(job*** __restrict__ jobs, char* __restrict__ jobName);

@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,11 +5,12 @@
 #include "../base/structure.h"
 #include "../base/config.h"
 #include <time.h>
+#include "../arch/opt.h"
 #define true 1
 #define false 0
 
 
-__attribute__((hot)) int createJob(job*** __restrict__ jobs, char* __restrict__ jobName, char* __restrict__ runnableFile, __uint64_t secondsInterval) {
+OPT(hot) int createJob(job*** __restrict__ jobs, char* __restrict__ jobName, char* __restrict__ runnableFile, __uint64_t secondsInterval) {
     if (__builtin_expect(jobs == NULL && *jobs == NULL, 0)) {
         job** tmp = malloc(__INITIAL_SCALE_SIZE_OF_JOBS__ * sizeof(job*));
         if (__builtin_expect(tmp == NULL, 0)) {

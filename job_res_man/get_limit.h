@@ -1,2 +1,2 @@
 #include "../base/structure.h"
-job_rs_limit* getLimit();
+__attribute__((hot)) job_rs_limit* getLimit();

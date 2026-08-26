@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +11,8 @@
 #include "../../utils.h"
 #include <string.h>
 #include <math.h>
+#include "../../arch/opt.h"
+#include "../../arch/fma.h"
 DECLARE_ROUND_2
 DECLARE_CHARS_128_T
 DECLARE_128_T
@@ -429,7 +430,7 @@ static inline __attribute__((always_inline, hot)) int show(char* serviceName, in
 
 
 
-__attribute__((hot)) int showRsLimit(service*** __restrict__ services, char* __restrict__ serviceName) {
+OPT(hot) int showRsLimit(service*** __restrict__ services, char* __restrict__ serviceName) {
     #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {

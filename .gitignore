@@ -4,3 +4,4 @@ data/*
 mrn
 test.*
 test
+syscalls/x86/64-bit/*.o

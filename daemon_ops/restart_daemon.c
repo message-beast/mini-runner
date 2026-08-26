@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "stop_daemon.h"
 #include "../job_ops/run_jobs.h"
+#include "../arch/opt.h"
 
 
-
-__attribute__((hot)) int restartJobDaemon(job*** jobs) {
+OPT(hot) int restartJobDaemon(job*** jobs) {
     if (__builtin_expect(stopJobDaemon(jobs) != 0, 0)) {
         perror("failed to stop running job daemon!\n");
         return -1;

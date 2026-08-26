@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <sys/stat.h>
@@ -9,8 +8,9 @@
 #include <dirent.h>
 #include <sys/dir.h>
 #include <errno.h>
+#include "../arch/opt.h"
 #define DECLARE_FILE_COPY_F\
-    static inline __attribute__((always_inline, hot)) int fileCopy(char* __restrict__ oldFile, char* __restrict__ newFile) {\
+    static inline __attrubute__((always_inline, hot)) int fileCopy(char* __restrict__ oldFile, char* __restrict__ newFile) {\
     int __fd_s = open(oldFile, O_RDWR);\
     if (__builtin_expect(__fd_s == -1, 0)) {\
         perror("failed to open the file to coped!");\

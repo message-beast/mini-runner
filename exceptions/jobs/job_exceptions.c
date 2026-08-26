@@ -1,9 +1,8 @@
-#pragma optimize("O3")
 #include <stdio.h>
 #include <string.h>
 #define true 1
 #define false 0
-
+#include "../../arch/opt.h"
 
 
 #define check_length(name, _flg)\
@@ -35,7 +34,7 @@
 
 
 
-__attribute__((hot)) _Bool isValidJobName(char* name) {
+_Bool isValidJobName(char* name) {
     _Bool error = false;
     check_length(name, error)
     return_res(error)
@@ -45,7 +44,7 @@ __attribute__((hot)) _Bool isValidJobName(char* name) {
 }
 
 
-__attribute__((hot)) _Bool isValidJobPath(char* path) {
+_Bool isValidJobPath(char* path) {
     _Bool error = false;
     check_length_path(path, error)
     return_res(error)

@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <unistd.h>
@@ -13,6 +12,7 @@
 #include <stdarg.h>
 #include "../sync/sync.h"
 #include "../sync/check.h"
+#include "../arch/opt.h"
 #define true 1
 #define false 0
 
@@ -83,7 +83,7 @@ static inline __attribute__((always_inline, hot)) int removeContentFromJobsFile(
 
 
 
-__attribute__((hot)) int save_jobs_daemon(job*** jobs) {
+OPT(hot) int save_jobs_daemon(job*** jobs) {
     if (__builtin_expect(jobs == NULL, 0)) {
         perror("failed invalid memory on jobs!\n");
         return -1;

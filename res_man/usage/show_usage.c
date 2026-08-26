@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <string.h>
@@ -13,7 +12,7 @@
 #include <sys/mman.h>
 #include "parser/mem_parser.h"
 #include "parser/cpu_parser.h"
-
+#include "../../arch/opt.h"
 
 
 static inline __attribute__((always_inline, hot)) char* defineSpace(char* _s) {
@@ -163,7 +162,7 @@ static inline __attribute__((always_inline, hot)) int showResourceUsage(char* se
 
 
 
-__attribute__((hot)) int showRsUsage(service*** __restrict__ services, char* __restrict__ serviceName) {
+OPT(hot) int showRsUsage(service*** __restrict__ services, char* __restrict__ serviceName) {
     #pragma GCC ivdep
     #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; ++i) {

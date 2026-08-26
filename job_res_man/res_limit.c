@@ -3,7 +3,7 @@
 
 
 
-__attribute__((hot)) int setLimit(__uint128_t memBytes, __uint64_t cpuLimit, _Bool setmemLimit, _Bool setCpuLimit) {
+int setLimit(__uint128_t memBytes, __uint64_t cpuLimit, _Bool setmemLimit, _Bool setCpuLimit) {
     if (setCpuLimit) {
         const struct rlimit cL = {
             .rlim_cur = cpuLimit,

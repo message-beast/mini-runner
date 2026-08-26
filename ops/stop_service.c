@@ -1,4 +1,3 @@
-#pragma optimize("O3")
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include "../basic.h"
@@ -11,6 +10,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "../file_sys_ops/file_system.h"
+#include "../arch/opt.h"
 DECLARE_PROCESS_COPY_F
 
 static inline __attribute__((always_inline)) int killProcess(pid_t pid) {
@@ -122,7 +122,7 @@ static inline __attribute__((always_inline, hot)) int updateCgrp(char* serviceNa
 
 
 
-int stopService(service*** __restrict__ services, char* __restrict__ serviceName) {
+OPT() int stopService(service*** __restrict__ services, char* __restrict__ serviceName) {
     #pragma GCC ivdep
     #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; ++i) {
