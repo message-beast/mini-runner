@@ -1,5 +1,4 @@
-*.asm linguist-language=Assembly linguist-detectable=true
+syscalls/** -linguist-vendored -linguist-documentation -linguist-generated
 
-syscalls/** linguist-vendored=false
-syscalls/** linguist-documentation=false
+*.asm linguist-language=Assembly linguist-detectable=true
 *.sh linguist-language=Shell linguist-detectable=true
