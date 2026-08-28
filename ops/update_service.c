@@ -13,6 +13,21 @@
 #include "../basic.h"
 #include "../checks_for_pr/write_chk.h"
 #include "../arch/opt.h"
+#include "../io_man/update/create_backup_update_status.h"
+#include "../io_man/update/apply_backup_update_status.h"
+
+
+void updateFileBackup(int signal) {
+    if (__builtin_expect(applyBackupUpdateStatus() != 0, 0)) {
+        if (__builtin_expect(write(1, "failed to apply bakcup\n", 24) <= 0, 0)) {
+            perror("can't apply backup!\n");
+            return;
+        }
+        return;
+    }
+    return;
+}
+
 static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char* dataToWrite) {
     int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(updateStatusFileFd == -1, 0)) {
@@ -29,6 +44,15 @@ static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char*
         perror("can not get data to write length!\n");
         return -1;
     }
+    if (__builtin_expect(createBackupForUpdateStatus() != 0, 0)) {
+        perror("failed to create backup!\n");
+        return -1;
+    }
+    struct sigaction sig;
+    sig.sa_handler = updateFileBackup;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
     if (__builtin_expect(ftruncate(updateStatusFileFd, len) != 0, 0)) {
         perror("ftruncate failed on updateStatus file!\n");
         return -1;

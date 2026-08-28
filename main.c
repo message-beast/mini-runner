@@ -40,6 +40,10 @@
 #include "daemon_ops/restart_daemon.h"
 #include "daemon_ops/stop_daemon.h"
 #include "daemon_ops/show_status.h"
+#include "io_man/services/apply_backup.h"
+#include "io_man/services/create_backup.h"
+#include "io_man/jobs/apply_backup.h"
+#include "io_man/jobs/create_backup.h"
 
 #define true 1
 #define false 0
@@ -89,6 +93,10 @@ void init() {
         perror("loading job failed!\n");
         exit_program(-1)
     }
+    if (__builtin_expect(createBackup() != 0 || createBackupForJobs() != 0, 0)) {
+        perror("failed to create time_shift");
+        exit_program(-1)
+    }
 }
 
 
@@ -99,11 +107,12 @@ void closeProcess() {
     #if defined(DEBUG_MODE)
         printf("destructor called!\n");
     #endif
-    if (__builtin_expect(save_services(&services) != 0, 0)) {
-        printf("save_service is not healthy!");
-    }
-    if (__builtin_expect(save_jobs(&jobs) != 0, 0)) {
-        printf("jobs is not healthy!\n");
+    if (__builtin_expect(save_services(&services) != 0 || save_jobs(&jobs) != 0, 0)) {
+        if (__builtin_expect(applyBackup() != 0 || applyBackupForjobs() != 0, 0)) {
+            perror("failed to apply auto time-shift!\n");
+            exit_program(-1)
+        }
+        exit_program(-1)
     }
     freeServices(&services);
     freeJobs(&jobs);
@@ -468,7 +477,9 @@ int main(int argc, char* argv[]) {
                             fprintf(stderr, "cpuLimit range required!\n");
                             return 1;
                         }
+                        printf("DEBUG %s : %i\n", __FILE__, __LINE__);
                         cpuLimit = convertToSeconds(cpulimitBuff);
+                        printf("DEBUG %s : %i\n", __FILE__, __LINE__);
                         if (__builtin_expect(cpuLimit == 0, 0)) {
                             fprintf(stderr, "failed to parse cpu core amount or you just passed 0 cores?\n");
                             displayJobRsLimithelp();
@@ -480,7 +491,9 @@ int main(int argc, char* argv[]) {
                             fprintf(stderr, "memory limit is required!\n");
                             return 1;
                         }
+                        printf("DEBUG %s : %i\n", __FILE__, __LINE__);
                         memLimit = convertToBytes_JOB(memLimitBuff);
+                        printf("DEBUG %s : %i\n", __FILE__, __LINE__);
                         if (__builtin_expect(memLimit == 0, 0)) {
                             fprintf(stderr, "failed to parse memory limit or you just passed 0 bytes?\n");
                             displayJobRsLimithelp();
@@ -488,9 +501,11 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
+                printf("STAR\n");
                 if (__builtin_expect(configJobRes(memLimit, cpuLimit, !!(memLimit), !!(cpuLimit)) != 0, 0)) {
                     return 1;
                 }
+                printf("FIN\n");
             }
         } else if (strcmp(argv[i], "show-job-limit") == 0) {
             showJobDaemonRsLimits();

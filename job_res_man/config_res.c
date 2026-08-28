@@ -4,10 +4,33 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <signal.h>
 #include "../res_man/utils/helper.h"
 #include "../res_format/cpu_format.h"
 #include "../res_format/mem_types.h"
 #include "../arch/opt.h"
+#include "../io_man/jobs_res_limit/mm/create_backup.h"
+#include "../io_man/jobs_res_limit/mm/apply_backup.h"
+#include "../io_man/jobs_res_limit/cpu/create_backup.h"
+#include "../io_man/jobs_res_limit/cpu/apply_backup.h"
+
+void hanldeRsMmbackup () {
+    if (__builtin_expect(applyJobRsMmLimitBackup() != 0, 0)) {
+        perror("failed to aply backup!\n");
+        return;
+    }
+    return;
+}
+
+void handleRsCpuBackup() {
+    if (__builtin_expect(applyJobRsLimitBackup() != 0, 0)) {
+        perror("failed to apply backup!\n");
+        return;
+    }
+    return;
+}
+
+
 DECLARE_128_T
 
 static inline __attribute__((always_inline, hot)) int limitCpuOnly(__uint64_t cpuLimit) {
@@ -27,6 +50,15 @@ static inline __attribute__((always_inline, hot)) int limitCpuOnly(__uint64_t cp
         perror("failed to calculate size of cpu limit string!\n");
         return -1;
     }
+    if (__builtin_expect(createJobRsLimitBackup() != 0, 0)) {
+        perror("failed to create a backup!\n");
+        return -1;
+    }
+    struct sigaction sig;
+    sig.sa_handler = handleRsCpuBackup;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
     if (__builtin_expect(ftruncate(fd, size) != 0, 0)) {
         perror("ftruncate failed on job cpu limit file!\n");
         return -1;
@@ -64,6 +96,15 @@ static inline __attribute__((always_inline, hot)) int limitMemOnly(__uint128_t m
         perror("failed to calculate size of memory limit string!\n");
         return -1;
     }
+    if (__builtin_expect(createJobRsMmLimitBackup() != 0, 0)) {
+        perror("failed to create backup!\n");
+        return -1;
+    }
+    struct sigaction sig;
+    sig.sa_handler = hanldeRsMmbackup;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
     if (__builtin_expect(ftruncate(fd, size) != 0, 0)) {
         perror("ftruncate failed on job memory limit file!\n");
         return -1;

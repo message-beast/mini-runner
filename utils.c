@@ -8,10 +8,6 @@
 #include <sys/syscall.h>
 #include <string.h>
 #include "syscalls/calls/sys.h"
-#ifndef SYS_getdents64
-    #define SYS_getdents64 217
-#endif
-
 
 #define true 1
 #define false 0

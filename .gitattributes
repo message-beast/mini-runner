@@ -1,4 +1,1 @@
-syscalls/** -linguist-vendored -linguist-documentation -linguist-generated
-
-*.asm linguist-language=Assembly linguist-detectable=true
-*.sh linguist-language=Shell linguist-detectable=true
+*.asm diff=assembly

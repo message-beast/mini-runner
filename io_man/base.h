@@ -1,0 +1,1 @@
+__attribute__((hot)) int doBackup(char* __restrict__ __src, char* __restrict__ __dest);

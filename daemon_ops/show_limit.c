@@ -8,7 +8,7 @@
 #include "../arch/opt.h"
 DECLARE_128_T
 
-OPT(hot) void showJobDaemonRsLimits() {
+void showJobDaemonRsLimits() {
     job_rs_limit* limit = getLimit();
     if (__builtin_expect(limit == NULL, 0)) {
         perror("failed to allocate memory for limit!\n");
@@ -20,7 +20,8 @@ OPT(hot) void showJobDaemonRsLimits() {
         return;
     }
     printf("\033[33m__________________\033[32mJob Runner Daemon Resource Limits\033[33m______________\n");
-    printf("\033[33mcpu-core: \033[31m%.3f\n", convertToCores(limit->cpuLimit));
+    double cores = convertToCores(limit->cpuLimit);
+    printf("\033[33mcpu-core: \033[31m%.3f\n", cores);
     printf("\033[33mmemory: \033[31m%s\n", memoryLimit);
     printf("\033[33m_________________________________________________________________\033[0m\n");
     free(limit);

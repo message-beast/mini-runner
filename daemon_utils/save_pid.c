@@ -5,6 +5,18 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "../arch/opt.h"
+#include <signal.h>
+#include "../io_man/job_daemon/create_backup.h"
+#include "../io_man/job_daemon/apply_backup.h"
+
+void handlePidBackup() {
+    if (__builtin_expect(applyJobDaemonPidBackup() != 0, 0)) {
+        perror("failed to apply backup!\n");
+        return;
+    }
+    return;
+}
+
 
 OPT(hot) int setPid(__uint32_t pid) {
     int fd = open("data/job_daemon_pid", O_CREAT | O_WRONLY, 0644);
@@ -24,6 +36,15 @@ OPT(hot) int setPid(__uint32_t pid) {
         close(fd);
         return -1;
     }
+    if (__builtin_expect(createBackupDaemonPid() != 0, 0)) {
+        perror("failed to create a backup!\n");
+        return -1;
+    }
+    struct sigaction sig;
+    sig.sa_handler = handlePidBackup;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
     if (__builtin_expect(ftruncate(fd, size) != 0, 0)) {
         perror("ftruncate failed on job daemon pid file!\n");
         return -1;

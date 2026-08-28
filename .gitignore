@@ -1,6 +1,8 @@
 secret
 data/*
 !data/.gitkeep
+backup/*
+!backup/.gitkeep
 mrn
 test.*
 test

@@ -9,6 +9,18 @@
 #include "../basic.h"
 #include <string.h>
 #include "../arch/opt.h"
+#include <signal.h>
+#include "../io_man/services/create_backup.h"
+#include "../io_man/services/apply_backup.h"
+
+static void handleServicesBackup() {
+    if (__builtin_expect(applyBackup() != 0, 0)) {
+        perror("failed to create a backup!\n");
+        return;
+    }
+    return;
+}
+
 static inline __attribute__((always_inline, hot)) char* concat(char* __restrict__ firstStr, char* __restrict__ secondStr) {
     size_t firstLen = strlen(firstStr);
     size_t secondLen = strlen(secondStr);
@@ -96,6 +108,15 @@ OPT(hot) int save_services(service*** services) {
         close(projectsFileFd);
         exit_program(-1)
     }
+    if (__builtin_expect(createBackup() != 0, 0)) {
+        perror("failed to create a backup!\n");
+        exit_program(-1)
+    }
+    struct sigaction sig;
+    sig.sa_handler = handleServicesBackup;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
     if (__builtin_expect(dataToBeWritten != NULL, 0)) { 
         if (ftruncate(projectsFileFd, strlen(dataToBeWritten)) != 0) {
             perror("ftruncate failed for projects file!\n");

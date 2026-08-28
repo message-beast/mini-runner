@@ -4,14 +4,20 @@
 #include <string.h>
 #include "../arch/fma.h"
 
-FMA(hot) __uint64_t convertToSeconds(char* cpuLimitBuff) {
+__uint64_t convertToSeconds(char* cpuLimitBuff) {
+    printf("DEBUG %s: %i\n", __FILE__, __LINE__);
     double cpuLimit = atof(cpuLimitBuff);
+    printf("DEBUG %s: %i\n", __FILE__, __LINE__);
     #pragma STDC FP_CONTRACT ON
-    return (__uint64_t)(cpuLimit * 100000);
+    printf("DEBUG %s: %i\n", __FILE__, __LINE__);
+    __uint64_t res = (__uint64_t)(cpuLimit * 100000);
+    printf("DEBUG %s: %i\n", __FILE__, __LINE__);
+    return res;
 }
 
 
-FMA(hot) double convertToCores(__uint64_t seconds) {
+double convertToCores(__uint64_t seconds) {
     #pragma STDC FP_CONTRACT ON
-    return (double)seconds / 100000;
+    double res = (double)seconds / 100000;
+    return res;
 }

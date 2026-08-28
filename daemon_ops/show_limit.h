@@ -1,1 +1,1 @@
-__attribute__((hot)) void showJobDaemonRsLimits();
+void showJobDaemonRsLimits();

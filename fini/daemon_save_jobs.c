@@ -13,8 +13,21 @@
 #include "../sync/sync.h"
 #include "../sync/check.h"
 #include "../arch/opt.h"
+#include "../io_man/jobs/create_backup.h"
+#include "../io_man/jobs/apply_backup.h"
+
 #define true 1
 #define false 0
+
+
+
+static void handleJobBackup() {
+    if (__builtin_expect(applyBackupForjobs() != 0, 0)) {
+        perror("failed to apply job sync backup!\n");
+        return;
+    }
+    return;
+}
 
 static inline __attribute__((always_inline, hot)) int writeData(char* dataTobeWritten) {
     int jobsFileFd = open("data/jobs", O_CREAT | O_RDWR, 0644);
@@ -29,6 +42,15 @@ static inline __attribute__((always_inline, hot)) int writeData(char* dataTobeWr
         return -1;
     }
     size_t dataLen = strlen(dataTobeWritten);
+    if (__builtin_expect(createBackupForJobs() != 0, 0)) {
+        perror("failed to create backup for jobs!\n");
+        return -1;
+    }
+    struct sigaction sig;
+    sig.sa_handler = handleJobBackup;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
     if (__builtin_expect(ftruncate(jobsFileFd, dataLen) != 0, 0)) {
         perror("ftruncate failed on jobs file!\n");
         close(jobsFileFd);
@@ -43,6 +65,7 @@ static inline __attribute__((always_inline, hot)) int writeData(char* dataTobeWr
     while(!isJobFree()) {
         sleep(1);
     }
+    
     if (__builtin_expect(syncJob(true) != 0, 0)) {
         perror("failed to lock jobs operation!\n");
         memcpy(data, dataTobeWritten, dataLen);
@@ -73,6 +96,15 @@ static inline __attribute__((always_inline, hot)) int removeContentFromJobsFile(
         close(jobsFileFd);
         return -1;
     }
+    if (__builtin_expect(createBackupForJobs() != 0, 0)) {
+        perror("failed to create jobs backup!\n");
+        return -1;
+    }
+    struct sigaction sig;
+    sig.sa_handler = handleJobBackup;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
     if(__builtin_expect(ftruncate(jobsFileFd, 0) != 0, 0)) {
         perror("ftruncate for deletion failed on jobs file!\n");
         return -1;
