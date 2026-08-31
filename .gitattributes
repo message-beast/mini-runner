@@ -1,1 +1,1 @@
-*.asm diff=assembly
+*.s diff=assembly

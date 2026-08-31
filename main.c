@@ -44,6 +44,8 @@
 #include "io_man/services/create_backup.h"
 #include "io_man/jobs/apply_backup.h"
 #include "io_man/jobs/create_backup.h"
+#include "time_shift/create_time_shift.h"
+#include "time_shift/apply_time_shift.h"
 
 #define true 1
 #define false 0
@@ -52,7 +54,7 @@ DECLARE_128_T
 
 struct service** services = NULL;
 struct job** jobs = NULL;
-
+_Bool reformatState = true;
 
 
 
@@ -107,12 +109,14 @@ void closeProcess() {
     #if defined(DEBUG_MODE)
         printf("destructor called!\n");
     #endif
-    if (__builtin_expect(save_services(&services) != 0 || save_jobs(&jobs) != 0, 0)) {
-        if (__builtin_expect(applyBackup() != 0 || applyBackupForjobs() != 0, 0)) {
-            perror("failed to apply auto time-shift!\n");
+    if (__builtin_expect(reformatState, 1)) {
+        if (__builtin_expect(save_services(&services) != 0 || save_jobs(&jobs) != 0, 0)) {
+            if (__builtin_expect(applyBackup() != 0 || applyBackupForjobs() != 0, 0)) {
+                perror("failed to apply auto time-shift!\n");
+                exit_program(-1)
+            }
             exit_program(-1)
         }
-        exit_program(-1)
     }
     freeServices(&services);
     freeJobs(&jobs);
@@ -520,6 +524,25 @@ int main(int argc, char* argv[]) {
 
         } else if (strcmp(argv[i], "job-status") == 0) {
             showDaemonStatus();
+        } else if (strcmp(argv[i], "time-shift") == 0) {
+            const char* type = argv[i + 1];
+            if (__builtin_expect(type == NULL, 0)) {
+                fprintf(stderr, "tim eshift operation is required!\n");
+                return 1;
+            }
+            if (strcmp(type, "create") == 0) {
+                reformatState = false;
+                if (__builtin_expect(createTimeShift() != 0, 0)) {
+                    return 1;
+                }
+            } else if (strcmp(type, "apply") == 0) {
+                if (__builtin_expect(applyTimeShift(&services, &jobs) != 0, 0)) {
+                    return 1;
+                }
+            } else {
+                printf("unsupported time shift operation %s\n", type);
+                return 1;
+            }
         }
 
 
