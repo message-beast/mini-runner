@@ -7,3 +7,4 @@ mrn
 test.*
 test
 syscalls/*/*/*.o
+compile_guide/compile_guide
