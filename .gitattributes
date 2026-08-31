@@ -1,5 +1,8 @@
 Makefile linguist-detectable=false
 */*/*/Makefile linguist-detectable=false
+Makefile linguist-documentation
+*.sh linguist-documentation
+*/*/*/Makefile linguist-documentation
 *.sh linguist-detectable=false
 *.s linguist-language=Assembly
 **/*.s linguist-language=Assembly
