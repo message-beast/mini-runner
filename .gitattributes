@@ -1,2 +1,3 @@
-*.s linguist-language=Assembly
+syscall/** linguist-vendored=false
 **/*.s linguist-language=Assembly
+**/*.asm linguist-language=Assembly
