@@ -1,1 +1,2 @@
-*.s diff=assembly
+*.s linguist-language=Assembly
+**/*.s linguist-language=Assembly
