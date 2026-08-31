@@ -1,3 +1,7 @@
-syscall/** linguist-vendored=false
+Makefile linguist-detectable=false
+*/*/*/Makefile linguist-detectable=false
+*.sh linguist-detectable=false
+*.s linguist-language=Assembly
 **/*.s linguist-language=Assembly
+*.asm linguist-language=Assembly
 **/*.asm linguist-language=Assembly
