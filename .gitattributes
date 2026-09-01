@@ -1,5 +1,3 @@
-#Makefile linguist-detectable=false
-#*/*/*/Makefile linguist-detectable=false
 Makefile linguist-documentation
 *.sh linguist-documentation
 */*/*/Makefile linguist-documentation

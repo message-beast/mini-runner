@@ -8,3 +8,5 @@ test.*
 test
 syscalls/*/*/*.o
 compile_guide/compile_guide
+mrn-run
+sample/
