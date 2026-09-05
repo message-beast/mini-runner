@@ -8,10 +8,21 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <string.h>
-static inline __attribute__((always_inline, hot, aligned(64))) int runCode(const char* __command) {
-    if (__builtin_expect(system(__command) != 0, 0)) {
-        fprintf(stderr, "%s is failed!\n", __command);
-        return -1;
+#include "../../base/structure.h"
+#include "../parser/parse.h"
+#include "../utils/free_mrn_execs.h"
+#include <stdlib.h>
+static inline __attribute__((always_inline, hot, aligned(64))) int runCode(const mrnExec* __exec) {
+    char* binary = __exec->commands[0];
+    int pid = fork();
+    if (pid == 0) {
+        printf("\n");
+        execvp(binary, (void*)__exec->commands);
+        fprintf(stderr, "failed to execute \033[33m%s\033[0m\n", binary);
+        abort();
+    } else {
+        int status;
+        waitpid(pid, &status, 0);
     }
     return 0;
 }
@@ -62,6 +73,15 @@ __attribute__((hot)) int runMrnFile(const char* __file) {
     int endIndex = st.st_size - 1;
     int lastIndex = 0;
     int afterEnd = st.st_size + 1;
+    mrnExec* mrn_execs = malloc(sizeof(mrnExec));
+    if (__builtin_expect(mrn_execs == NULL, 0)) {
+        perror("failed to allocate memory for mrn exec run time data!\n");
+        return -1;
+    }
+    mrn_execs->next = NULL;
+    mrn_execs->capacity = __INITIAL_SCALE_OF_ENV__;
+    mrn_execs->numbers = 0;
+    mrn_execs->commands = NULL;
     pid_t pid = fork();
     if (pid == 0) {
         for (register int i = 0; i < st.st_size; ++i) {
@@ -79,11 +99,28 @@ __attribute__((hot)) int runMrnFile(const char* __file) {
                     char* path = giveString(command, 3, size);
                     free(command);
                     if (__builtin_expect(ch(path) != 0, 0)) {
+                        free(path);
                         abort();
                     }
                     free(path);
                 } else {
-                    if (__builtin_expect(runCode(command) != 0, 0)) {
+                    //parse to mrn_exec
+                    mrnExec* new_mrn_exec = getParse(command, strlen(command));
+                    //pass to run code
+                    if (__builtin_expect(new_mrn_exec == NULL, 0)) {
+                        freeMrnExecs(&mrn_execs);
+                        fprintf(stderr, "\033[31mfailed to execute \033[33m%s\033[0m\n", command);
+                        free(command);
+                        munmap(data, st.st_size);
+                        close(fd);
+                        abort();
+                    }
+                    new_mrn_exec->next = mrn_execs;
+                    mrn_execs = new_mrn_exec;
+                    if (__builtin_expect(runCode(new_mrn_exec) != 0, 0)) {
+                        free(command);
+                        munmap(data, st.st_size);
+                        close(fd);
                         abort();
                     }
                     free(command);
@@ -94,18 +131,34 @@ __attribute__((hot)) int runMrnFile(const char* __file) {
                 char* command = giveString(data, lastIndex, afterEnd);
                 if (__builtin_expect(command == NULL, 0)) {
                     perror("failed to get command!\n");
-                    return -1;
+                    abort();
                 }
                 if (__builtin_expect(command[0] == 'c' && command[1] == 'd', 0)) {
                     int size = strlen(command);
                     char* path = giveString(command, 3, size);
                     free(command);
                     if (__builtin_expect(ch(path) != 0, 0)) {
+                        free(path);
                         abort();
                     }
                     free(path);
                 } else {
-                    if (__builtin_expect(runCode(command) != 0, 0)) {
+                    mrnExec* new_mrn_exec = getParse(command, strlen(command));
+                    //pass to run code
+                    if (__builtin_expect(new_mrn_exec == NULL, 0)) {
+                        freeMrnExecs(&mrn_execs);
+                        fprintf(stderr, "\033[31mfailed to execute \033[33m%s\033[0m\n", command);
+                        munmap(data, st.st_size);
+                        close(fd);
+                        abort();
+                    }
+                    new_mrn_exec->next = mrn_execs;
+                    mrn_execs = new_mrn_exec;
+                    if (__builtin_expect(runCode(new_mrn_exec) != 0, 0)) {
+                        freeMrnExecs(&mrn_execs);
+                        free(command);
+                        munmap(data, st.st_size);
+                        close(fd);
                         abort();
                     }
                     free(command);
@@ -113,10 +166,16 @@ __attribute__((hot)) int runMrnFile(const char* __file) {
                 }
             }
         }
+        munmap(data, st.st_size);
+        close(fd);
+        freeMrnExecs(&mrn_execs);
+        abort();
     } else {
         int status;
         waitpid(pid, &status, 0);
-        return 0;
     }
+    freeMrnExecs(&mrn_execs);
+    munmap(data, st.st_size);
+    close(fd);
     return 0;
 }

@@ -9,4 +9,8 @@ int capacityOfServices = __INITIAL_SCALE_SIZE_OF_SERVICES__;
 int capacityOfJobs = __INITIAL_SCALE_SIZE_OF_JOBS__;
 int capacityOfJobsDaemon = __INITIAL_SCALE_SIZE_OF_JOBS__;
 #define __DEFAULT_TIME_EXPECTATION_SECONDS_SCALE__FOR_JOBS__ 20
+#define __INITIAL_SCALE_NUM_ARGS__ 20
+#define __INITIAL_SCALE_OF_ENV__ 20
+int numberOfEnv = 0;
+int capacityOfEnv = __INITIAL_SCALE_OF_ENV__;
 //#define DEBUG_MODE 1

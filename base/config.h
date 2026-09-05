@@ -10,4 +10,8 @@ extern int capacityOfServices;
 extern int capacityOfJobs;
 extern int capacityOfJobsDaemon;
 #define __DEFAULT_TIME_EXPECTATION_SECONDS_SCALE__FOR_JOBS__ 20
+#define __INITIAL_SCALE_NUM_ARGS__ 20
+#define __INITIAL_SCALE_OF_ENV__ 20
+extern int numberOfEnv;
+extern int capacityOfEnv;
 //#define DEBUG_MODE 1

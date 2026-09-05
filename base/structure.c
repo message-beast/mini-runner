@@ -46,3 +46,16 @@ typedef struct param {
     char* name;
     _Bool attach;
 } param;
+
+typedef struct env {
+    char* name;
+    char* key;
+    char* value;
+} env;
+
+typedef struct mrnExec {
+    struct mrnExec* next;
+    char** commands;
+    int numbers;
+    int capacity;
+} mrnExec;

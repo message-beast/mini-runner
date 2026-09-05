@@ -1,0 +1,1 @@
+void freeEnvs(env*** __envs);
