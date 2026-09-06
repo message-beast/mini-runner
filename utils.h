@@ -21,7 +21,7 @@ int addProject(service*** __restrict__ services, char* __restrict__  githubRepo,
 __attribute__((hot)) _Bool fileExists(const char* filePath);
 void freeServices(service*** __restrict__ services);
 int loadProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid);
-int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach);
+__attribute__((hot)) int runService(service*** __restrict__ services, env*** __restrict__ envs, char* __restrict__ name, char* __restrict__ bash, _Bool attach);
 int warmService(service** __restrict__ services, char* __restrict__ bash, _Bool attach);
 
 

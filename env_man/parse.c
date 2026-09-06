@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include "../basic.h"
 #include "load_env.h"
-
+#include <string.h>
 #define ENV_FILE "data/env"
 
 static inline __attribute__((always_inline, hot, aligned(64))) char* giveString(char* string, int startingIndex, int endingIndex) {
@@ -32,7 +32,7 @@ int loadEnvs(env*** __env) {
         }
         (*__env) = tmp;
     }
-    int fd = open(ENV_FILE, O_CREAT, O_RDONLY, 0644);
+    int fd = open(ENV_FILE, O_CREAT | O_RDONLY, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open env file!\n");
         return -1;
@@ -55,6 +55,9 @@ int loadEnvs(env*** __env) {
     char* name = NULL;
     char* key = NULL;
     for (register int i = 0; i < st.st_size; ++i) {
+        if (__builtin_expect((i & 63) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&data[i+ 64], 0, 3);
+        }
         switch(state) {
             case FIND_NAME:
                 if (__builtin_expect(data[i] == '`', 0)) {
@@ -99,7 +102,7 @@ int loadEnvs(env*** __env) {
                     newEnv->value = value;
                     if (__builtin_expect(loadEnv(__env, newEnv) != 0, 0)) {
                         perror("can't load env!\n");
-                        exit_program(-1)
+                        exit_program(1)
                     }
                 }
                 break;

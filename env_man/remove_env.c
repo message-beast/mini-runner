@@ -13,6 +13,9 @@ int removeEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restr
     env* foundEnv = NULL;
     int lastIndex = 0;
     for (register int i = 0; i < numberOfEnv; ++i) {
+        if (__builtin_expect((i & 511) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&(*envs)[i+512], 0, 3);
+        }
         if (state == FIND_ENV) {
             env* current = (*envs)[i];
             if (__builtin_expect(strcmp(current->name, __name) == 0 && strcmp(current->key, __key) == 0, 0)) {
@@ -45,4 +48,6 @@ int removeEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restr
             return 0;
         }
     }
+    fprintf(stderr, "can not find any env in %s with %s key\n", __name, __key);
+    return -1;
 }

@@ -42,12 +42,6 @@ typedef struct verbose {
     int pid;
 } verbose;
 
-typedef struct param {
-    service** service;
-    char* command;
-    char* name;
-    _Bool attach;
-} param;
 
 typedef struct env {
     char* name;
@@ -61,3 +55,25 @@ typedef struct mrnExec {
     int numbers;
     int capacity;
 } mrnExec;
+
+
+typedef struct envGroup {
+    env** envs;
+    int nums;
+    int capacpty;
+} envGroup;
+
+
+typedef struct envToArg {
+    char** args;
+    int nums;
+    int capacity;
+} envToArg;
+
+typedef struct param {
+    service** service;
+    char* command;
+    char* name;
+    envToArg* args;
+    _Bool attach;
+} param;

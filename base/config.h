@@ -14,4 +14,5 @@ extern int capacityOfJobsDaemon;
 #define __INITIAL_SCALE_OF_ENV__ 20
 extern int numberOfEnv;
 extern int capacityOfEnv;
+#define __INITIAL_SCALE_OF_ENV_GROUP__ 10
 //#define DEBUG_MODE 1

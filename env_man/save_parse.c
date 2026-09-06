@@ -13,7 +13,7 @@
 #define true 1
 
 static inline __attribute__((always_inline)) int writeData(char* __restrict__ content, int len) {
-    int fd = open(ENV_FILE, O_CREAT, O_WRONLY, 0644);
+    int fd = open(ENV_FILE, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open env file!\n");
         return -1;
@@ -50,20 +50,48 @@ static inline __attribute__((always_inline)) int writeData(char* __restrict__ co
 }
 
 
+static inline int __attribute__((always_inline)) eraseData() {
+    int fd = open(ENV_FILE, O_CREAT | O_RDWR, 0644);
+    if (__builtin_expect(fd == -1, 0)) {
+        perror("failed to open env file!\n");
+        return -1;
+    }
+    struct stat st;
+    if (__builtin_expect(fstat(fd, &st) != 0, 0)) {
+        perror("fstat failedon env file!\n");
+        close(fd);
+        return -1;
+    }
+    if (__builtin_expect(ftruncate(fd, 0) != 0, 0)) {
+        perror("ftruncate failed on env file!\n");
+        close(fd);
+        return -1;
+    }
+    return 0;
+}
+
+
 int saveEnvs(env*** envs) {
-    if (__builtin_expect(numberOfEnv == 0, 0)) return 0;
+    if (__builtin_expect(numberOfEnv == 0, 0)) {
+        if (__builtin_expect(eraseData() != 0, 0)) return -1;
+        return 0;
+    }
     if (__builtin_expect(envs == NULL || *envs == NULL, 0)) {
         return -1;
     }
     char* dataToWrite = NULL;
-    _Bool first = false;
+    _Bool first = true;
     for (register int i = 0; i < numberOfEnv; ++i) {
+        if (__builtin_expect((i & 63) == 0 || i == 0, 0)) {
+            __builtin_prefetch(&(*envs)[i+64], 0, 3);
+        }
         env* currentEnv = (*envs)[i];
         if (__builtin_expect(first, 0)) {
             size_t size = snprintf(NULL, 0, "%s`%s^%s\n", currentEnv->name, currentEnv->key, currentEnv->value);
             char* tmpData = malloc(size + 1);
-            if (__builtin_expect(tmpData, 0)) {
+            if (__builtin_expect(tmpData == NULL, 0)) {
                 perror("failed toallocate memory for single data!\n");
+                free(dataToWrite);
                 return -1;
             }
             snprintf(tmpData, size + 1, "%s`%s^%s\n", currentEnv->name, currentEnv->key, currentEnv->value);
@@ -74,6 +102,7 @@ int saveEnvs(env*** envs) {
             char* tmpData = malloc(size + 1);
             if (__builtin_expect(tmpData == NULL, 0)) {
                 perror("failed to allocate memory for temp data!\n");
+                free(dataToWrite);
                 return -1;
             }
             snprintf(tmpData, size + 1, "%s%s`%s^%s\n", dataToWrite, currentEnv->name, currentEnv->key, currentEnv->value);
@@ -86,13 +115,11 @@ int saveEnvs(env*** envs) {
         :
         : "memory"
     );
-    if (__builtin_expect(dataToWrite == NULL && numberOfEnv == 0, 0)) {
-        return 0;
-    }
     if (__builtin_expect(dataToWrite == NULL, 0)) {
         return -1;
     }
     if (__builtin_expect(writeData(dataToWrite, strlen(dataToWrite)) != 0, 0)) {
+        free(dataToWrite);
         return -1;
     }
     free(dataToWrite);

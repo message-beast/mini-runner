@@ -46,6 +46,15 @@
 #include "io_man/jobs/create_backup.h"
 #include "time_shift/create_time_shift.h"
 #include "time_shift/apply_time_shift.h"
+#include "env_man/parse.h"
+#include "env_man/save_parse.h"
+#include "env_man/free_env.h"
+#include "env_man/add_env.h"
+#include "env_man/get_env.h"
+#include "env_man/remove_env.h"
+#include "env_man/update_env.h"
+#include "exceptions/env/env_exceptions.h"
+#include "exceptions/messages/env/help.h"
 
 #define true 1
 #define false 0
@@ -55,7 +64,7 @@ DECLARE_128_T
 struct service** services = NULL;
 struct job** jobs = NULL;
 _Bool reformatState = true;
-
+struct env** envs = NULL;
 
 
 
@@ -95,6 +104,17 @@ void init() {
         perror("loading job failed!\n");
         exit_program(-1)
     }
+    env** tmp = malloc(__INITIAL_SCALE_OF_ENV__ * sizeof(env*));
+    if (__builtin_expect(tmp == NULL, 0)) {
+        perror("memory allocation for envs failed!\n");
+        exit_program(-1)
+    }
+    envs = tmp;
+    tmp = NULL;
+    if (__builtin_expect(loadEnvs(&envs) != 0, 0)) {
+        perror("environment loading failed!\n");
+        exit_program(-1)
+    }
     if (__builtin_expect(createBackup() != 0 || createBackupForJobs() != 0, 0)) {
         perror("failed to create time_shift");
         exit_program(-1)
@@ -118,8 +138,13 @@ void closeProcess() {
             exit_program(-1)
         }
     }
+    if (__builtin_expect(saveEnvs(&envs) != 0, 0)) {
+        perror("failed to save envs!\n");
+        exit_program(-1)
+    }
     freeServices(&services);
     freeJobs(&jobs);
+    freeEnvs(&envs);
 }
 
 static inline __attribute((always_inline)) void displayHelp() {
@@ -176,7 +201,7 @@ int main(int argc, char* argv[]) {
                     break;
                 }
             }
-            if (__builtin_expect(runService(&services, name, bash, attach) != 0, 0)) {
+            if (__builtin_expect(runService(&services, &envs, name, bash, attach) != 0, 0)) {
                 fprintf(stderr, "can not run service \"%s\"\n", name);
             }
             
@@ -481,9 +506,7 @@ int main(int argc, char* argv[]) {
                             fprintf(stderr, "cpuLimit range required!\n");
                             return 1;
                         }
-                        printf("DEBUG %s : %i\n", __FILE__, __LINE__);
                         cpuLimit = convertToSeconds(cpulimitBuff);
-                        printf("DEBUG %s : %i\n", __FILE__, __LINE__);
                         if (__builtin_expect(cpuLimit == 0, 0)) {
                             fprintf(stderr, "failed to parse cpu core amount or you just passed 0 cores?\n");
                             displayJobRsLimithelp();
@@ -495,9 +518,7 @@ int main(int argc, char* argv[]) {
                             fprintf(stderr, "memory limit is required!\n");
                             return 1;
                         }
-                        printf("DEBUG %s : %i\n", __FILE__, __LINE__);
                         memLimit = convertToBytes_JOB(memLimitBuff);
-                        printf("DEBUG %s : %i\n", __FILE__, __LINE__);
                         if (__builtin_expect(memLimit == 0, 0)) {
                             fprintf(stderr, "failed to parse memory limit or you just passed 0 bytes?\n");
                             displayJobRsLimithelp();
@@ -543,6 +564,54 @@ int main(int argc, char* argv[]) {
                 printf("unsupported time shift operation %s\n", type);
                 return 1;
             }
+        } else if (strcmp(argv[i], "add-env") == 0) {
+            char* name = argv[i + 1];
+            char* key = argv[i + 2];
+            char* value = argv[i + 3];
+            if (__builtin_expect(name == NULL || key == NULL || value == NULL, 0)) {
+                fprintf(stderr, "unexpected format. expected format <name> <key> <value>\n");
+                return 1;
+            }
+            if (__builtin_expect(isValidEnvName(name) == false || isValidEnvKey(key) == false || isValidEnvValue(value) == false, 0)) {
+                printf("\033[31mRules violated!\n\033[0m");
+                displayEnvHelp();
+                return 1;
+            }
+            if (__builtin_expect(addEnv(&envs, name, key, value) != 0, 0)) {
+                return 1;
+            }
+        } else if (strcmp(argv[i], "show-env") == 0) {
+            char* name = argv[i + 1];
+            char* key = argv[i + 2];
+            if (__builtin_expect(name == NULL || key == NULL, 0)) {
+                fprintf(stderr, "unexpected format. expected format <name> <key>\n");
+                return 1;
+            }
+            showEnv(&envs, name, key);
+        } else if (strcmp(argv[i], "remove-env") == 0) {
+            char* name = argv[i + 1];
+            char* key = argv[i + 2];
+            if (__builtin_expect(name == NULL || key == NULL, 0)) {
+                fprintf(stderr, "unexpected format. expected format <name> <key>\n");
+                return 1;
+            }
+            if (__builtin_expect(removeEnv(&envs, name, key) != 0, 0)) {
+                return 1;
+            }
+        } else if (strcmp(argv[i], "update-env") == 0) {
+            char* name = argv[i + 1];
+            char* key = argv[i + 2];
+            char* value = argv[i + 3];
+            if (__builtin_expect(name == NULL || key == NULL || value == NULL, 0)) {
+                fprintf(stderr, "unexpected format. expected format <name> <key> <value>\n");
+                return 1;
+            }
+            if (__builtin_expect(isValidEnvName(name) == false || isValidEnvKey(key) == false || isValidEnvValue(value) == false, 0)) {
+                printf("\033[31mRules violated!\n\033[0m");
+                displayEnvHelp();
+                return 1;
+            }
+            if (__builtin_expect(updateEnv(&envs, name, key, value) != 0, 0)) return 1;
         }
 
 

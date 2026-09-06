@@ -16,8 +16,8 @@
 #include "../checks_for_pr/write_chk.h"
 #include "../arch/opt.h"
 #include "../utils.h"
-
-
+#include "../env_man/get_args.h"
+#include "../env_man/free_args.h"
 #define true 1
 #define false 0
 
@@ -95,9 +95,15 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
             close(pipeFd[1]);
             abort();
         }
-        execlp("bash", "bash", params->command, NULL);
+        if (__builtin_expect(params->args == NULL, 0)) {
+            execlp("bash", "bash", params->command, NULL);
+        } else {
+            char* const args[] = {"/bin/bash", params->command, NULL};
+            execve("/bin/bash", args, params->args->args);
+        }
+        freeArgs(&(params->args));
         free(params->command);
-        printf("child failed!\n");
+        perror("child failed!\n");
         close(pipeFd[0]);
         written = write(pipeFd[1], "0", 1);
         CHECK_WRITE_PR(pipeFd[1], written, 1)
@@ -125,6 +131,7 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
         pthread_mutex_unlock(&mutex);
         close(pipeFd[0]);
     }
+    freeArgs(&(params->args));
     free(params->command);
     free(params);
     params = NULL;
@@ -168,7 +175,7 @@ static inline __attribute__((always_inline, hot)) void backup(service** foundSer
 }
 
 
-OPT(hot) int runService(service*** __restrict__ services, char* __restrict__ name, char* __restrict__ bash, _Bool attach) {
+OPT(hot) int runService(service*** __restrict__ services, env*** __restrict__ envs, char* __restrict__ name, char* __restrict__ bash, _Bool attach) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         fprintf(stderr, "\033[31mcan not run service \033[33m%s\033[0m, services empty!\n", name);
         return -1;
@@ -208,6 +215,7 @@ OPT(hot) int runService(service*** __restrict__ services, char* __restrict__ nam
             params->service = &((*services)[i]);
             params->name = name;
             params->attach = attach;
+            params->args = getArgs(envs, (*services)[i]->name);
             printf("setting pointer of %p\n", ((*services)[i]));
             __asm__ volatile (
                 "sfence"

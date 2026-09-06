@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "run/run.h"
 
-int main(int argc, char* argv[]) {
+/*int main(int argc, char* argv[]) {
     char* file = argv[1];
     if (__builtin_expect(file == NULL, 0)) {
         fprintf(stderr, "file to run is required!\n");
@@ -11,4 +11,4 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     return 0;
-}
+}*/
