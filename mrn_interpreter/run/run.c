@@ -73,8 +73,8 @@ __attribute__((hot)) int runMrnFile(const char* __file) {
     int endIndex = st.st_size - 1;
     int lastIndex = 0;
     int afterEnd = st.st_size + 1;
-    mrnExec* mrn_execs = malloc(sizeof(mrnExec));
-    if (__builtin_expect(mrn_execs == NULL, 0)) {
+    mrnExec* mrn_execs = NULL;
+    /*if (__builtin_expect(mrn_execs == NULL, 0)) {
         perror("failed to allocate memory for mrn exec run time data!\n");
         return -1;
     }
@@ -82,6 +82,7 @@ __attribute__((hot)) int runMrnFile(const char* __file) {
     mrn_execs->capacity = __INITIAL_SCALE_OF_ENV__;
     mrn_execs->numbers = 0;
     mrn_execs->commands = NULL;
+    */
     pid_t pid = fork();
     if (pid == 0) {
         for (register int i = 0; i < st.st_size; ++i) {

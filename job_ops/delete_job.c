@@ -28,7 +28,7 @@ OPT() int removeJob(job*** __restrict__ jobs, char* __restrict__ jobName) {
             state = FMT_JOB;
         }
         if (state == FMT_JOB) {
-            if (i == numberOfJobs - 1) {
+            if (__builtin_expect(i == numberOfJobs - 1, 0)) {
                 state = DEL_JOB;
             } else {
                 (*jobs)[i] = (*jobs)[i + 1];

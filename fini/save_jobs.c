@@ -106,6 +106,8 @@ static inline __attribute__((always_inline, hot)) int removeContentFromJobsFile(
     sigemptyset(&sig.sa_mask);
     sig.sa_flags = 0;
     sigaction(SIGINT, &sig, NULL);
+    sigaction(SIGTERM, &sig, NULL);
+    sigaction(SIGSEGV, &sig, NULL);
     if(__builtin_expect(ftruncate(jobsFileFd, 0) != 0, 0)) {
         perror("ftruncate for deletion failed on jobs file!\n");
         return -1;

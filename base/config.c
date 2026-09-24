@@ -3,6 +3,8 @@ __attribute__((aligned(64))) int numberOfJobs = 0;
 __attribute__((aligned(64)))int numberOfJobsDaemon = 0;
 #define __INITIAL_SCALE_SIZE_OF_SERVICES__ 4
 __attribute__((aligned(64))) int capacityOfServices = __INITIAL_SCALE_SIZE_OF_SERVICES__;
+__attribute__((aligned(64))) int numberOfCloneProjects = 0;
+__attribute__((aligned(64))) int capacityOfCloneServices = __INITIAL_SCALE_SIZE_OF_SERVICES__;
 #define __MAX_CORE_VIOLATION 3
 #define __ERROR_FORMATING_STR 4
 #define __INITIAL_SCALE_SIZE_OF_JOBS__ 4

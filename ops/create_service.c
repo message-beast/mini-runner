@@ -117,6 +117,8 @@ OPT(hot) int save_services(service*** services) {
     sigemptyset(&sig.sa_mask);
     sig.sa_flags = 0;
     sigaction(SIGINT, &sig, NULL);
+    sigaction(SIGTERM, &sig, NULL);
+    sigaction(SIGSEGV, &sig, NULL);
     if (__builtin_expect(dataToBeWritten != NULL, 0)) { 
         if (ftruncate(projectsFileFd, strlen(dataToBeWritten)) != 0) {
             perror("ftruncate failed for projects file!\n");

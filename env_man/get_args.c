@@ -61,6 +61,7 @@ __attribute__((hot, aligned(64))) envToArg* getArgs(env*** __restrict__ envs, ch
                 tmp = NULL;
             }
             arg->args[found] = kvPair;
+            found++;
         }
     }
     __asm__ volatile (

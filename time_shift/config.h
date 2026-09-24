@@ -12,7 +12,8 @@
 #define _PROJECT_BACKUP_PATH "data/projects.backup"
 #define _UPDATE_STATUS_PATH "data/updateStatus"
 #define _UPDATE_STATUS_BACKUP_PATH "data/updateStatus.backup"
-
+#define _ENV_PATH "data/env"
+#define _ENV_BACKUP_PATH "data/env.backup"
 
 #define _JOB_CPU_LIMIT_COPY_PATH "backup/job_cpu_limit"
 #define _JOB_CPU_LIMIT_BACKUP_COPY_PATH "backup/job_cpu_limit.backup"
@@ -28,5 +29,7 @@
 #define _PROJECT_BACKUP_COPY_PATH "backup/projects.backup"
 #define _UPDATE_STATUS_COPY_PATH "backup/updateStatus"
 #define _UPDATE_STATUS_BACKUP_COPY_PATH "backup/updateStatus.backup"
+#define _ENV_COPY_PATH "backup/env"
+#define _ENV_BACKUP_COPY_PATH "backup/env.backup"
 
 

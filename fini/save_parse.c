@@ -7,10 +7,20 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include "../base/config.h"
+#include "../io_man/env/create_backup.h"
+#include "../io_man/env/apply_backup.h"
+#include <sys/signal.h>
 
 #define ENV_FILE "data/env"
 #define false 0
 #define true 1
+
+static void handleBackupForEnv() {
+    if (__builtin_expect(applyEnvBackup() != 0, 0)) {
+        perror("failed to create a backup!\n");
+        return;
+    }
+}
 
 static inline __attribute__((always_inline)) int writeData(char* __restrict__ content, int len) {
     int fd = open(ENV_FILE, O_CREAT | O_RDWR, 0644);
@@ -24,6 +34,17 @@ static inline __attribute__((always_inline)) int writeData(char* __restrict__ co
         close(fd);
         return -1;
     }
+    if (__builtin_expect(createEnvBackup() != 0, 0)) {
+        perror("can not create backup for envs!\n");
+        return -1;
+    }
+    struct sigaction sig;
+    sig.sa_handler = handleBackupForEnv;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
+    sigaction(SIGTERM, &sig, NULL);
+    sigaction(SIGSEGV, &sig, NULL);
     if (__builtin_expect(ftruncate(fd, len) != 0, 0)) {
         perror("ftruncate failed on env file!\n");
         close(fd);
@@ -67,6 +88,7 @@ static inline int __attribute__((always_inline)) eraseData() {
         close(fd);
         return -1;
     }
+    close(fd);
     return 0;
 }
 
@@ -105,8 +127,10 @@ int saveEnvs(env*** envs) {
                 free(dataToWrite);
                 return -1;
             }
+            char* beforeData = dataToWrite;
             snprintf(tmpData, size + 1, "%s%s`%s^%s\n", dataToWrite, currentEnv->name, currentEnv->key, currentEnv->value);
             dataToWrite = tmpData;
+            free(beforeData);
         }
     }
     __asm__ volatile(

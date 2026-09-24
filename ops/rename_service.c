@@ -14,6 +14,7 @@
 #include "../res_man/utils/cgrpv1/utils.h"
 #include "../res_man/utils/cgrpv2/utils.h"
 #include "../res_man/utils/helper.h"
+#include "../env_man/rename_env.h"
 DECLARE_FILE_COPY_F
 DECLARE_COPY_PROCESS_F
 DECLARE_PROCESS_COPY_F
@@ -260,7 +261,7 @@ static inline __attribute__((always_inline, hot)) int renameCgrp(char* __restric
 
 
 
-OPT() void renameService(service*** __restrict__ services, char* __restrict__ serviceName, char* __restrict__ newName) {
+OPT() void renameService(service*** __restrict__ services, env*** __restrict__  envs, char* __restrict__ serviceName, char* __restrict__ newName) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         return;
     }
@@ -289,6 +290,11 @@ OPT() void renameService(service*** __restrict__ services, char* __restrict__ se
                 beforeName = NULL;
                 return;
             }
+            /*if (__builtin_expect(renameEnv(envs, serviceName, newName) != 0, 0)) {
+                fprintf(stderr, "\033[33mfailed to rename environment varibales for the service. don't forget to manually update the envs!\n\033[0m");
+                beforeName = NULL;
+                return;
+            }*/
             currentService->name = strdup(newName);
             printf("\033[33mservice \033[31m\"%s\" \033[33msuccessfully renamed to \033[32m\"%s\"\033[0m\n", beforeName, currentService->name);
             free(beforeName);

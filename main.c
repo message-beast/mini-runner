@@ -47,7 +47,7 @@
 #include "time_shift/create_time_shift.h"
 #include "time_shift/apply_time_shift.h"
 #include "env_man/parse.h"
-#include "env_man/save_parse.h"
+#include "fini/save_parse.h"
 #include "env_man/free_env.h"
 #include "env_man/add_env.h"
 #include "env_man/get_env.h"
@@ -55,11 +55,14 @@
 #include "env_man/update_env.h"
 #include "exceptions/env/env_exceptions.h"
 #include "exceptions/messages/env/help.h"
+#include "help.h"
 
 #define true 1
 #define false 0
 
 DECLARE_128_T
+
+HELP_FUN
 
 struct service** services = NULL;
 struct job** jobs = NULL;
@@ -147,9 +150,9 @@ void closeProcess() {
     freeEnvs(&envs);
 }
 
-static inline __attribute((always_inline)) void displayHelp() {
+/*static inline __attribute((always_inline)) void displayHelp() {
     printf("\033[32m Welcome to mrn (Mini-Runner/Minimal-Resource-Usage Runner) built for vps users to automate thigs and then to reduce cloud costs,\n\n\033[33m Developed by Melikt Belay!\n\n\033[0mHere is major uses cases you can make:\n\n\tmrn add <github repo> -- this adds the github repo to your process and then update them when the update is going!\n\tmrn stop -- this stops all running processes of your miroservices and macroservices\n\tmrn run <bash to run> --this just runs your bash on linux vps to start some services or servers\n\tmrn update --this updates and pull github requests if it fails you just do the merge your self\n\tmrn stop <service name> -- this stops the service by its name\n\tmrn list -- this lists all the services\n\tmrn find <service name> -- this finds service by its name pattern matching, it is developed if you incase forget the name of your service\n\t\t --sort this sorts the results depending on their name matching score\n\tmrn run <service name> -- this runs your service but you can specify the running file after it\n\t\t --example: mrn run myservice run.sh\n\t\t\t    mrn run myservice run.sh --attach (attach is if you are looking to interact your service)\n\tmrn rename <old service name> <new service name> -- this changes the name of your service also renames the service program directory\n\tmrn neglect-updates --this just ignores if the updates avialable or not  and back to normal state to run your services\n\tmrn restart <service name> -- this restarts the services that is running/not\n\t\t--example mrn restart myservice\n\t\t\t  mrn restart myservice --attach (attach is just if you wanna test it interacting with it)\n\n\tthanks for using mrn it is well powered c program that just needs tiny memory and cpu to do the work\n");
-}
+}*/
 
 
 int main(int argc, char* argv[]) {
@@ -275,7 +278,7 @@ int main(int argc, char* argv[]) {
                 fprintf(stderr, "old/new service name doesn't provided!\n");
                 return 1;
             }
-            renameService(&services, oldName, newName);
+            renameService(&services, &envs, oldName, newName);
             
         } else if (strcmp(argv[i], "set-limit") == 0) {
             char* serviceName = argv[i + 1];
@@ -552,7 +555,6 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
             if (strcmp(type, "create") == 0) {
-                reformatState = false;
                 if (__builtin_expect(createTimeShift() != 0, 0)) {
                     return 1;
                 }
@@ -560,6 +562,7 @@ int main(int argc, char* argv[]) {
                 if (__builtin_expect(applyTimeShift(&services, &jobs) != 0, 0)) {
                     return 1;
                 }
+                reformatState = false;
             } else {
                 printf("unsupported time shift operation %s\n", type);
                 return 1;

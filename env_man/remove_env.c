@@ -9,7 +9,7 @@ int removeEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restr
         perror("envs is null!\n");
         return -1;
     }
-    enum {FIND_ENV, FREE_ENV, FORMAT_ENV} state = FIND_ENV;
+    enum {FIND_ENV, FREE_ENV, FORMAT_ENV, DEL_ENV} state = FIND_ENV;
     env* foundEnv = NULL;
     int lastIndex = 0;
     for (register int i = 0; i < numberOfEnv; ++i) {
@@ -34,11 +34,20 @@ int removeEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restr
             state = FORMAT_ENV;
         }
         if (state == FORMAT_ENV) {
-            env* current = (*envs)[i];
-            if (__builtin_expect(current != NULL, 1)) {
-                (*envs)[i] = (*envs)[i - 1];
+            if (i == numberOfEnv - 1) {
+                state = DEL_ENV;
+            } else {
+                (*envs)[i] = (*envs)[i + 1];
             }
+        }
+        if (state == DEL_ENV) {
             numberOfEnv --;
+            __asm__ volatile (
+                "sfence"
+                :
+                :
+                : "memory"
+            );
             if (__builtin_expect(numberOfEnv == 0, 0)) {
                 free((*envs));
                 (*envs) = NULL;

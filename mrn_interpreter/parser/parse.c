@@ -21,7 +21,6 @@ static inline __attribute__((always_inline, hot, aligned(64))) char* giveString(
 mrnExec* getParse(char* __command, int len) {
     int lastIndex = 0;
     int found = 0;
-    printf("recieving: %s\nlen: %i\n", __command, len);
     mrnExec* mrn_exec = malloc(sizeof(mrnExec));
     mrn_exec->commands = malloc(sizeof(char*) * __INITIAL_SCALE_NUM_ARGS__);
     mrn_exec->capacity = __INITIAL_SCALE_NUM_ARGS__;
@@ -52,7 +51,6 @@ mrnExec* getParse(char* __command, int len) {
                 }
                 mrn_exec->capacity = newCapacity;
             }
-            printf("inserting: %s to %i index\n", word, found);
             mrn_exec->commands[found] = word;
             lastIndex = i + 1;
             found++;
@@ -80,7 +78,6 @@ mrnExec* getParse(char* __command, int len) {
                 }
                 mrn_exec->capacity = newCapacity;
             }
-            printf("inserting: %s to %i index\n", word, found);
             mrn_exec->commands[found] = word;
             lastIndex = i + 1;
             found++;

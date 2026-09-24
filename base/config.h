@@ -2,6 +2,8 @@
 extern int numberOfProjects;
 extern int numberOfJobs;
 extern int numberOfJobsDaemon;
+extern int numberOfCloneProjects;
+extern int capacityOfCloneServices;
 #define __INITIAL_SCALE_SIZE_OF_SERVICES__ 4
 extern int capacityOfServices;
 #define __MAX_CORE_VIOLATION 3
