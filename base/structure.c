@@ -74,3 +74,9 @@ typedef struct param {
     envToArg* args;
     _Bool attach;
 } param;
+
+typedef struct limit {
+    char* name;
+    __uint64_t cpu;
+    __uint128_t memory;
+} limit;

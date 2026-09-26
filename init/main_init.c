@@ -43,7 +43,7 @@ __attribute__((cold)) int initiateMemoryPtr() {
 
 
 
-static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startingIndex, int endingIndex) {
+static inline __attribute__((always_inline, hot, aligned(64))) char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;
     char* finalString = malloc(length + 1);
     if (__builtin_expect(finalString == NULL, 0)) {

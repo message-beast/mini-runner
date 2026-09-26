@@ -17,4 +17,7 @@ extern int capacityOfJobsDaemon;
 extern int numberOfEnv;
 extern int capacityOfEnv;
 #define __INITIAL_SCALE_OF_ENV_GROUP__ 10
+#define __INITIAL_SCALE_OF_RES_LIMIT__ 4
+extern int numberOfResLimits;
+extern int capacityOfResLimits;
 //#define DEBUG_MODE 1

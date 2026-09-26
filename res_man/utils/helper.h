@@ -33,6 +33,7 @@
 
 
 #define format_128_char(x) chars_to_uint_128(x);
+#define format_128_char_e(x) chars_to_uint_128(x)
 
 
 #define CHECK_WRITE(fd, _w, len)\

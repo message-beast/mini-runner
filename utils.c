@@ -32,33 +32,6 @@ __attribute__((hot)) _Bool folderExists(const char* path) {
 
 
 
-/*static inline __attribute__((always_inline)) long syscall_openat(int dir_fd, const char* pathName, int flags, int mode) {
-    long ret;
-    __asm__ volatile (
-        "syscall"
-        : "=a" (ret)
-        : "a" (SYS_openat), "D" (dir_fd), "S" (pathName), "d" (flags), "r10" (mode)
-        : "rcx", "r11", "memory"
-    );
-    return ret;
-}
-
-
-static inline __attribute__((always_inlne)) long syscall_getdent64(int fd, void* dirp, size_t count) {
-    long ret;
-    __asm__ volatile (
-        "syscall"
-        : "=a" (ret)
-        : "a" (SYS_getdents64), "D" (fd), "S" (dirp), "d" (count)
-        : "rcx", "r11", "memory"
-    );
-    return ret;
-}
-
-*/
-
-
-
 
 static inline __attribute__((hot)) int deleteFolderFdRc(int fd) {
     char buff[8192];

@@ -16,4 +16,7 @@ __attribute__((aligned(64)))int capacityOfJobsDaemon = __INITIAL_SCALE_SIZE_OF_J
 __attribute__((aligned(64))) int numberOfEnv = 0;
 __attribute__((aligned(64)))int capacityOfEnv = __INITIAL_SCALE_OF_ENV__;
 #define __INITIAL_SCALE_OF_ENV_GROUP__ 10
+__attribute__((aligned(64))) int numberOfResLimits = 0;
+#define __INITIAL_SCALE_OF_RES_LIMIT__ 4
+__attribute__((aligned(64))) int capacityOfResLimits = __INITIAL_SCALE_OF_RES_LIMIT__;
 //#define DEBUG_MODE 1
