@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -14,7 +16,7 @@
 #include "../io_man/jobs_res_limit/cpu/create_backup.h"
 #include "../io_man/jobs_res_limit/cpu/apply_backup.h"
 
-void hanldeRsMmbackup () {
+void hanldeRsMmbackup (int signal) {
     if (__builtin_expect(applyJobRsMmLimitBackup() != 0, 0)) {
         perror("failed to aply backup!\n");
         return;
@@ -22,7 +24,7 @@ void hanldeRsMmbackup () {
     return;
 }
 
-void handleRsCpuBackup() {
+void handleRsCpuBackup(int signal) {
     if (__builtin_expect(applyJobRsLimitBackup() != 0, 0)) {
         perror("failed to apply backup!\n");
         return;

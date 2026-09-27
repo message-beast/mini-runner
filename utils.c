@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
 #include <sys/stat.h>
 #include "utils_ops/load_project.h"
 #include <sys/stat.h>

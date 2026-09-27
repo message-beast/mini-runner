@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -13,7 +15,7 @@
 #include "../io_man/services/create_backup.h"
 #include "../io_man/services/apply_backup.h"
 
-static void handleServicesBackup() {
+static void handleServicesBackup(int signal) {
     if (__builtin_expect(applyBackup() != 0, 0)) {
         perror("failed to create a backup!\n");
         return;

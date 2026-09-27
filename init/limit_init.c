@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -86,13 +88,13 @@ __attribute__((hot)) int initLimits(limit*** limits) {
             case FIND_CPU_LIMIT:
                 if (__builtin_expect(data[i] == '\n', 0)) {
                     char* cpuLimitBuff = giveString(data, lastIndex, i);
-                    if (__Builtin_expect(cpuLimitBuff == NULL, 0)) {
+                    if (__builtin_expect(cpuLimitBuff == NULL, 0)) {
                         perror("failed to allocate memory for ");
                         free(name);
                         goto cleanup;
                     }
                     __uint64_t cpuLimit = atol(cpuLimitBuff);
-                    free(cpuLimit);
+                    free(cpuLimitBuff);
                     if (__builtin_expect(cpuLimit == 0, 0)) {
                         fprintf(stderr, "failed to parse limit cpu buffer!\n");
                         free(name);

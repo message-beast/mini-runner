@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -86,7 +88,7 @@ static inline __attribute__((always_inline, hot)) void freeJobs(job*** jobs) {
 
 
 
-static inline __attribute__((always_inline, hot)) void* runJobsDaemon() {
+static inline __attribute__((always_inline, hot)) void* runJobsDaemon(void*) {
     job** _jobs = malloc(sizeof(job*) * __INITIAL_SCALE_SIZE_OF_JOBS__);
     while(_jobs == NULL) {
         sleep(5);

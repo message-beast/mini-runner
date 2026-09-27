@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
@@ -7,6 +9,8 @@
 #include <sys/stat.h>
 #include "../base/structure.h"
 #include "../base/config.h"
+#include <stdlib.h>
+
 int removeLimit(limit*** __restrict__ limits, char* __restrict__ name) {
     enum {FIND_LIMIT, FREE_LIMIT, FMT_LIMIT, DEL_LIMIT} state = FIND_LIMIT;
     limit* foundLimit = NULL;

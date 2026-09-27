@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -9,7 +11,7 @@
 #include "../io_man/job_daemon/create_backup.h"
 #include "../io_man/job_daemon/apply_backup.h"
 
-void handlePidBackup() {
+void handlePidBackup(int signal) {
     if (__builtin_expect(applyJobDaemonPidBackup() != 0, 0)) {
         perror("failed to apply backup!\n");
         return;

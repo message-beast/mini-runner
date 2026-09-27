@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -21,7 +23,7 @@
 
 
 
-static void handleJobBackup() {
+static void handleJobBackup(int signal) {
     if (__builtin_expect(applyBackupForjobs() != 0, 0)) {
         perror("failed to apply job sync backup!\n");
         return;

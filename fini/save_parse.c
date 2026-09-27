@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200809L
+#ifndef _POSIX_C_SOURCE
+    #define _POSIX_C_SOURCE 200809L
+#endif
 #include "../base/structure.h"
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +17,7 @@
 #define false 0
 #define true 1
 
-static void handleBackupForEnv() {
+static void handleBackupForEnv(int signal) {
     if (__builtin_expect(applyEnvBackup() != 0, 0)) {
         perror("failed to create a backup!\n");
         return;
