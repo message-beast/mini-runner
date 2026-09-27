@@ -15,6 +15,7 @@
 #include "../file_sys_ops/file_system.h"
 #include "../utils.h"
 #include <signal.h>
+#include "../utils_ops/remove_limit.h"
 
 static inline __attribute__((always_inline, hot)) char* cutString(char* __restrict__ data, int startingIndex, int endingIndex) {
     int dataLength = strlen(data);
@@ -175,7 +176,7 @@ static inline __attribute__((always_inline)) int killProcess(pid_t pid) {
     return 0;
 }
 
-OPT(hot) int normalDeleteServices(service*** __restrict__ services, char* __restrict__ serviceName) {
+OPT(hot) int normalDeleteServices(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName) {
     if (__builtin_expect(services == NULL || *services == NULL, 0)) {
         printf("\003[31mno services avialable\n");
         return -1;
@@ -235,7 +236,13 @@ OPT(hot) int normalDeleteServices(service*** __restrict__ services, char* __rest
                 }
                 printf("\033[33mSuccessfully deleted service!\n\t\033[34m|-\033[35mname: \033[32m%s\n\t\033[34m|-\033[35mgithub-repo: \033[32m%s\n\t\033[34m|-\033[35mrunningpid \033[32m%i\033[0m\n", serviceVerbose.name, serviceVerbose.githubRepo, serviceVerbose.pid);
                 printf("\n\tfriendly reminder: if the deleted service have pid greater than 0, just run \t\033[32mmrn stop <pid>\033[0m\n");
+                if (__builtin_expect(removeLimit(limits, serviceVerbose.name) != 0, 0)) {
+                    return -1;
+                }
                 return 0;
+            }
+            if (__builtin_expect(removeLimit(limits, serviceVerbose.name) != 0, 0)) {
+                return -1;
             }
             DEBUG
             if(__builtin_expect(killProcess(serviceVerbose.pid) == 0, 1)) {
@@ -244,6 +251,7 @@ OPT(hot) int normalDeleteServices(service*** __restrict__ services, char* __rest
             printf("\033[33mSuccessfully deleted service!\n\t\033[34m|-\033[35mname: \033[32m%s\n\t\033[34m|-\033[35mgithub-repo: \033[32m%s\n\t\033[34m|-\033[35mrunningpid \033[32m%i\033[0m\n", serviceVerbose.name, serviceVerbose.githubRepo, serviceVerbose.pid);
             printf("\n\tfriendly reminder: if the deleted service have pid greater than 0, just run \t\033[32mmrn stop <pid>\033[0m\n");
             freeVerbose(&serviceVerbose);
+
             return 0;
         }
     }

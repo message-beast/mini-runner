@@ -12,8 +12,11 @@
 #include "../basic.h"
 #include <stdlib.h>
 #include "../utils_ops/load_limit.h"
+#include "../res_man/utils/helper.h"
 
 #define FILE "data/limits"
+
+DECLARE_128_T
 
 static inline __attribute__((always_inline, hot, aligned(64), malloc)) char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;
@@ -40,6 +43,7 @@ __attribute__((hot)) int initLimits(limit*** limits) {
         return -1;
     }
     int size = st.st_size;
+    if (__builtin_expect(size == 0, 0)) return 0;
     char* data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (__builtin_expect(data == MAP_FAILED, 0)) {
         perror("failed to map limit file!\n");
@@ -75,7 +79,7 @@ __attribute__((hot)) int initLimits(limit*** limits) {
                     }
                     __uint128_t memLimit = atoll(memLimitBuff);
                     free(memLimitBuff);
-                    if (__builtin_expect(memLimit == 0, 0)) {
+                    if (__builtin_expect(memLimit < 0, 0)) {
                         fprintf(stderr, "failed to parse memory limit buffer from limit!\n");
                         free(name);
                         goto cleanup;
@@ -95,7 +99,7 @@ __attribute__((hot)) int initLimits(limit*** limits) {
                     }
                     __uint64_t cpuLimit = atol(cpuLimitBuff);
                     free(cpuLimitBuff);
-                    if (__builtin_expect(cpuLimit == 0, 0)) {
+                    if (__builtin_expect(cpuLimit < 0, 0)) {
                         fprintf(stderr, "failed to parse limit cpu buffer!\n");
                         free(name);
                         goto cleanup;
@@ -115,7 +119,7 @@ __attribute__((hot)) int initLimits(limit*** limits) {
                         free(name);
                         munmap(data, size);
                         close(fd);
-                        return -1;
+                        exit_program(-1)
                     }
                     state = FIND_NAME;
                     lastIndex = i + 1;
@@ -124,11 +128,11 @@ __attribute__((hot)) int initLimits(limit*** limits) {
                 break;
         }
     }
+    munmap(data, size);
+    close(fd);
+    return 0;
     cleanup:
         munmap(data, size);
         close(fd);
         exit_program(-1)
-    munmap(data, size);
-    close(fd);
-    return 0;
 }

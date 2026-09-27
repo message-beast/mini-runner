@@ -56,6 +56,9 @@
 #include "exceptions/env/env_exceptions.h"
 #include "exceptions/messages/env/help.h"
 #include "help.h"
+#include "init/limit_init.h"
+#include "fini/save_limits.h"
+#include "utils_ops/free_limits.h"
 
 #define true 1
 #define false 0
@@ -68,6 +71,8 @@ struct service** services = NULL;
 struct job** jobs = NULL;
 _Bool reformatState = true;
 struct env** envs = NULL;
+struct limit** limits = NULL;
+_Bool reformatLimits = false;
 
 
 
@@ -118,6 +123,17 @@ void init() {
         perror("environment loading failed!\n");
         exit_program(-1)
     }
+    limit** temp = malloc(sizeof(limit*) * __INITIAL_SCALE_OF_RES_LIMIT__);
+    if (__builtin_expect(temp == NULL, 0)) {
+        perror("failed to allocate memory for limits!\n");
+        exit_program(-1)
+    }
+    limits = temp;
+    temp = NULL;
+    if (__builtin_expect(initLimits(&limits) != 0, 0)) {
+        perror("limits loading failed!\n");
+        exit_program(-1)
+    }
     if (__builtin_expect(createBackup() != 0 || createBackupForJobs() != 0, 0)) {
         perror("failed to create time_shift");
         exit_program(-1)
@@ -145,9 +161,15 @@ void closeProcess() {
         perror("failed to save envs!\n");
         exit_program(-1)
     }
+    if (__builtin_expect(reformatLimits && saveLimits(&limits) != 0, 0)) {
+        perror("failed to save limits!\n");
+        exit_program(-1)
+    }
     freeServices(&services);
     freeJobs(&jobs);
     freeEnvs(&envs);
+    freeLimits(&limits);
+
 }
 
 
@@ -183,9 +205,10 @@ int main(int argc, char* argv[]) {
             continue;
         } else if (strcmp(argv[i], "remove") == 0) {
             char* serviceName = argv[i + 1];
-            if (__builtin_expect(normalDeleteServices(&services, serviceName) != 0, 0)) {
+            if (__builtin_expect(normalDeleteServices(&services, &limits, serviceName) != 0, 0)) {
                 fprintf(stderr, "\033[31mcan't delete %s\033[0m\n", serviceName);
             }
+            reformatLimits = true;
         } else if (strcmp(argv[i], "run") == 0) {
             char* name = argv[i + 1];
             char* bash = argv[i + 2];
@@ -274,8 +297,8 @@ int main(int argc, char* argv[]) {
                 fprintf(stderr, "old/new service name doesn't provided!\n");
                 return 1;
             }
-            renameService(&services, &envs, oldName, newName);
-            
+            renameService(&services, &limits, &envs, oldName, newName);
+            reformatLimits = true;
         } else if (strcmp(argv[i], "set-limit") == 0) {
             char* serviceName = argv[i + 1];
             if (__builtin_expect(serviceName == NULL, 0)) {
@@ -358,9 +381,10 @@ int main(int argc, char* argv[]) {
                             return 1;
                         }
                     }
-                    if (__builtin_expect(setCpuResourceLimit(&services, serviceName, cpuLimit, (!!(memBytes)), memBytes) != 0, 0)) {
+                    if (__builtin_expect(setCpuResourceLimit(&services, &limits, serviceName, cpuLimit, (!!(memBytes)), memBytes) != 0, 0)) {
                         return 1;
                     }
+                    reformatLimits = true;
                 } else if (useLarge && !useExtreme) {
                     memBytes_lrg = convertToByte_F_LRG(memBytesStr);
                     if (__builtin_expect(memBytes_lrg == 0, 0)) {
@@ -369,7 +393,8 @@ int main(int argc, char* argv[]) {
                         return 1;
                     }
                     printf("custom mem: %li\n", memBytes_lrg);
-                    if (__builtin_expect(setCpuResourceLimit_F_LRG(&services, serviceName, cpuLimit, (!!(memBytes_lrg)), memBytes_lrg) != 0, 0)) {
+                    if (__builtin_expect(setCpuResourceLimit_F_LRG(&services, &limits, serviceName, cpuLimit, (!!(memBytes_lrg)), memBytes_lrg) != 0, 0)) {
+                        reformatLimits = true;
                         return 1;
                     }
                 } else {
@@ -379,7 +404,8 @@ int main(int argc, char* argv[]) {
                         displayMemManVerbose();
                         return 1;
                     }
-                    if (__builtin_expect(setCpuResourceLimit_F_EXTR(&services, serviceName, cpuLimit, (!!(memBytesExtr)), memBytesExtr) != 0, 0)) {
+                    if (__builtin_expect(setCpuResourceLimit_F_EXTR(&services, &limits, serviceName, cpuLimit, (!!(memBytesExtr)), memBytesExtr) != 0, 0)) {
+                        reformatLimits = true;
                         return 1;
                     }
                 }
@@ -393,9 +419,10 @@ int main(int argc, char* argv[]) {
                             return 1;
                         }
                     }
-                    if (__builtin_expect(setMemoryLimit(&services, serviceName, memBytes) != 0, 0)) {
+                    if (__builtin_expect(setMemoryLimit(&services, &limits, serviceName, memBytes) != 0, 0)) {
                         return 1;
                     }
+                    reformatLimits = true;
                 } else if (!useExtreme && useLarge) {
                     printf("this!\n");
                     memBytes_lrg = convertToByte_F_LRG(memBytesStr);
@@ -405,9 +432,10 @@ int main(int argc, char* argv[]) {
                         displayMemManVerbose();
                         return 1;
                     }
-                    if (__builtin_expect(setMemoryLimit_F_LRG(&services, serviceName, memBytes_lrg) != 0, 0)) {
+                    if (__builtin_expect(setMemoryLimit_F_LRG(&services, &limits, serviceName, memBytes_lrg) != 0, 0)) {
                         return 1;
                     }
+                    reformatLimits = true;
                 } else {
                     memBytesExtr = convertToByte_F_EXTR(memBytesStr);
                     if (__builtin_expect(memBytesExtr == 0, 0)) {
@@ -415,9 +443,10 @@ int main(int argc, char* argv[]) {
                         displayMemManVerbose();
                         return 1;
                     }
-                    if (__builtin_expect(setMemoryLimit_F_EXTR(&services, serviceName, memBytesExtr) != 0, 0)) {
+                    if (__builtin_expect(setMemoryLimit_F_EXTR(&services, &limits, serviceName, memBytesExtr) != 0, 0)) {
                         return 1;
                     }
+                    reformatLimits = true;
                 }
             }
         } else if (strcmp(argv[i], "res-usage") == 0) {
@@ -525,11 +554,9 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
-                printf("STAR\n");
                 if (__builtin_expect(configJobRes(memLimit, cpuLimit, !!(memLimit), !!(cpuLimit)) != 0, 0)) {
                     return 1;
                 }
-                printf("FIN\n");
             }
         } else if (strcmp(argv[i], "show-job-limit") == 0) {
             showJobDaemonRsLimits();

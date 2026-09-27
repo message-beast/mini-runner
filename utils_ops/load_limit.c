@@ -3,7 +3,8 @@
 #include <string.h>
 #include "../base/structure.h"
 #include "../base/config.h"
-
+#include "../res_man/utils/helper.h"
+DECLARE_128_T
 
 __attribute__((hot, aligned(64))) int loadLimit(limit*** __restrict__ limits, limit* __restrict__ newLimit) {
     if (__builtin_expect(limits == NULL || *limits == NULL, 0)) {
@@ -27,7 +28,8 @@ __attribute__((hot, aligned(64))) int loadLimit(limit*** __restrict__ limits, li
         tmp = NULL;
         capacityOfResLimits = newCapacity;
     }
-    (*limits)[++numberOfResLimits] = newLimit;
+    (*limits)[numberOfResLimits] = newLimit;
+    numberOfResLimits++;
     __asm__ volatile (
         "sfence"
         :

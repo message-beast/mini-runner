@@ -36,7 +36,7 @@ DECLARE_128_T
 
 
 
-OPT(hot) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint128_t memBytes) {
+OPT(hot) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint128_t memBytes) {
     __asm__ volatile (
         "sfence"
         :
@@ -58,6 +58,11 @@ OPT(hot) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, char* 
             if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, pid, numberOfCpu, limitMemory, memBytes) != 0, 0)) {
                 return -1;
             }
+            __uint64_t cpuSeconds = numberOfCpu * 100000;
+            if (__builtin_expect(createLimit(limits, serviceName, cpuSeconds, memBytes) != 0, 0)) {
+                fprintf(stderr, "failed to apply limits for guranteed persistency!\n");
+                return -1;
+            }
             
             return 0;
         }
@@ -71,7 +76,7 @@ OPT(hot) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, char* 
 
 
 
-OPT(hot) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint64_t memBytes) {
+OPT(hot) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, limit*** __restrict limits, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint64_t memBytes) {
     __asm__ volatile (
         "sfence"
         :
@@ -93,6 +98,11 @@ OPT(hot) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, char* _
             if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, pid, numberOfCpu, limitMemory, memBytes) != 0, 0)) {
                 return -1;
             }
+            __uint64_t cpuSeconds = numberOfCpu * 100000;
+            if (__builtin_expect(createLimit(limits, serviceName, cpuSeconds, (__uint128_t)memBytes) != 0, 0)) {
+                fprintf(stderr, "failed to apply limits for guranteed persistency!\n");
+                return -1;
+            }
             return 0;
         }
     }
@@ -106,7 +116,7 @@ OPT(hot) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, char* _
 
 
 
-OPT(hot) int setCpuResourceLimit(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, int memBytesStr) {
+OPT(hot) int setCpuResourceLimit(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, int memBytesStr) {
     __asm__ volatile (
         "sfence"
         :
@@ -128,6 +138,12 @@ OPT(hot) int setCpuResourceLimit(service*** __restrict__ services, char* __restr
             if (__builtin_expect(SET_CPU_SIZE_WITH_MEM(serviceName, pid, numberOfCpu, limitMemory, memBytesStr) != 0, 0)) {
                 return -1;
             }
+            __uint64_t cpuSeconds = numberOfCpu * 100000;
+            if (__builtin_expect(createLimit(limits, serviceName, cpuSeconds, (__uint128_t)memBytesStr) != 0, 0)) {
+                fprintf(stderr, "failed to apply limits for guranteed persistency!\n");
+                return -1;
+            }
+            printf("###DEBUG %s: %i\n", __FILE__, __LINE__);
             return 0;
         }
     }

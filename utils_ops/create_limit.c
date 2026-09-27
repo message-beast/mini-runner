@@ -11,6 +11,10 @@
 #include "../base/config.h"
 #include <stdlib.h>
 __attribute__((hot, aligned(64))) int createLimit(limit*** __restrict__ limits, char* __restrict__ name, __uint64_t cpuLimit, __uint128_t memLimit) {
+    if (__builtin_expect(limits == NULL || *limits == NULL, 0)) {
+        perror("limit is null!\n");
+        return -1;
+    }
     for (register int i = 0; i < numberOfResLimits; ++i) {
         if (__builtin_expect((i & 511) == 0 || i == 0, 0)) __builtin_prefetch(&(*limits)[i+512], 0, 3);
         if (__builtin_expect(strcmp(name, (*limits)[i]->name) == 0, 0)) {
@@ -25,7 +29,7 @@ __attribute__((hot, aligned(64))) int createLimit(limit*** __restrict__ limits, 
         perror("failed to allocate memory for new limit!\n");
         return -1;
     }
-    newLimit->name = name;
+    newLimit->name = strdup(name);
     newLimit->memory = memLimit;
     newLimit->cpu = cpuLimit;
     if (__builtin_expect(numberOfResLimits >= capacityOfResLimits, 0)) {
@@ -38,7 +42,8 @@ __attribute__((hot, aligned(64))) int createLimit(limit*** __restrict__ limits, 
         tmp = NULL;
         capacityOfResLimits = newCapacity;
     }
-    (*limits)[++numberOfResLimits] = newLimit;
+    (*limits)[numberOfResLimits] = newLimit;
+    numberOfResLimits++;
     __asm__ volatile (
         "mfence"
         :

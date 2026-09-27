@@ -37,7 +37,7 @@ __attribute__((hot, aligned(64))) envGroup* getEnvs(env*** __restrict__ envs, ch
                 group->envs = tmp;
                 tmp = NULL;
             }
-            group->envs[++found] = (*envs)[i];
+            group->envs[found++] = (*envs)[i];
         }
     }
     __asm__ volatile (

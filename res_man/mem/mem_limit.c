@@ -17,7 +17,7 @@
 #include "../utils/cgrpv1/memory_limit.h"
 #include "../utils/helper.h"
 #include "./limiter.h"
-
+#include "../../utils_ops/create_limit.h"
 
 
 
@@ -35,7 +35,7 @@
 
 
 
-__attribute__((hot)) int setMemoryLimit(service*** __restrict__ services, char* __restrict__ serviceName, int memBytes) {
+__attribute__((hot)) int setMemoryLimit(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, int memBytes) {
     __asm__ volatile (
         "sfence"
         :
@@ -56,13 +56,16 @@ __attribute__((hot)) int setMemoryLimit(service*** __restrict__ services, char* 
             if (__builtin_expect(SET_MEM_LIMIT(serviceName, pid, memBytes) != 0, 0)) {
                 return -1;
             }
+            if (__builtin_expect(createLimit(limits, serviceName, 0, memBytes) != 0, 0)) {
+                return -1;
+            }
             return 0;
         }
     }
 }
 
 
-__attribute__((hot)) int setMemoryLimit_F_LRG(service*** __restrict__ services, char* __restrict__ serviceName, __uint64_t memBytes) {
+__attribute__((hot)) int setMemoryLimit_F_LRG(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, __uint64_t memBytes) {
     __asm__ volatile (
         "sfence"
         :
@@ -83,13 +86,16 @@ __attribute__((hot)) int setMemoryLimit_F_LRG(service*** __restrict__ services, 
             if (__builtin_expect(SET_MEM_LIMIT(serviceName, pid, memBytes) != 0, 0)) {
                 return -1;
             }
+            if (__builtin_expect(createLimit(limits, serviceName, 0, (__uint128_t)memBytes) != 0, 0)) {
+                return -1;
+            }
             return 0;
         }
     }
 }
 
 
-__attribute__((hot)) int setMemoryLimit_F_EXTR(service*** __restrict__ services, char* __restrict__ serviceName, __uint128_t memBytes) {
+__attribute__((hot)) int setMemoryLimit_F_EXTR(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, __uint128_t memBytes) {
     __asm__ volatile (
         "sfence"
         :
@@ -108,6 +114,9 @@ __attribute__((hot)) int setMemoryLimit_F_EXTR(service*** __restrict__ services,
                 return 0;
             }
             if (__builtin_expect(SET_MEM_LIMIT(serviceName, pid, memBytes) != 0, 0)) {
+                return -1;
+            }
+            if (__builtin_expect(createLimit(limits, serviceName, 0, (__uint128_t)memBytes) != 0, 0)) {
                 return -1;
             }
             return 0;

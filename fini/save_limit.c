@@ -78,7 +78,10 @@ __attribute__((hot)) int saveLimits(limit*** limits) {
     if (__builtin_expect((limits == NULL || *limits == NULL) && numberOfResLimits != 0, 0)) {
         return -1;
     }
-    if (__builtin_expect(numberOfResLimits == 0, 0)) eraseData();
+    if (__builtin_expect(numberOfResLimits == 0, 0)) {
+        if (__builtin_expect(eraseData() != 0, 0)) return -1;
+        return 0;
+    }
     char* dataToWrite = NULL;
     _Bool first = true;
     int dataSize = 0;
@@ -87,7 +90,7 @@ __attribute__((hot)) int saveLimits(limit*** limits) {
         limit* currentLimit = (*limits)[i];
         if (__builtin_expect(first, 0)) {
             size_t size = snprintf(NULL, 0, "%s^%s#%li\n", currentLimit->name, format_128_t(currentLimit->memory), currentLimit->cpu);
-            if (__builtin_expect(size <= -1, 0)) {
+            if (__builtin_expect(size <= 0, 0)) {
                 perror("failed to calculate size of single data of limit string!\n");
                 exit_program(-1)
             }
@@ -99,8 +102,9 @@ __attribute__((hot)) int saveLimits(limit*** limits) {
             snprintf(tmp, size + 1, "%s^%s#%li\n", currentLimit->name, format_128_t(currentLimit->memory), currentLimit->cpu);
             dataToWrite = tmp;
             dataSize += size;
+            first = false;
         } else {
-            size_t size = snprintf(NULL, 0, "%s%s^%s#%li\n", dataToWrite, currentLimit->name, format_128_t(currentLimit->memory), currentLimit->cpu);
+            size_t size = snprintf(NULL, 0, "%s%s^%s#%li\n", dataToWrite, currentLimit->name, currentLimit->name, format_128_t(currentLimit->memory), currentLimit->cpu);
             if (__builtin_expect(size <= -1, 0)) {
                 perror("failed to calculate size of single data of limit string!\n");
                 exit_program(-1)
@@ -110,7 +114,7 @@ __attribute__((hot)) int saveLimits(limit*** limits) {
                 perror("failed to allocate memory for single limit string!\n");
                 exit_program(-1)
             }
-            snprintf(currentData, size + 1, "%s%s^%s#%li\n", dataToWrite, currentLimit->name, format_128_t(currentLimit->memory), currentLimit->cpu);
+            snprintf(currentData, size + 1, "%s%s^%s#%li\n", dataToWrite, currentLimit->name, currentLimit->name, format_128_t(currentLimit->memory), currentLimit->cpu);
             char* beforeData = dataToWrite;
             dataToWrite = currentData;
             free(beforeData);
@@ -125,7 +129,9 @@ __attribute__((hot)) int saveLimits(limit*** limits) {
         : "memory"
     );
     if (__builtin_expect(writeData(dataToWrite, dataSize) != 0, 0)) {
+        free(dataToWrite);
         return -1;
     }
+    free(dataToWrite);
     return 0;
 }

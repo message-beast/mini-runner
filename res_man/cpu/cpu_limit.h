@@ -22,11 +22,11 @@ __attribute__((hot)) int limitCpuAndMemory(char* serviceName, __uint32_t service
 
 
 
-__attribute__((hot)) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint128_t memBytes);
+__attribute__((hot)) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint128_t memBytes);
 
 
-__attribute__((hot)) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint64_t memBytes);
+__attribute__((hot)) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint64_t memBytes);
 
 
 
-__attribute__((hot)) int setCpuResourceLimit(service*** __restrict__ services, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, int  memBytesStr);
+__attribute__((hot)) int setCpuResourceLimit(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, int  memBytesStr);
