@@ -78,8 +78,8 @@ _Bool reformatLimits = false;
 
 __attribute__((constructor))
 void init() {
-    if (!fileExists("data/updateStatus")) {
-        if (initiateMemoryPtr() == 0) {
+    if (__builtin_expect(!fileExists(__FILE_UPDATE_STATUS), 0)) {
+        if (__builtin_expect(initiateMemoryPtr() != 0, 0)) {
             DEBUG
             exit_program(-1)
         }
@@ -177,6 +177,9 @@ int main(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             displayHelp();
+            return 0;
+        } else if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) {
+            printf("MRN VERSION: %s\nrun mrn --help for help message!\n", __MRN_VERSION__);
             return 0;
         } else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--max") == 0) {
             int numberofProcesses = atoi(argv[i+1]);

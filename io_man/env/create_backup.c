@@ -12,8 +12,8 @@
 #include "../../base/config.h"
 #include "../base.h"
 
-#define __ENV_COPY_FILE_PATH "data/env.backup"
-#define __ENV_FILE_PATH "data/env"
+#define __ENV_COPY_FILE_PATH __FILE_ENV_COPY
+#define __ENV_FILE_PATH __FILE_ENV
 #define true 1
 
 

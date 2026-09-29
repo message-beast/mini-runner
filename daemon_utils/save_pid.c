@@ -10,6 +10,7 @@
 #include <signal.h>
 #include "../io_man/job_daemon/create_backup.h"
 #include "../io_man/job_daemon/apply_backup.h"
+#include "../base/config.h"
 
 void handlePidBackup(int signal) {
     if (__builtin_expect(applyJobDaemonPidBackup() != 0, 0)) {
@@ -21,7 +22,7 @@ void handlePidBackup(int signal) {
 
 
 OPT(hot) int setPid(__uint32_t pid) {
-    int fd = open("data/job_daemon_pid", O_CREAT | O_WRONLY, 0644);
+    int fd = open(__FILE_JOB_DAEMON_PID, O_CREAT | O_WRONLY, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open job daemon pid file!\n");
         return -1;

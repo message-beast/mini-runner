@@ -107,10 +107,10 @@ static inline __attribute__((always_inline, hot)) int cloneRepo(service** servic
             printf("command to run: %s\n", command);
             if(system(command) != 0) {
                 ssize_t written = write(pipeFd[1], "f", 1);
-                CHECK_WRITE_PR(pipeFd[1], written, 7)
+                CHECK_WRITE_PR(pipeFd[1], written, 1)
             } else {
                 ssize_t written = write(pipeFd[1], "s", 1);
-                CHECK_WRITE_PR(pipeFd[1], written, 8)    
+                CHECK_WRITE_PR(pipeFd[1], written, 1)    
             }
             close(pipeFd[1]);
             free(command);

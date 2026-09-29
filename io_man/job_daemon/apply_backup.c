@@ -1,8 +1,8 @@
 #include "../base.h"
+#include "../../base/config.h"
 
-
-#define _JOB_DAEMON_PID_FILE "data/job_daemon_pid"
-#define _JOB_DAEMON_PID_COPY_FILE "data/job_daemon_pid.backup"
+#define _JOB_DAEMON_PID_FILE __FILE_JOB_DAEMON_PID
+#define _JOB_DAEMON_PID_COPY_FILE __FILE_JOB_DAEMON_PID_COPY
 
 int applyJobDaemonPidBackup() {
     if (__builtin_expect(doBackup(_JOB_DAEMON_PID_COPY_FILE, _JOB_DAEMON_PID_FILE) != 0, 0)) {

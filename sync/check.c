@@ -8,12 +8,13 @@
 #include <sys/stat.h>
 #include <string.h>
 #include "../arch/opt.h"
+#include "../base/config.h"
 #define true 1
 #define false 0
 
 
 OPT(hot) int isJobFree() {
-    int fd = open("data/jobs_sync", O_CREAT | O_RDWR, 0644);
+    int fd = open(__FILE_JOBS_SYNC, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("filed to open jobs sync file!\n");
         return -1;
@@ -22,6 +23,9 @@ OPT(hot) int isJobFree() {
     if (__builtin_expect(fstat(fd, &st) != 0, 0)) {
         perror("fstat failed on jobs sync file!\n");
         return -1;
+    }
+    if (__builtin_expect(st.st_size == 0, 0)) {
+        return true;
     }
     char* data = mmap(NULL, st.st_size, PROT_WRITE | PROT_READ, MAP_SHARED, fd, 0);
     if (__builtin_expect(data == MAP_FAILED, 0)) {

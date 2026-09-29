@@ -13,7 +13,7 @@
 #include "../io_man/env/apply_backup.h"
 #include <sys/signal.h>
 
-#define ENV_FILE "data/env"
+#define ENV_FILE __FILE_ENV
 #define false 0
 #define true 1
 

@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <string.h>
+#include "../base/config.h"
 
 static inline __attribute__((always_inline, hot)) int lockJob(int fd) {
     char* content = "locked";
@@ -64,7 +65,7 @@ static inline __attribute__((always_inline, hot)) int unlockJob(int fd) {
 
 
 __attribute__((hot)) int syncJob(_Bool lock) {
-    int fd = open("data/jobs_sync", O_CREAT | O_RDWR, 0644);
+    int fd = open(__FILE_JOBS_SYNC, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open job sync file!\n");
         return -1;

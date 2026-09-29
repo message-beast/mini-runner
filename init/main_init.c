@@ -16,7 +16,7 @@
 #include "../arch/opt.h"
 //#define DEBUG_MODE 1
 __attribute__((cold)) int initiateMemoryPtr() {
-    int sharedUpdateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644);
+    int sharedUpdateStatusFileFd = open(__FILE_UPDATE_STATUS, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(sharedUpdateStatusFileFd == -1, 0)) {
         perror("can not open the update status file!\n");
         exit_program(-1)
@@ -28,7 +28,7 @@ __attribute__((cold)) int initiateMemoryPtr() {
     }
 
     if (__builtin_expect(ftruncate(sharedUpdateStatusFileFd, strlen("idle")) != 0, 0)) {
-        printf("ftruncate failed!\n");
+        perror("ftruncate failed!\n");
         exit_program(-1)
     }
     char* data = mmap(NULL, strlen("idle"), PROT_READ | PROT_WRITE, MAP_SHARED, sharedUpdateStatusFileFd, 0);
@@ -68,7 +68,7 @@ OPT(hot) int loadServices(service*** services) {
         }
         (*services) = tmp;
     }
-    int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644);
+    int projectsFileFd = open(__FILE_PROJECTS, O_CREAT | O_RDONLY, 0644);
     if (__builtin_expect(projectsFileFd == -1, 0)) {
         perror("can not open the projects file!\n");
         exit_program(-1)
@@ -82,7 +82,7 @@ OPT(hot) int loadServices(service*** services) {
     if (__builtin_expect(st.st_size == 0, 0)) {
         return 0;
     }
-    char* data = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, projectsFileFd, 0);
+    char* data = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, projectsFileFd, 0);
     if (__builtin_expect(data == MAP_FAILED, 0)) {
         perror("map failed for projects file!\n");
         close(projectsFileFd);

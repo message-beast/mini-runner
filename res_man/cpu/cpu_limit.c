@@ -143,7 +143,6 @@ OPT(hot) int setCpuResourceLimit(service*** __restrict__ services, limit*** __re
                 fprintf(stderr, "failed to apply limits for guranteed persistency!\n");
                 return -1;
             }
-            printf("###DEBUG %s: %i\n", __FILE__, __LINE__);
             return 0;
         }
     }

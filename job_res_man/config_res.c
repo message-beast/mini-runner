@@ -15,6 +15,7 @@
 #include "../io_man/jobs_res_limit/mm/apply_backup.h"
 #include "../io_man/jobs_res_limit/cpu/create_backup.h"
 #include "../io_man/jobs_res_limit/cpu/apply_backup.h"
+#include "../base/config.h"
 
 void hanldeRsMmbackup (int signal) {
     if (__builtin_expect(applyJobRsMmLimitBackup() != 0, 0)) {
@@ -36,7 +37,7 @@ void handleRsCpuBackup(int signal) {
 DECLARE_128_T
 
 static inline __attribute__((always_inline, hot)) int limitCpuOnly(__uint64_t cpuLimit) {
-    int fd = open("data/job_cpu_limit", O_CREAT | O_WRONLY, 0644);
+    int fd = open(__FILE_JOB_CPU_LIMIT, O_CREAT | O_WRONLY, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open job cpu limit file!\n");
         return -1;
@@ -82,7 +83,7 @@ static inline __attribute__((always_inline, hot)) int limitCpuOnly(__uint64_t cp
 
 
 static inline __attribute__((always_inline, hot)) int limitMemOnly(__uint128_t memLimit) {
-    int fd = open("data/job_mem_limit", O_CREAT | O_WRONLY, 0644);
+    int fd = open(__FILE_JOB_MEM_LIMIT, O_CREAT | O_WRONLY, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open job memory limit file!\n");
         return -1;

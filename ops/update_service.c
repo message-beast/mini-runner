@@ -31,7 +31,7 @@ void updateFileBackup(int signal) {
 }
 
 static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char* dataToWrite) {
-    int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644);
+    int updateStatusFileFd = open(__FILE_UPDATE_STATUS, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(updateStatusFileFd == -1, 0)) {
         perror("can not open update status file!\n");
         return -1;

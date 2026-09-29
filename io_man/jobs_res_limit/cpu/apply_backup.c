@@ -9,8 +9,10 @@
 #include <sys/mman.h>
 #include "../../../basic.h"
 #include "../../base.h"
-#define _JOB_CPU_LIMIT_FILE "data/job_cpu_limit"
-#define _JOB_CPU_LIMIT_COPY_FILE "data/job_cpu_limit.backup"
+#include "../../../base/config.h"
+
+#define _JOB_CPU_LIMIT_FILE __FILE_JOB_CPU_LIMIT
+#define _JOB_CPU_LIMIT_COPY_FILE __FILE_JOB_CPU_LIMIT_COPY
 
 
 static inline __attribute__((always_inline, hot)) int applyJobLmBackup(char* cpuLimitBuff) {

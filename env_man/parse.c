@@ -11,7 +11,7 @@
 #include "../basic.h"
 #include "load_env.h"
 #include <string.h>
-#define ENV_FILE "data/env"
+#define ENV_FILE __FILE_ENV
 
 static inline __attribute__((always_inline, hot, aligned(64))) char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;

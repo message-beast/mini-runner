@@ -8,8 +8,10 @@
 #include "../base/structure.h"
 #include <stdlib.h>
 #include <sys/stat.h>
+#include "../base/config.h"
+
 __attribute__((hot)) job_rs_limit* getLimit() {
-    int fd = open("data/job_mem_limit", O_CREAT | O_RDONLY, 0644);
+    int fd = open(__FILE_JOB_MEM_LIMIT, O_CREAT | O_RDONLY, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open job memory limit file!\n");
         return NULL;
@@ -23,7 +25,7 @@ __attribute__((hot)) job_rs_limit* getLimit() {
     char memLimit[130];
     ssize_t readBytes = read(fd, memLimit, 129);
     memLimit[readBytes] = '\0';
-    fd = open("data/job_cpu_limit", O_CREAT | O_RDONLY, 0644);
+    fd = open(__FILE_JOB_CPU_LIMIT, O_CREAT | O_RDONLY, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open job cpu limit file!\n");
         return NULL;

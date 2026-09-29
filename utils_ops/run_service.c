@@ -142,9 +142,9 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
 
 
 static inline __attribute__((always_inline, hot)) _Bool updateAvialable() {
-    int updateStatusFileFd = open("data/updateStatus", O_CREAT | O_RDWR, 0644);
+    int updateStatusFileFd = open(__FILE_UPDATE_STATUS, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(updateStatusFileFd == -1, 0)) {
-        perror("can not open data/updateStatus file!\n");
+        perror("can not open /usr/lib/mrn/data/updateStatus file!\n");
         return 0;
     }
     struct stat st;

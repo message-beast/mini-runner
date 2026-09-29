@@ -12,8 +12,9 @@
 #include <stdlib.h>
 #include "../res_man/utils/helper.h"
 #include "../basic.h"
+#include "../base/config.h"
 
-#define FILE "data/limits"
+#define FILE __FILE_LIMITS
 
 #define true 1
 #define false 0

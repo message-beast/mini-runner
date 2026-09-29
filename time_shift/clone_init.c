@@ -40,7 +40,7 @@ OPT(hot) int loadCloneServices(service*** services) {
         }
         (*services) = tmp;
     }
-    int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644);
+    int projectsFileFd = open(__FILE_PROJECTS, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(projectsFileFd == -1, 0)) {
         perror("can not open the projects file!\n");
         exit_program(-1)

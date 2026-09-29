@@ -13,6 +13,8 @@
 #include "../basic.h"
 #include <string.h>
 #include "../arch/opt.h"
+#include "../base/config.h"
+
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;
     char* finalString = malloc(length + 1);
@@ -37,9 +39,9 @@ OPT(hot) int loadJobs(job*** jobs) {
         (*jobs) = tmp;
         tmp = NULL;
     }
-    int jobsFileFd = open("data/jobs", O_CREAT | O_RDWR, 0644);
+    int jobsFileFd = open(__FILE_JOBS, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(jobsFileFd == -1, 0)) {
-        perror("failed to open data/jobs file!\n");
+        perror("failed to open /usr/lib/mrn/data/jobs file!\n");
         exit_program(-1)
     }
     struct stat st;

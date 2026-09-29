@@ -56,7 +56,7 @@ OPT(hot) int save_services(service*** services) {
     if (__builtin_expect(!findToSave && numberOfProjects > 0, 0)) {
         return 0;
     }
-    int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644);
+    int projectsFileFd = open(__FILE_PROJECTS, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(projectsFileFd == -1, 0)) {
         perror("failed to open projects file!\n");
         exit_program(-1)

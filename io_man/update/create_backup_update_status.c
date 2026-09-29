@@ -7,9 +7,11 @@
 #include <sys/mman.h>
 #include <stdio.h>
 #include "../../basic.h"
-#define _UPDATE_STATUS_FILE "data/updateStatus"
-#define _UPDATE_STATUS_FILE_COPY "data/updateStatus.backup"
 #include "../base.h"
+#include "../../base/config.h"
+
+#define _UPDATE_STATUS_FILE __FILE_UPDATE_STATUS
+#define _UPDATE_STATUS_FILE_COPY __FILE_UPDATE_STATUS_COPY
 
 
 

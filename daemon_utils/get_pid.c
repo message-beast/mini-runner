@@ -8,9 +8,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../arch/opt.h"
+#include "../base/config.h"
 
 OPT(hot) __uint32_t getDaemonPid() {
-    int fd = open("data/job_daemon_pid", O_CREAT | O_RDONLY, 0644);
+    int fd = open(__FILE_JOB_DAEMON_PID, O_CREAT | O_RDONLY, 0644);
     if (__builtin_expect(fd == -1, 0)) {
         perror("failed to open job deamon pid file!\n");
         return -1;

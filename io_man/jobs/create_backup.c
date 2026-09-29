@@ -11,8 +11,8 @@
 #include "../../base/config.h"
 #include "../base.h"
 
-#define __JOBS_COPY_FILE_PATH "data/jobs.backup"
-#define __JOBS_FILE_PATH "data/jobs"
+#define __JOBS_COPY_FILE_PATH __FILE_JOBS_COPY
+#define __JOBS_FILE_PATH __FILE_JOBS
 #define true 1
 
 

@@ -13,8 +13,9 @@
 #include <stdlib.h>
 #include "../utils_ops/load_limit.h"
 #include "../res_man/utils/helper.h"
+#include "../base/config.h"
 
-#define FILE "data/limits"
+#define FILE __FILE_LIMITS
 
 DECLARE_128_T
 

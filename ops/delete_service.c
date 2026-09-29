@@ -295,7 +295,7 @@ int delete_service_force(service*** __restrict__ services, char* __restrict__ se
         }
     }
     deleteFromDisk:
-        int projectsFileFd = open("data/projects", O_CREAT | O_RDWR, 0644);
+        int projectsFileFd = open(__FILE_PROJECTS, O_CREAT | O_RDWR, 0644);
         if (projectsFileFd == -1) {
             perror("failed to open projects file!\n");
             exit_program(-1)

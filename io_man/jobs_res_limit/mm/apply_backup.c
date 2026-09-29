@@ -9,9 +9,10 @@
 #include <sys/mman.h>
 #include "../../../basic.h"
 #include "../../base.h"
+#include "../../../base/config.h"
 
-#define _JOB_MEM_LIMIT_FILE "data/job_mem_limit"
-#define _JOB_MEM_LIMIT_COPY_FILE "data/job_mem_limit.backup"
+#define _JOB_MEM_LIMIT_FILE __FILE_JOB_MEM_LIMIT
+#define _JOB_MEM_LIMIT_COPY_FILE __FILE_JOB_MEM_LIMIT_COPY
 
 
 int applyJobRsMmLimitBackup() {

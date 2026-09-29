@@ -9,9 +9,10 @@
 #include <string.h>
 #include "../../basic.h"
 #include "../base.h"
+#include "../../base/config.h"
 
-#define _UPDATE_STATUS_FILE "data/updateStatus"
-#define _UPDATE_STATUS_COPY_FILE "data/updateStatus.backup"
+#define _UPDATE_STATUS_FILE __FILE_UPDATE_STATUS
+#define _UPDATE_STATUS_COPY_FILE __FILE_UPDATE_STATUS_COPY
 
 
 int applyBackupUpdateStatus() {

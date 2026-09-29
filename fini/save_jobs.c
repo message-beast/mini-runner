@@ -17,6 +17,7 @@
 #include "../arch/opt.h"
 #include "../io_man/jobs/create_backup.h"
 #include "../io_man/jobs/apply_backup.h"
+#include "../base/config.h"
 
 
 #define true 1
@@ -33,7 +34,7 @@ static void handleJobBackup(int signal) {
 
 
 static inline __attribute__((always_inline, hot)) int writeData(char* dataTobeWritten) {
-    int jobsFileFd = open("data/jobs", O_CREAT | O_RDWR, 0644);
+    int jobsFileFd = open(__FILE_JOBS, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(jobsFileFd == -1, 0)) {
         perror("failed to open jobs file!\n");
         return -1;
@@ -88,7 +89,7 @@ static inline __attribute__((always_inline, hot)) int writeData(char* dataTobeWr
 }   
 
 static inline __attribute__((always_inline, hot)) int removeContentFromJobsFile() {
-    int jobsFileFd = open("data/jobs", O_CREAT | O_RDWR, 0644);
+    int jobsFileFd = open(__FILE_JOBS, O_CREAT | O_RDWR, 0644);
     if (__builtin_expect(jobsFileFd == -1, 0)) {
         perror("failed to open jobs file!\n");
         return -1;

@@ -12,8 +12,8 @@
 #include "../../base/config.h"
 #include "../base.h"
 
-#define __SERVICES_COPY_FILE_PATH "data/projects.backup"
-#define __SERVICES_FILE_PATH "data/projects"
+#define __SERVICES_COPY_FILE_PATH __FILE_PROJECTS_COPY
+#define __SERVICES_FILE_PATH __FILE_PROJECTS
 
 
 int applyBackup() {
