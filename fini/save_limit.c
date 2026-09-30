@@ -13,6 +13,9 @@
 #include "../res_man/utils/helper.h"
 #include "../basic.h"
 #include "../base/config.h"
+#include "../io_man/limits/create_backup.h"
+#include "../io_man/limits/apply_backup.h"
+#include <signal.h>
 
 #define FILE __FILE_LIMITS
 
@@ -20,6 +23,14 @@
 #define false 0
 
 DECLARE_128_T
+
+
+static void handleBackup(int signal) {
+    if (__builtin_expect(applyBackupLimits() != 0, 0)) {
+        perror("failed to apply snapshoots!\n");
+    }
+}
+
 
 static inline __attribute__((always_inline, nonnull_if_nonzero(1, 2), access(read_only, 1, 2))) int writeData(char* content, int len) {
     int fd = open(FILE, O_CREAT | O_RDWR, 0644);
@@ -32,6 +43,15 @@ static inline __attribute__((always_inline, nonnull_if_nonzero(1, 2), access(rea
         perror("fstat failed on limits file!\n");
         goto fail;
     }
+    if (__builtin_expect(createBackupLimit() != 0, 0)) {
+        perror("can not create snapshot before making a changes in limits!\n");
+        return -1;
+    }
+    struct sigaction sig;
+    sig.sa_handler = handleBackup;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
     if (__builtin_expect(ftruncate(fd, len) != 0, 0)) {
         perror("ftruncate failed on limits file!\n");
         goto fail;
@@ -64,6 +84,15 @@ static inline __attribute__((always_inline)) int eraseData() {
         perror("fstat failed on limits file!\n");
         goto fail;
     }
+    if (__builtin_expect(createBackupLimit() != 0, 0)) {
+        perror("can not create snapshot before making a changes in limits!\n");
+        return -1;
+    }
+    struct sigaction sig;
+    sig.sa_handler = handleBackup;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+    sigaction(SIGINT, &sig, NULL);
     if (__builtin_expect(ftruncate(fd, 0) != 0, 0)) {
         perror("ftruncate failed on limits file!\n");
         goto fail;
