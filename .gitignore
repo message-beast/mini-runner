@@ -10,3 +10,4 @@ syscalls/*/*/*.o
 compile_guide/compile_guide
 mrn-run
 sample/
+arch/*/features.h
