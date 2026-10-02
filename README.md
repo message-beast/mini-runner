@@ -53,4 +53,5 @@ if you already installed MRN it is better to run --help message or check out the
 
 ### Author:
 Name: Message Beast (Melikt Belay)
-#### Message: I created mrn because paas are too expensive and waste half of the resource you used on them. you pay for their stuff than what you actually used and i heared something called VPS so i just wanna create a program that is going to manage the machine and gives me like paas environment.
+#### Message: 
+I created mrn because paas are too expensive and waste half of the resource you used on them. you pay for their stuff than what you actually used and i heared something called VPS so i just wanna create a program that is going to manage the machine and gives me like paas environment.
