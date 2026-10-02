@@ -1,0 +1,59 @@
+Welcome to mrn (Mini-Runner/Minimal-Resource-Usage Runner) built to take any raw linux to paas tier managment and supports both 32bit and 64 bt systems with intel, amd and arm processors and supports both cgroup v1 and cgroup v2,which also gives the full paas program you need with a full controll over the machine
+
+ Developed by Melikt Belay!
+
+Here is service uses cases you can make:
+
+	mrn add <github repo> -- this adds the github repo to your process and then update them when the update is going!
+	mrn remove <service name> -- this removes the service
+	mrn stop -- this stops all running processes of your miroservices and macroservices
+	mrn run <bash/mrn to run> --this just runs your bash on linux vps to start some services or servers
+	mrn update <service> --this updates and pull github requests if it fails you just do the merge your self
+		you can use --stop to stop running the service from running while updating or just use the default which has do down time
+	mrn stop <service name> -- this stops the service by its name
+	mrn list -- this lists all the services
+	mrn find <service name> -- this finds service by its name pattern matching, it is developed if you incase forget the name of your service
+		 --sort this sorts the results depending on their name matching score
+	mrn run <service name> -- this runs your service but you can specify the running file after it
+		 --example: mrn run myservice run.sh
+			    mrn run myservice run.sh --attach (attach is if you are looking to interact your service)
+	mrn rename <old service name> <new service name> -- this changes the name of your service also renames the service program directory
+	mrn neglect-updates --this just ignores if the updates avialable or not  and back to normal state to run your services
+	mrn restart <service name> -- this restarts the services that is running/not
+		--example mrn restart myservice
+			  mrn restart myservice --attach (attach is just if you wanna test it interacting with it)
+	mrn rename <old service name> <new name> -- this renames all the settings to your new name including cgroups
+	mrn set-limit <service name> -cpu <number of cores> -mem <amount>
+		for above 4gb you must use --type supported types are:
+		standard -- the default
+		custom -- this is for gbs
+		extrene -- this is for teara and above
+			example: mrn set-limit myservice -cpu 2.4 -mem 2g -- this sets the resource limit for service "my service" about 2.4 cores and 2gb of memory
+	mrn res-usage <service name> -- this shows the resource using while typing that by the service
+	mrn res-limit <service name> this shows the resource limits of the service
+
+ major use cases for jobs:
+
+	mrn add-job <job name> <runnable file> <interval time> -- this adds a job to mrn
+	mrn remove-job <job name> --this removes a job from job lists
+	mrn warmup-jobs -- you don't have to run this mrn does that for you automatically when the device turned on
+	mrn config job --max-cpu <number of cores> | -mc <number of cores> --max-memory <amount> | -mm <amount> -- this sets the job runner how much resource to use
+	mrn show-job-limit -- this shows the mrn job configuration
+	mrn restart-jobs -- this restarts the job runner if your jobs weren't running
+	mrn stop-jobs -- if you wanna to kill the job runner you can do this
+	mrn job-status -- this tells you weather the job runner is running or not
+	mrn list-jobs --this lists all jobs and details
+
+major use case for time-shift:
+
+	mrn time-shift create --this creates and updates the current time-shift to be save as the current state
+	mrn time-shift apply -- this applies the time shift you have
+major use cases for environment variables
+
+	mrn add-env <service name> <variable> <value> -- this adds the variable and its value to the service
+	mrn show-env <service name> <variable> -- this shows the environment variable, value and where it is avialable
+	mrn remove-env <service name> <variable> -- this removes the environment variable from service
+	mrn update-env <service name> <variable> <new value> -- this updates the service environment variable to new value
+
+About MRN
+	MRN is a well written c program that supports services, isolation, resource controll, signal managment, environment isolation, time shift, jobs, mrn-run (mrn interpreted language | alternative to bash)

@@ -1,0 +1,53 @@
+# MRN (MINI-RUNNER/minimal-resource-usage-runner)
+mrn is a free software built up on a linux kernel to manage deployments and use the linux as the platform and it involved a lot of things and mini is for resource usage not for what it does
+
+### REQUIREMENTS
+#### Kernel version >= 2.6.24
+#### gcc
+#### nasm
+
+### MRN CAPABILITIES
+mrn is powerfull software that just removes uncessary overhead and it is simple to use and gives much controll to the user. the things that mrn has:
+#### -> services managment
+#### -> jobs managment
+#### -> resource controll
+#### -> resource monitoring
+#### -> time-shift
+#### -> environment variable isolation
+
+### MRN DESIGN PHILOSOPHY
+#### -> mrn is setted as for developers and devops who uses linux -> linux mechanisims but if you are not using any os dependencies you can use mrn in deployment.
+#### no single point of failure
+-- means that the services are not being supervised they are only launch if you launch or kill you're the manager MRN can't decide to kill your program on random teusday or restart it if you wanna get to how MRN solves the point of failure and to be adapted to MRN environment it is better to see how you can use mrn. [More info](https://github.com/message-beast/mini-runner/Documentation/usage.txt)
+#### services are integrated to github
+-- means that the service controll desicision and for their cloning diretories are determined by MRN and also if you wanna update mrn must know about it so services are basically integrated to github but if you have a problem updating like network failures or something you handle mrn doesn't handle it. it is not its job
+### jobs are one time running processes
+-- means that jobs must always be finite and run in a time what you estimate you basically tells mrn to add a job to your mrn so it can run it in some time interval. you can use jobs for example for database backups or something you wanna run based on some time interval
+### jobs are given to you
+-- means that mrn doesn't care where your code is from github or from your vps it only cares about where it is found and it does even delete that folder if you even delete that directory jobs and services are handled differently in MRN philosophy
+### always state is snapshooted
+-- means that mrn do automatic snapshoot of the configuration that it is goingto apply the changes you make. so you don't lose anything by existing the program on sudden shutdown by for example adding services or by doing ctrl + c it always handles the signals to backup to normal state
+### MRN Time shift
+-- means that you can manually create a snap shoot of the internal files if you are not sure that the machine can't go down while making mrn changes so you just create it ,manually and apply it manually if something strong forces mrn to be killed. check out the docs for more info
+### MRN-RUN alternative to bash
+-- means that MRN does have its own execution program you can use it is not implemented by default and the interpreter works 100% fine but the services supports bash by default. MRN has mrn-run interperter because having bash can slow down your services/jobs startup so in mrn-run you just type the commands that you run in normal bash and you write it down line by line so mrn executes it line by line and mrn-run doesn't support any of bash languages features it is more tend to be running a binary with its arguments line by line
+### MRN should be compiled in user machine
+-- this is a design choice that instead of just distributing binary we ship the source and you just run instllation binary that is going to work. and this is choosen because if you even run infrastrutre on mrn it can settup milllions of services in seconds and for that for specific calculations we use special cpu features that is going to be selected at the installation time and creates a header file for describing your cpu
+### MRN ARCH
+-- mrn is currently works on x86 64 and 32 bit systems but for ARM it is being developing for things like memory barriers, inline assembly and syscalls
+### MRN auto restart
+-- this feature is being developed and it just be the most important one to auto restart both jobs and services for those whom were running
+### MRN runs as a sudo
+-- MRN follows a specific kind of execution state that it loads states before your programs begins and apply it if your program makes a change after mrn main thread completed. so the internal mrn files lives in /usr/lib/mrn that you are going to be forced to use sudo for mrn and it makes sense for a depolyment
+### No hellmet
+-- MRN doesn't stop you from running wrong binaries or harmfull things it is just does its job if you don't know what you are running the problem is yours not mrn's
+### MRN is independet of systemd
+-- means that it is not systemd services it handles the state when the machine turns on by its own and launches systemd before it so you can use the setted up environment for many cases you need that for example NEtworkManager is a systemd service systemd must be launched before your programs and if you doesn't use systemd you can configure the entry program to use another binary that runs as mrn if mrn doesn't find anything to run it is just runs your programmers assuming that you don't want any user space things.
+## MRN CURRENT STATUS
+mrn is still in development and its work is 97% done what remains is to write installation program and some little bit footage work for arm processors if you wanna compile and configure manually please follow [docs for compiling MRN](https://github.com/message-beast/mini-runner/Documentation/compiling-guide.txt)
+## Getting started
+if you already installed MRN it is better to run --help message or check out the [Documentation](https://github.com/message-beast/mini-runner/Documentation/usage.txt)
+
+### Author:
+Name: Message Beast (Melikt Belay)
+Message: I created mrn because paas are too expensive and waste half of the resource you used on them you pay for their stuff than what you actually used and i heared something called VPS so i just wanna create a program that is going to manage the machine and gives me like paas environment.

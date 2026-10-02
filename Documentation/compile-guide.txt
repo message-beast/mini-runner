@@ -1,0 +1,16 @@
+to compile mrn and configure it manually you just need to do some important things
+-> make sure your machine is either intel or amd
+-> create a folder named "mrn" in /usr/lib
+-> create a folder named "data" in /usr/lib/mrn
+-> create a folder named "backup" in /usr/lib/mrn
+-> go to mini-runner/syscalls/x86/64-bit/
+-> run all make targets those are:
+- make compile-close
+- make compile-fstatat
+- make compile-getdents64
+- make compile-openat
+- make compile-unlinkat
+- make compile-rmdir
+-> if your system is 32 bit you better to go mini-runner/syscalls/x86/32-bit/ and runs the targets
+-> after all make runs you just run make comile in to mini-runner/
+-> after that you can use mrn or controbute to it

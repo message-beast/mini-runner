@@ -5,4 +5,5 @@
     #define ARCH X86_64
 #elif defined(__i386__) || defined(_M_IX86)
     #define ARCH X86_32
+
 #endif
