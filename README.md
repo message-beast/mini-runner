@@ -18,7 +18,7 @@ mrn is powerfull software that just removes uncessary overhead and it is simple 
 ### MRN DESIGN PHILOSOPHY
 #### -> mrn is setted as for developers and devops who uses linux -> linux mechanisims but if you are not using any os dependencies you can use mrn in deployment.
 #### no single point of failure
--- means that the services are not being supervised they are only launch if you launch or kill you're the manager MRN can't decide to kill your program on random teusday or restart it if you wanna get to how MRN solves the point of failure and to be adapted to MRN environment it is better to see how you can use mrn. [More info](https://github.com/message-beast/mini-runner/Documentation/usage.txt)
+-- means that the services are not being supervised they are only launch if you launch or kill you're the manager MRN can't decide to kill your program on random teusday or restart it if you wanna get to how MRN solves the point of failure and to be adapted to MRN environment it is better to see how you can use mrn. [More info](https://github.com/message-beast/mini-runner/blob/master/Documentation/usage.txt)
 #### services are integrated to github
 -- means that the service controll desicision and for their cloning diretories are determined by MRN and also if you wanna update mrn must know about it so services are basically integrated to github but if you have a problem updating like network failures or something you handle mrn doesn't handle it. it is not its job
 ### jobs are one time running processes
@@ -44,9 +44,9 @@ mrn is powerfull software that just removes uncessary overhead and it is simple 
 ### MRN is independet of systemd
 -- means that it is not systemd services it handles the state when the machine turns on by its own and launches systemd before it so you can use the setted up environment for many cases you need that for example NEtworkManager is a systemd service systemd must be launched before your programs and if you doesn't use systemd you can configure the entry program to use another binary that runs as mrn if mrn doesn't find anything to run it is just runs your programmers assuming that you don't want any user space things.
 ## MRN CURRENT STATUS
-mrn is still in development and its work is 97% done what remains is to write installation program and some little bit footage work for arm processors if you wanna compile and configure manually please follow [docs for compiling MRN](https://github.com/message-beast/mini-runner/Documentation/compiling-guide.txt)
+mrn is still in development and its work is 97% done what remains is to write installation program and some little bit footage work for arm processors if you wanna compile and configure manually please follow [docs for compiling MRN](https://github.com/message-beast/mini-runner/blob/master/Documentation/compile-guide.txt)
 ## Getting started
-if you already installed MRN it is better to run --help message or check out the [Documentation](https://github.com/message-beast/mini-runner/Documentation/usage.txt)
+if you already installed MRN it is better to run --help message or check out the [Documentation](https://github.com/message-beast/mini-runner/blob/master/Documentation/usage.txt)
 
 ### Author:
 Name: Message Beast (Melikt Belay)
