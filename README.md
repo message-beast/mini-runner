@@ -20,9 +20,9 @@ mrn is powerful software that just removes unnecessary overhead and it is simple
 
 ### MRN DESIGN PHILOSOPHY
 #### -> mrn is created for developers and devops who uses linux -> linux mechanisms but if you are not using any os dependencies you can use mrn in deployment.
-#### no single point of failure
+### no single point of failure
 -- means that the services are not being supervised. They are only launch if you launch or kill if you killed. You're the manager MRN can't decide to kill your program on random Tuesday or restart it. if you wanna get to how MRN solves the point of failure and to be adapted to MRN environment it is better to see how you can use mrn. [More info](https://github.com/message-beast/mini-runner/blob/master/Documentation/usage.txt)
-#### services are integrated to github
+### services are integrated to github
 -- means that the service control decision and their cloning directories are determined by MRN and also if you wanna update mrn must know about it. so services are basically integrated to github but if you have a problem updating like network failures or something you are going to handle it. mrn doesn't handle it. it is not its job
 ### jobs are repeatedly running finite processes
 -- means that jobs must always be finite and run in a time what you estimate you basically tells mrn to add a job to your mrn so it can run it in some time interval. you can use jobs for example for database backups or something you wanna run based on some time interval
@@ -53,4 +53,4 @@ if you already installed MRN it is better to run --help message or check out the
 
 ### Author:
 Name: Message Beast (Melikt Belay)
-Message: I created mrn because paas are too expensive and waste half of the resource you used on them. you pay for their stuff than what you actually used and i heared something called VPS so i just wanna create a program that is going to manage the machine and gives me like paas environment.
+#### Message: I created mrn because paas are too expensive and waste half of the resource you used on them. you pay for their stuff than what you actually used and i heared something called VPS so i just wanna create a program that is going to manage the machine and gives me like paas environment.
