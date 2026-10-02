@@ -1,6 +1,9 @@
 # MRN (MINI-RUNNER/minimal-resource-usage-runner)
 mrn is a free software built up on a linux kernel to manage deployments and use the linux as the platform and it involved a lot of things and mini is for resource usage not for what it does
 
+# What is MRN?
+MRN is a free software that it just turns any linux to paas and it is not a paas it is a paas like program that you install on your vps or your machines to turn them into production grade servers. for example when renting VPS you can use mrn rather than docker or systemd or anything. mrn details are listed below.
+
 ### REQUIREMENTS
 #### Kernel version >= 2.6.24
 #### gcc
