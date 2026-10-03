@@ -1,1 +1,1 @@
-echo "export PATH=$PATH:/home/ano/Desktop/mini-runner/" > ~/.bashrc && source ~/.bashrc
+echo "export PATH=$PATH:/usr/lib/mrn/bin" > ~/.bashrc && source ~/.bashrc

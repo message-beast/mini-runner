@@ -4,12 +4,12 @@ SOURCE_CODE_TW = *.c */*.c */*/*.c */*/*/*.c syscalls/x86/32-bit/*.o
 CPP_GARBAGE_DISABLING_FLAGS = -fno-exceptions -fno-asynchronous-unwind-tables -fno-unwind-tables -fomit-frame-pointer
 GEN_OPT_FLAGS = -fopenmp -pthread -lm -O2
 ASM_TYPE = -masm=intel
-
+EXECUTABLE_PATH = /usr/lib/mrn/bin/mrn
 
 compile:
-	gcc $(SOURCE_CODE) $(GEN_OPT_FLAGS) $(CPP_GARBAGE_DISABLING_FLAGS) -o mrn
+	gcc $(SOURCE_CODE) $(GEN_OPT_FLAGS) $(CPP_GARBAGE_DISABLING_FLAGS) -o $(EXECUTABLE_PATH)
 compile-for-32-bit:
-	gcc $(SOURCE_CODE_TW) -m32 $(GEN_OPT_FLAGS) $(CPP_GARBAGE_DISABLING_FLAGS) -o mrn
+	gcc $(SOURCE_CODE_TW) -m32 $(GEN_OPT_FLAGS) $(CPP_GARBAGE_DISABLING_FLAGS) -o $(EXECUTABLE_PATH) 
 run:
 	./mrn
 get-assembly:

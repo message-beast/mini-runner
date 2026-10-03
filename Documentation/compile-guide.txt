@@ -3,6 +3,7 @@ to compile mrn and configure it manually you just need to do some important thin
 -> create a folder named "mrn" in /usr/lib
 -> create a folder named "data" in /usr/lib/mrn
 -> create a folder named "backup" in /usr/lib/mrn
+-> create a folder named "bin" in /usr/lib/mrn
 -> go to mini-runner/syscalls/x86/64-bit/
 -> run all make targets those are:
 - make compile-close
