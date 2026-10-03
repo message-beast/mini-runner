@@ -2,7 +2,6 @@
 rmdir_dir_path_pointer
 .string ""
 
-.intel_syntax
 .global syscall_rmdir_arm_64
 syscall_rmdir_arm_64:
     mov x8, #35
