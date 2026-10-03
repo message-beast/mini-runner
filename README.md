@@ -7,7 +7,8 @@ MRN is a free software that it just turns any linux to paas and it is not a paas
 ### REQUIREMENTS
 #### Kernel version >= 2.6.24
 #### gcc
-#### nasm
+#### at least 8kb of memory
+#### thiny core (intel/amd/arm either 32 bit or 64 bit)
 
 ### MRN CAPABILITIES
 mrn is powerful software that just removes unnecessary overhead and it is simple to use and gives much control to the user. the things that mrn has:
