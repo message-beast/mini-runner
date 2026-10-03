@@ -13,6 +13,8 @@
 #include "../res_man/utils/cgrpv2/utils.h"
 #include "../res_man/utils/cgrpv2/setup.h"
 #include "../res_man/utils/helper.h"
+#include "../arch/mem_barrier.h"
+
 CREATE_PROCESS_REG_F
 DECLARE_PROCESS_COPY_F
 
@@ -109,12 +111,7 @@ __attribute__((hot)) int restartService(service*** __restrict__ services, char* 
             if (__builtin_expect(warmService(&((*services)[i]), bash, attach) != 0, 0)) {
                 return -1;
             }
-            __asm__ volatile (
-                "sfence"
-                :
-                :
-                : "memory"
-            );
+            __SFENCE__
             if (__builtin_expect(updateCgroup(serviceName, currentService->pid) != 0, 0)) {
                 if(__builtin_expect(killService(currentService->pid) != 0, 0)) {
                     perror("failed to kill the failed service!\n");

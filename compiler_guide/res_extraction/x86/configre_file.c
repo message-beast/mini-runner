@@ -8,6 +8,8 @@
 #include <sys/mman.h>
 #include "../data.h"
 #include <string.h>
+#include "../../../arch/mem_barrier.h"
+
 #define _ARCH_CONFIG_FILE_PATH "arch/x86/features.h"
 
 void configureFile() {
@@ -39,10 +41,5 @@ void configureFile() {
     msync(data, len, MS_SYNC);
     munmap(configData, len);
     close(fd);
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
 }

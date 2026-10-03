@@ -15,6 +15,8 @@
 #include "../arch/opt.h"
 #include <string.h>
 #include "../base/config.h"
+#include "../arch/mem_barrier.h"
+
 
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;
@@ -168,11 +170,6 @@ OPT(hot) int loadJobsDaemon(job*** jobs) {
                 break;
         }
     }
-    __asm__ volatile (
-        "mfence"
-        :
-        :
-        : "memory"
-    );
+    __MFENCE__
     return 0;
 }

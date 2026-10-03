@@ -17,6 +17,8 @@
 #include <signal.h>
 #include "../arch/opt.h"
 #include "../checks_for_pr/write_chk.h"
+#include "../arch/mem_barrier.h"
+
 static inline __attribute__((always_inline, hot)) int cloneRepo(service** services);
 [[nodiscard]] OPT() int addProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName) {
     if (__builtin_expect(services == NULL, 0)) {
@@ -61,12 +63,7 @@ static inline __attribute__((always_inline, hot)) int cloneRepo(service** servic
         capacityOfServices += __INITIAL_SCALE_SIZE_OF_SERVICES__;
     }
     (*services)[numberOfProjects] = newService;
-    __asm__ volatile (
-        "mfence"
-        :
-        :
-        : "memory"
-    );
+    __MFENCE__
     if (__builtin_expect((*services)[numberOfProjects]->githubRepo == NULL || (*services)[numberOfProjects]->pid != 0, 0)) {
         printf("\033[31mcan not add project!\033[0m\n");
         free(newService);

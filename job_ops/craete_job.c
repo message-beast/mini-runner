@@ -8,6 +8,8 @@
 #include "../base/config.h"
 #include <time.h>
 #include "../arch/opt.h"
+#include "../arch/mem_barrier.h"
+
 #define true 1
 #define false 0
 
@@ -69,11 +71,6 @@ OPT(hot) int createJob(job*** __restrict__ jobs, char* __restrict__ jobName, cha
     printf("new job added:\n");
     printf("\033[33m|\033[31m-\033[32mname: \033[33m%s\n\033[33m|\033[31m-\033[32mrunnable-file: \033[33m%s\n\033[33m|\033[31m-\033[32mseconds-interval: \033[33m%li\033[0m\n", newJob->name, newJob->runnableFile, newJob->secondsInterval);
     numberOfJobs++;
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     return 0;
 }

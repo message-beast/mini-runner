@@ -17,6 +17,7 @@
 #include "../arch/opt.h"
 #include "../io_man/update/create_backup_update_status.h"
 #include "../io_man/update/apply_backup_update_status.h"
+#include "../arch/mem_barrier.h"
 
 
 void updateFileBackup(int signal) {
@@ -64,12 +65,7 @@ static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char*
         perror("mem map failed on updateStatus file!\n");
         return -1;
     }
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     memcpy(data, dataToWrite, len);
     msync(data, len, MS_SYNC);
     munmap(data, len);

@@ -20,6 +20,7 @@
 #include "../utils.h"
 #include "../env_man/get_args.h"
 #include "../env_man/free_args.h"
+#include "../arch/mem_barrier.h"
 #define true 1
 #define false 0
 
@@ -76,12 +77,7 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
         CHECK_WRITE_PR(pipeFd[1], written , size)
         close(pipeFd[1]);
         DEBUG
-        __asm__ volatile (
-            "sfence" 
-            :
-            :
-            : "memory"
-        );
+        __SFENCE__
         printf("thread running with pid: %i\n", getpid());
         printf("command: %s\n", params->command);
         if (params->attach == false) {
@@ -114,7 +110,7 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
         abort();
     } else {
         DEBUG
-        __asm__ volatile ("sfence" ::: "memory");
+        __SFENCE__
         close(pipeFd[1]);
         char buff[10];
         size_t size = read(pipeFd[0], buff, 10);
@@ -219,12 +215,7 @@ OPT(hot) int runService(service*** __restrict__ services, env*** __restrict__ en
             params->attach = attach;
             params->args = getArgs(envs, (*services)[i]->name);
             printf("setting pointer of %p\n", ((*services)[i]));
-            __asm__ volatile (
-                "sfence"
-                :
-                :
-                : "memory"
-            );
+            __SFENCE__
             if (__builtin_expect(pthread_create(&process_thread, NULL, runthread, (void*)params) != 0, 0)) {
                 perror("can not run service! failed to create thread!\n");
                 free(params);
@@ -291,12 +282,7 @@ __attribute__((hot)) int warmService(service** __restrict__ services, char* __re
     params->service = services;
     params->name = name;
     params->attach = attach;
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     if (__builtin_expect(pthread_create(&process_thread, NULL, runthread, (void*)params) != 0, 0)) {
         perror("can not run service! failed to create thread!\n");
         free(params);

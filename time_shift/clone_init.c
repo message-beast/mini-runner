@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include "../arch/opt.h"
 #include "../utils_ops/load_clone_project.h"
+#include "../arch/mem_barrier.h"
 
 
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startingIndex, int endingIndex) {
@@ -61,12 +62,7 @@ OPT(hot) int loadCloneServices(service*** services) {
         exit_program(-1)
     }
     int maxProjectsFileLength = st.st_size;
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     int lastIndex = 0;
     char* name = NULL;
     char*githubRepo = NULL;

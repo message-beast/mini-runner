@@ -14,6 +14,7 @@
 #include <signal.h>
 #include "../io_man/services/create_backup.h"
 #include "../io_man/services/apply_backup.h"
+#include "../arch/mem_barrier.h"
 
 static void handleServicesBackup(int signal) {
     if (__builtin_expect(applyBackup() != 0, 0)) {
@@ -136,12 +137,7 @@ OPT(hot) int save_services(service*** services) {
         close(projectsFileFd);
         exit_program(-1)
     }
-    __asm__  volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     if (__builtin_expect(dataToBeWritten != NULL && numberOfProjects > 0, 1)) {
         memcpy(data, dataToBeWritten, strlen(dataToBeWritten));
         msync(data, strlen(dataToBeWritten), MS_SYNC);

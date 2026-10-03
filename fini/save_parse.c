@@ -12,6 +12,7 @@
 #include "../io_man/env/create_backup.h"
 #include "../io_man/env/apply_backup.h"
 #include <sys/signal.h>
+#include "../arch/mem_barrier.h"
 
 #define ENV_FILE __FILE_ENV
 #define false 0
@@ -60,12 +61,7 @@ static inline __attribute__((always_inline)) int writeData(char* __restrict__ co
     }
     memcpy(data, content, len);
     msync(data, len, MS_SYNC);
-    __asm__ volatile (
-        "mfence"
-        :
-        :
-        : "memory"
-    );
+    __MFENCE__
     munmap(data, len);
     fsync(fd);
     close(fd);
@@ -135,12 +131,7 @@ int saveEnvs(env*** envs) {
             free(beforeData);
         }
     }
-    __asm__ volatile(
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     if (__builtin_expect(dataToWrite == NULL, 0)) {
         return -1;
     }

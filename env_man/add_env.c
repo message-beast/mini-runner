@@ -5,6 +5,8 @@
 #include "../base/config.h"
 #include <string.h>
 #include <stdlib.h>
+#include "../arch/mem_barrier.h"
+
 int addEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restrict__ __key, char* __restrict__ __value) {
 
     if (__builtin_expect(envs == NULL, 0)) {
@@ -48,12 +50,7 @@ int addEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restrict
         capacityOfEnv = newSize;
     }
     (*envs)[numberOfEnv] = newEnv;
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     if (__builtin_expect((*envs)[numberOfEnv] != NULL, 1)) {
         numberOfEnv++;
         return 0;

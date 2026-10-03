@@ -2,6 +2,7 @@
 #include "../base/config.h"
 #include <string.h>
 #include <stdlib.h>
+#include "../arch/mem_barrier.h"
 
 
 int removeEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restrict__ __key) {
@@ -42,12 +43,7 @@ int removeEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restr
         }
         if (state == DEL_ENV) {
             numberOfEnv --;
-            __asm__ volatile (
-                "sfence"
-                :
-                :
-                : "memory"
-            );
+            __SFENCE__
             if (__builtin_expect(numberOfEnv == 0, 0)) {
                 free((*envs));
                 (*envs) = NULL;

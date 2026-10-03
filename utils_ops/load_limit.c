@@ -4,6 +4,8 @@
 #include "../base/structure.h"
 #include "../base/config.h"
 #include "../res_man/utils/helper.h"
+#include "../arch/mem_barrier.h"
+
 DECLARE_128_T
 
 __attribute__((hot, aligned(64))) int loadLimit(limit*** __restrict__ limits, limit* __restrict__ newLimit) {
@@ -30,11 +32,6 @@ __attribute__((hot, aligned(64))) int loadLimit(limit*** __restrict__ limits, li
     }
     (*limits)[numberOfResLimits] = newLimit;
     numberOfResLimits++;
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     return 0;
 }

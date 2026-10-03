@@ -14,6 +14,8 @@
 #include "../utils.h"
 #include <stdio.h>
 #include "../arch/opt.h"
+#include "../arch/mem_barrier.h"
+
 //#define DEBUG_MODE 1
 __attribute__((cold)) int initiateMemoryPtr() {
     int sharedUpdateStatusFileFd = open(__FILE_UPDATE_STATUS, O_CREAT | O_RDWR, 0644);
@@ -89,12 +91,7 @@ OPT(hot) int loadServices(service*** services) {
         exit_program(-1)
     }
     int maxProjectsFileLength = st.st_size;
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     int lastIndex = 0;
     char* name = NULL;
     char*githubRepo = NULL;

@@ -4,6 +4,7 @@
 #include "../base/structure.h"
 #include "../base/config.h"
 #include "free_args.h"
+#include "../arch/mem_barrier.h"
 
 static inline __attribute__((always_inline, hot, aligned(64))) char* parseEnvToString(char* __restrict__ key, char* __restrict__ value) {
     size_t size = snprintf(NULL, 0, "%s=%s", key, value);
@@ -64,12 +65,7 @@ __attribute__((hot, aligned(64))) envToArg* getArgs(env*** __restrict__ envs, ch
             found++;
         }
     }
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     arg->args[found+1] = NULL;
     arg->nums = found;
     return arg;   

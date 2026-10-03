@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include "../base/config.h"
+#include "../arch/mem_barrier.h"
 
 static inline __attribute__((always_inline, hot)) int lockJob(int fd) {
     char* content = "locked";
@@ -23,12 +24,7 @@ static inline __attribute__((always_inline, hot)) int lockJob(int fd) {
     }
     memcpy(data, content, size);
     msync(data, size, MS_SYNC);
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     munmap(data, size);
     close(fd);
     return 0;
@@ -50,12 +46,7 @@ static inline __attribute__((always_inline, hot)) int unlockJob(int fd) {
     }
     memcpy(data, content, size);
     msync(data, size, MS_SYNC);
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     munmap(data, size);
     close(fd);
     return 0;

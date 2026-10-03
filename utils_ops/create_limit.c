@@ -10,6 +10,8 @@
 #include "../base/structure.h"
 #include "../base/config.h"
 #include <stdlib.h>
+#include "../arch/mem_barrier.h"
+
 __attribute__((hot, aligned(64))) int createLimit(limit*** __restrict__ limits, char* __restrict__ name, __uint64_t cpuLimit, __uint128_t memLimit) {
     if (__builtin_expect(limits == NULL || *limits == NULL, 0)) {
         perror("limit is null!\n");
@@ -44,11 +46,6 @@ __attribute__((hot, aligned(64))) int createLimit(limit*** __restrict__ limits, 
     }
     (*limits)[numberOfResLimits] = newLimit;
     numberOfResLimits++;
-    __asm__ volatile (
-        "mfence"
-        :
-        :
-        : "memory"
-    );
+    __MFENCE__
     return 0;
 }

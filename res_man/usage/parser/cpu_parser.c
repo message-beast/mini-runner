@@ -8,6 +8,8 @@
 #include "../../../basic.h"
 #include "../../../arch/fma.h"
 #include "../../../arch/opt.h"
+#include "../../../arch/mem_barrier.h"
+
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startIndex, int endingIndex) {
     int length = endingIndex - startIndex;
     char* newString = malloc(length + 1);
@@ -32,12 +34,7 @@ OPT(hot) FMA() double numOfCores(char* __restrict__ data, char* __restrict__ upt
     int nowInJiffies = 0;
     int dataLen = strlen(data);
     int foundVars = 0;
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     for (register int i = 0; i < dataLen; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
             __builtin_prefetch(&data[i + 128], 0, 3);

@@ -3,6 +3,7 @@
 #include "../base/config.h"
 #include <stdlib.h>
 #include <string.h>
+#include "../arch/mem_barrier.h"
 
 
 __attribute__((hot, aligned(64))) envGroup* getEnvs(env*** __restrict__ envs, char* __restrict__ name) {
@@ -40,12 +41,7 @@ __attribute__((hot, aligned(64))) envGroup* getEnvs(env*** __restrict__ envs, ch
             group->envs[found++] = (*envs)[i];
         }
     }
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     group->nums = found;
     return group;
 }

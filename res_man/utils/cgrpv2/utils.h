@@ -1,3 +1,4 @@
+#include "../../../arch/mem_barrier.h"
 #define CREATE_PROCESS_REG_F\
     static inline __attribute__((always_inline)) int createProcess(char* serviceName, __uint32_t servicePid) {\
         size_t size = snprintf(NULL, 0, "/sys/fs/cgroup/%s/cgroup.procs", serviceName);\
@@ -16,12 +17,7 @@
             perror("can not open the system cgourp cgroup.procs!\n");\
             return -1;\
         }\
-        __asm__ volatile (\
-            "mfence"\
-            :\
-            :\
-            : "memory"\
-        );\
+        __MFENCE__\
         size = snprintf(NULL, 0, "%i", servicePid);\
         if (__builtin_expect(size <= 0, 0)) {\
             return -1;\

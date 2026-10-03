@@ -11,6 +11,7 @@
 #include <string.h>
 #include "../../base/config.h"
 #include "../base.h"
+#include "../../arch/mem_barrier.h"
 
 #define __JOBS_COPY_FILE_PATH __FILE_JOBS_COPY
 #define __JOBS_FILE_PATH __FILE_JOBS
@@ -60,12 +61,7 @@ static inline __attribute__((always_inline, hot)) int writeToRealData(char* jobs
         perror("failed to unlock jobs!\n");
         exit_program(-1)
     }
-    __asm__ volatile (
-        "mfence"
-        :
-        :
-        : "memory"
-    );
+    __MFENCE__
 
     return 0;
 }

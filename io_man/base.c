@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include "../basic.h"
+#include "../arch/mem_barrier.h"
 
 
 static inline __attribute__((always_inline, hot)) int copyBackup(char* __restrict__ cpuLimitBuff, char* __restrict__ __dest, int size) {
@@ -40,12 +41,7 @@ static inline __attribute__((always_inline, hot)) int copyBackup(char* __restric
     fsync(fd);
     close(fd);
     
-    __asm__ volatile (
-        "mfence"
-        :
-        :
-        : "memory"
-    );
+    __MFENCE__
 
     return 0;
 }

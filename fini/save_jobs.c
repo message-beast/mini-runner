@@ -18,7 +18,7 @@
 #include "../io_man/jobs/create_backup.h"
 #include "../io_man/jobs/apply_backup.h"
 #include "../base/config.h"
-
+#include "../arch/mem_barrier.h"
 
 #define true 1
 #define false 0
@@ -174,23 +174,13 @@ OPT() int save_jobs(job*** jobs) {
         }
     }
 
-    __asm__ volatile (
-        "mfence"
-        :
-        :
-        : "memory"
-    );
+    __MFENCE__
     
     if (__builtin_expect(writeData(dataTobeWritten) != 0, 0)) {
         return -1;
     }
     free(dataTobeWritten);
     dataTobeWritten = NULL;
-    __asm__ volatile (
-        "sfence"
-        :
-        :
-        : "memory"
-    );
+    __SFENCE__
     return 0;
 }
