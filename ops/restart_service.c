@@ -14,6 +14,7 @@
 #include "../res_man/utils/cgrpv2/setup.h"
 #include "../res_man/utils/helper.h"
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 CREATE_PROCESS_REG_F
 DECLARE_PROCESS_COPY_F
@@ -112,6 +113,7 @@ __attribute__((hot)) int restartService(service*** __restrict__ services, char* 
                 return -1;
             }
             __SFENCE__
+            __DSB_ISHST__
             if (__builtin_expect(updateCgroup(serviceName, currentService->pid) != 0, 0)) {
                 if(__builtin_expect(killService(currentService->pid) != 0, 0)) {
                     perror("failed to kill the failed service!\n");

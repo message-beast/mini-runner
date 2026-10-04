@@ -18,7 +18,7 @@
 #include "../io_man/update/create_backup_update_status.h"
 #include "../io_man/update/apply_backup_update_status.h"
 #include "../arch/mem_barrier.h"
-
+#include "../arch/arm_specs.h"
 
 void updateFileBackup(int signal) {
     if (__builtin_expect(applyBackupUpdateStatus() != 0, 0)) {
@@ -65,7 +65,8 @@ static inline __attribute__((always_inline, hot)) int writeUpdateAvialable(char*
         perror("mem map failed on updateStatus file!\n");
         return -1;
     }
-    __SFENCE__
+    __LFENCE__
+    __DSB_ISHLD__
     memcpy(data, dataToWrite, len);
     msync(data, len, MS_SYNC);
     munmap(data, len);

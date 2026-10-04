@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
+
 __attribute__((hot, aligned(64))) int loadEnv(env*** __restrict__ __env, env* __restrict__ newEnv) {
     for (register int i = 0; i < numberOfEnv; ++i) {
         if (__builtin_expect((i & 255) == 0 || i == 0, 0)) {
@@ -27,5 +29,6 @@ __attribute__((hot, aligned(64))) int loadEnv(env*** __restrict__ __env, env* __
     (*__env)[numberOfEnv] = newEnv;
     numberOfEnv++;
     __SFENCE__
+    __DSB_ISHST__
     return 0;
 }

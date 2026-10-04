@@ -11,6 +11,7 @@
 #include "../base/config.h"
 #include <stdlib.h>
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 __attribute__((hot, aligned(64))) int createLimit(limit*** __restrict__ limits, char* __restrict__ name, __uint64_t cpuLimit, __uint128_t memLimit) {
     if (__builtin_expect(limits == NULL || *limits == NULL, 0)) {
@@ -47,5 +48,6 @@ __attribute__((hot, aligned(64))) int createLimit(limit*** __restrict__ limits, 
     (*limits)[numberOfResLimits] = newLimit;
     numberOfResLimits++;
     __MFENCE__
+    __DSB_ISH__
     return 0;
 }

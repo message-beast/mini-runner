@@ -16,6 +16,7 @@
 #include <stdatomic.h>
 #include <signal.h>
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 //#define DEBUG_MODE 1
 [[nodiscard]]__attribute__((hot)) int loadCloneProject(service*** __restrict__ services, char* __restrict__  githubRepo, char* __restrict__ nickName, pid_t pid) {
@@ -62,6 +63,7 @@
 
     (*services)[numberOfCloneProjects] = newService;
     __MFENCE__
+    __DSB_ISH__
     if (__builtin_expect((*services)[numberOfCloneProjects]->githubRepo == NULL, 0)) {
         printf("\033[31mcan not add project!\033[0m\n");
         return -1;

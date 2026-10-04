@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 int addEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restrict__ __key, char* __restrict__ __value) {
 
@@ -51,6 +52,7 @@ int addEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restrict
     }
     (*envs)[numberOfEnv] = newEnv;
     __SFENCE__
+    __DSB_ISHST__
     if (__builtin_expect((*envs)[numberOfEnv] != NULL, 1)) {
         numberOfEnv++;
         return 0;

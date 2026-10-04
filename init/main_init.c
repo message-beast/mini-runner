@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include "../arch/opt.h"
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 //#define DEBUG_MODE 1
 __attribute__((cold)) int initiateMemoryPtr() {
@@ -91,7 +92,8 @@ OPT(hot) int loadServices(service*** services) {
         exit_program(-1)
     }
     int maxProjectsFileLength = st.st_size;
-    __SFENCE__
+    __LFENCE__
+    __DSB_ISHLD__
     int lastIndex = 0;
     char* name = NULL;
     char*githubRepo = NULL;

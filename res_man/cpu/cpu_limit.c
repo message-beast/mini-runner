@@ -23,6 +23,7 @@
 #include "../../arch/opt.h"
 #include "../../utils_ops/create_limit.h"
 #include "../../arch/mem_barrier.h"
+#include "../../arch/arm_specs.h"
 
 DECLARE_128_T
 
@@ -39,6 +40,7 @@ DECLARE_128_T
 
 OPT(hot) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint128_t memBytes) {
     __SFENCE__
+    __DSB_ISHST__
     #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
@@ -74,6 +76,7 @@ OPT(hot) int setCpuResourceLimit_F_EXTR(service*** __restrict__ services, limit*
 
 OPT(hot) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, limit*** __restrict limits, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, __uint64_t memBytes) {
     __SFENCE__
+    __DSB_ISHST__
     #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
@@ -109,6 +112,7 @@ OPT(hot) int setCpuResourceLimit_F_LRG(service*** __restrict__ services, limit**
 
 OPT(hot) int setCpuResourceLimit(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, float numberOfCpu, _Bool limitMemory, int memBytesStr) {
     __SFENCE__
+    __DSB_ISHST__
     #pragma GCC ivdep
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {

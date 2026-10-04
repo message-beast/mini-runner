@@ -13,6 +13,7 @@
 #include "../io_man/env/apply_backup.h"
 #include <sys/signal.h>
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 #define ENV_FILE __FILE_ENV
 #define false 0
@@ -62,6 +63,7 @@ static inline __attribute__((always_inline)) int writeData(char* __restrict__ co
     memcpy(data, content, len);
     msync(data, len, MS_SYNC);
     __MFENCE__
+    __DSB_ISH__
     munmap(data, len);
     fsync(fd);
     close(fd);
@@ -132,6 +134,7 @@ int saveEnvs(env*** envs) {
         }
     }
     __SFENCE__
+    __DSB_ISHST__
     if (__builtin_expect(dataToWrite == NULL, 0)) {
         return -1;
     }

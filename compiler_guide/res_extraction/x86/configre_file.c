@@ -9,6 +9,7 @@
 #include "../data.h"
 #include <string.h>
 #include "../../../arch/mem_barrier.h"
+#include "../../../arch/arm_specs.h"
 
 #define _ARCH_CONFIG_FILE_PATH "arch/x86/features.h"
 
@@ -39,7 +40,8 @@ void configureFile() {
     }
     memcpy(configData, data, len);
     msync(data, len, MS_SYNC);
+    __SFENCE__
+    __DSB_ISHST__
     munmap(configData, len);
     close(fd);
-    __SFENCE__
 }

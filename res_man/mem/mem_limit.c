@@ -19,7 +19,7 @@
 #include "./limiter.h"
 #include "../../utils_ops/create_limit.h"
 #include "../../arch/mem_barrier.h"
-
+#include "../../arch/arm_specs.h"
 
 
 
@@ -38,6 +38,7 @@
 
 __attribute__((hot)) int setMemoryLimit(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, int memBytes) {
     __SFENCE__
+    __DSB_ISHST__
     #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
@@ -63,6 +64,7 @@ __attribute__((hot)) int setMemoryLimit(service*** __restrict__ services, limit*
 
 __attribute__((hot)) int setMemoryLimit_F_LRG(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, __uint64_t memBytes) {
     __SFENCE__
+    __DSB_ISHST__
     #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {
@@ -88,6 +90,7 @@ __attribute__((hot)) int setMemoryLimit_F_LRG(service*** __restrict__ services, 
 
 __attribute__((hot)) int setMemoryLimit_F_EXTR(service*** __restrict__ services, limit*** __restrict__ limits, char* __restrict__ serviceName, __uint128_t memBytes) {
     __SFENCE__
+    __DSB_ISHST__
     #pragma GCC unroll 4
     for (register int i = 0; i < numberOfProjects; ++i) {
         if (__builtin_expect((i & 127) == 0 || i == 0, 0)) {

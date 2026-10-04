@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../arch/mem_barrier.h"
-
+#include "../arch/arm_specs.h"
 
 __attribute__((hot, aligned(64))) envGroup* getEnvs(env*** __restrict__ envs, char* __restrict__ name) {
     envGroup* group = malloc(sizeof(envGroup));
@@ -42,6 +42,7 @@ __attribute__((hot, aligned(64))) envGroup* getEnvs(env*** __restrict__ envs, ch
         }
     }
     __SFENCE__
+    __DSB_ISHST__
     group->nums = found;
     return group;
 }

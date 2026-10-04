@@ -5,6 +5,7 @@
 #include "../base/config.h"
 #include "../res_man/utils/helper.h"
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 DECLARE_128_T
 
@@ -33,5 +34,6 @@ __attribute__((hot, aligned(64))) int loadLimit(limit*** __restrict__ limits, li
     (*limits)[numberOfResLimits] = newLimit;
     numberOfResLimits++;
     __SFENCE__
+    __DSB_ISHST__
     return 0;
 }

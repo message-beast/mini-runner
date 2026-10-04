@@ -19,6 +19,7 @@
 #include "../io_man/jobs/apply_backup.h"
 #include "../base/config.h"
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 #define true 1
 #define false 0
@@ -173,12 +174,12 @@ OPT(hot) int save_jobs_daemon(job*** jobs) {
     }
 
     __MFENCE__
+    __DSB_ISH__
     
     if (__builtin_expect(writeData(dataTobeWritten) != 0, 0)) {
         return -1;
     }
     free(dataTobeWritten);
     dataTobeWritten = NULL;
-    __SFENCE__
     return 0;
 }

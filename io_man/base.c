@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 #include "../basic.h"
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 
 static inline __attribute__((always_inline, hot)) int copyBackup(char* __restrict__ cpuLimitBuff, char* __restrict__ __dest, int size) {
@@ -37,11 +38,11 @@ static inline __attribute__((always_inline, hot)) int copyBackup(char* __restric
     }
     memcpy(data, cpuLimitBuff, size);
     msync(data, size, MS_SYNC);
+     __MFENCE__
+    __DSB_ISH__
     munmap(data, size);
     fsync(fd);
     close(fd);
-    
-    __MFENCE__
 
     return 0;
 }

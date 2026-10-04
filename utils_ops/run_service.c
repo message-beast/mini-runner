@@ -77,7 +77,6 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
         CHECK_WRITE_PR(pipeFd[1], written , size)
         close(pipeFd[1]);
         DEBUG
-        __SFENCE__
         printf("thread running with pid: %i\n", getpid());
         printf("command: %s\n", params->command);
         if (params->attach == false) {
@@ -110,7 +109,6 @@ static inline __attribute__((always_inline, hot)) void* runthread(void* paramss)
         abort();
     } else {
         DEBUG
-        __SFENCE__
         close(pipeFd[1]);
         char buff[10];
         size_t size = read(pipeFd[0], buff, 10);

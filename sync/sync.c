@@ -9,6 +9,7 @@
 #include <string.h>
 #include "../base/config.h"
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 static inline __attribute__((always_inline, hot)) int lockJob(int fd) {
     char* content = "locked";
@@ -25,6 +26,7 @@ static inline __attribute__((always_inline, hot)) int lockJob(int fd) {
     memcpy(data, content, size);
     msync(data, size, MS_SYNC);
     __SFENCE__
+    __DSB_ISHST__
     munmap(data, size);
     close(fd);
     return 0;
@@ -47,6 +49,7 @@ static inline __attribute__((always_inline, hot)) int unlockJob(int fd) {
     memcpy(data, content, size);
     msync(data, size, MS_SYNC);
     __SFENCE__
+    __DSB_ISHST__
     munmap(data, size);
     close(fd);
     return 0;

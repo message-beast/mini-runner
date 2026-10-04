@@ -17,6 +17,7 @@
 #include "../io_man/limits/apply_backup.h"
 #include <signal.h>
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 #define FILE __FILE_LIMITS
 
@@ -152,8 +153,10 @@ __attribute__((hot)) int saveLimits(limit*** limits) {
             dataSize += size;
         }
     }
-    if (__builtin_expect(dataToWrite == NULL, 0)) return -1;
     __MFENCE__
+    __DSB_ISH__
+    if (__builtin_expect(dataToWrite == NULL, 0)) return -1;
+
     if (__builtin_expect(writeData(dataToWrite, dataSize) != 0, 0)) {
         free(dataToWrite);
         return -1;

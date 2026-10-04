@@ -15,6 +15,7 @@
 #include "../arch/opt.h"
 #include "../base/config.h"
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startingIndex, int endingIndex) {
     int length = endingIndex - startingIndex;
@@ -166,5 +167,6 @@ OPT(hot) int loadJobs(job*** jobs) {
         }
     }
     __MFENCE__
+    __DSB_ISH__
     return 0;
 }

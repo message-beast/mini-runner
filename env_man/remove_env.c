@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include "../arch/mem_barrier.h"
 
-
 int removeEnv(env*** __restrict__ envs, char* __restrict__ __name, char* __restrict__ __key) {
     if (__builtin_expect(envs == NULL, 0)) {
         perror("envs is null!\n");

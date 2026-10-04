@@ -16,6 +16,7 @@
 #include <string.h>
 #include "../base/config.h"
 #include "../arch/mem_barrier.h"
+#include "../arch/arm_specs.h"
 
 
 static inline __attribute__((always_inline, hot)) char* giveString(char* string, int startingIndex, int endingIndex) {
@@ -171,5 +172,6 @@ OPT(hot) int loadJobsDaemon(job*** jobs) {
         }
     }
     __MFENCE__
+    __DSB_ISH__
     return 0;
 }

@@ -12,6 +12,7 @@
 #include "../../base/config.h"
 #include "../base.h"
 #include "../../arch/mem_barrier.h"
+#include "../../arch/arm_specs.h"
 
 #define __JOBS_COPY_FILE_PATH __FILE_JOBS_COPY
 #define __JOBS_FILE_PATH __FILE_JOBS
@@ -62,6 +63,7 @@ static inline __attribute__((always_inline, hot)) int writeToRealData(char* jobs
         exit_program(-1)
     }
     __MFENCE__
+    __DSB_ISH__
 
     return 0;
 }
