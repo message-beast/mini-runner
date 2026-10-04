@@ -10,6 +10,34 @@ MRN is a free software that it just turns any linux to paas and it is not a paas
 #### at least 8kb of memory
 #### thiny core (intel/amd/arm either 32 bit or 64 bit)
 
+## Manual installation
+```bash
+    #create a setup for mrn
+    sudo mkdir -p /usr/lib/mrn
+    sudo mkdir -p /usr/lib/mrn/data
+    sudo mkdir -p /usr/lib/mrn/backup
+    sudo mkdir -p /usr/lib/mrn/bin
+    #clone the repository
+    git clone https://github.com/message-beast/mini-runner
+    # make sure you are using x86_64 other wise choose other folder <arch type> / <processor width>
+    cd mini-runner/sycalls/x86/64-bit
+    make compile-close
+    make compile-fstatat
+    make compile-unlinkat
+    make compile-rmdir
+    make compile-getdents64
+    make compile-openat
+    cd ../../../
+    sudo make compile
+    echo 'export PATH="export PATH=$PATH:/usr/lib/mrn/bin"' >> ~/.bashrc
+    echo 'alias sudo="sudo env \"PATH=\$PATH\""' >> ~/.bashrc
+    source ~/.bashrc
+    #installation has been finished time to try it out
+    sudo mrn --help
+```
+if this doesn't work for you see [manual compilation guide](https://github.com/message-beast/mini-runner/blob/master/Documentation/compile-guide.txt)
+
+
 ### MRN CAPABILITIES
 mrn is powerful software that just removes unnecessary overhead and it is simple to use and gives much control to the user. the things that mrn has:
 #### -> services management
