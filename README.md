@@ -38,7 +38,7 @@ mrn is powerful software that just removes unnecessary overhead and it is simple
 ### MRN should be compiled in user machine
 -- this is a design choice that instead of just distributing binary we ship the source and you just run installation binary that is going to work. and this is chosen because if you even run infrastructure on mrn it can setup millions of services in seconds and for that for specific calculations we use special cpu features that is going to be selected at the installation time and creates a header file for describing your cpu
 ### MRN ARCH
--- mrn is currently works on x86 64 and 32 bit systems but for ARM it is being developing for things like memory barriers, inline assembly and syscalls
+-- mrn is currently works on x86 and arm 64 bit and 32 bit systems
 ### MRN auto restart
 -- this feature is being developed and it just be the most important one to auto restart both jobs and services for those whom were running
 ### MRN runs as a sudo
@@ -46,9 +46,9 @@ mrn is powerful software that just removes unnecessary overhead and it is simple
 ### No helmet
 -- MRN doesn't stop you from running wrong binaries or harmful things it is just does its job if you don't know what you are running the problem is yours not mrn's
 ### MRN is independent of systemd
--- means that it is not systemd service. it handles the state when the machine turns on by its own and launches systemd before it. so you can use the stetted up environment for many cases. you need that for example NetworkManager is a systemd service. systemd must be launched before your programs and if you doesn't use systemd you can configure the entry program to use another binary that runs as the program mrn launches. if mrn doesn't find anything to run it is just runs your programmers assuming that you don't want any user space things.
+-- means that it is not systemd service. it handles the state when the machine turns on by its own and launches systemd before it. so you can use the stetted up environment for many cases. you need that for example NetworkManager is a systemd service. systemd must be launched before your programs and if you doesn't use systemd you can configure the entry program to use another binary that runs as the program mrn launches. if mrn doesn't find anything to run it is just runs your programs assuming that you don't want any user space things.
 ## MRN CURRENT STATUS
-mrn is still in development and its work is 97% done. what remains is to write installation program and some little bit footage work for arm processors. if you wanna compile and configure manually please follow [docs for compiling MRN](https://github.com/message-beast/mini-runner/blob/master/Documentation/compile-guide.txt)
+mrn is still in development and its work is 98% done. what remains is to write installation program and testing for arm processors. if you wanna compile and configure manually please follow [docs for compiling MRN](https://github.com/message-beast/mini-runner/blob/master/Documentation/compile-guide.txt)
 ## Getting started
 if you already installed MRN it is better to run --help message or check out the [Documentation](https://github.com/message-beast/mini-runner/blob/master/Documentation/usage.txt)
 
