@@ -66,7 +66,7 @@ mrn is powerful software that just removes unnecessary overhead and it is simple
 ### MRN should be compiled in user machine
 -- this is a design choice that instead of just distributing binary we ship the source and you just run installation binary that is going to work. and this is chosen because if you even run infrastructure on mrn it can setup millions of services in seconds and for that for specific calculations we use special cpu features that is going to be selected at the installation time and creates a header file for describing your cpu
 ### MRN ARCH
--- mrn is currently works on x86 and arm 64 bit and 32 bit systems
+-- mrn is currently works on x86 and arm 64 bit and 32 bit systems and support both cgroup v1 and v2
 ### MRN auto restart
 -- this feature is being developed and it just be the most important one to auto restart both jobs and services for those whom were running
 ### MRN runs as a sudo
