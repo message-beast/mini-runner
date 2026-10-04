@@ -27,13 +27,22 @@ MRN is a free software that it just turns any linux to paas and it is not a paas
     make compile-rmdir
     make compile-getdents64
     make compile-openat
-    cd ../../../
+    #generate a header file for describing your cpu
+    cd ../../../compiler_guide
+    make compile
+    ./compiler_guide
+    cd ../
+    #compile mrn binary
     sudo make compile
     echo 'export PATH="export PATH=$PATH:/usr/lib/mrn/bin"' >> ~/.bashrc
     echo 'alias sudo="sudo env \"PATH=\$PATH\""' >> ~/.bashrc
     source ~/.bashrc
     #installation has been finished time to try it out
     sudo mrn --help
+    #install mrn-run (mrn_interpreter/bash alternative)
+    cd mrn_interpreter
+    make compile
+    cd ../
 ```
 if this doesn't work for you see [manual compilation guide](https://github.com/message-beast/mini-runner/blob/master/Documentation/compile-guide.txt)
 
