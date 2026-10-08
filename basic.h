@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdnoreturn.h>
 #include <stdlib.h>
-__attribute__((hot)) int exit_process(int i);
+int exit_process(int i);
 #define exit_program(i) \
 printf("##### DEBUG %s: %i\n", __FILE__, __LINE__);\
 exit_process(i);\

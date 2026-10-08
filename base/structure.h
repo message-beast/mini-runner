@@ -83,3 +83,11 @@ typedef struct limit {
     __uint64_t cpu;
     __uint128_t memory;
 } limit;
+
+typedef struct memory {
+    void* mem;
+    void* base;
+    struct memory* next;
+    __uint64_t capacity;
+    __uint64_t index;
+} memory;

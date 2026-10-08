@@ -23,6 +23,6 @@ int renameLimit(limit*** __restrict__ limits, char* __restrict__ name, char* __r
             return 0;
         }
     }
-    fprintf(stderr, "can not find any limit with name %s\n");
+    fprintf(stderr, "can not find any limit with name %s\n", name);
     return 0;
 }

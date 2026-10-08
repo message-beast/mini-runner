@@ -4,7 +4,7 @@
 #include <errno.h>
 #include <string.h>
 #include "base/config.h"
-__attribute__((hot))int exit_process(int i) {
+void exit_process(int i) {
     if (i == 0) {
         exit(0);
     } else if (i < 0) {
@@ -12,6 +12,7 @@ __attribute__((hot))int exit_process(int i) {
         abort();
     }
     abort();
+    __builtin_unreachable();
 }
 
 #define exit_program(i) exit_process(i);
