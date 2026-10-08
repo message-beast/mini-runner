@@ -7,7 +7,8 @@ mrn
 test.*
 test
 syscalls/*/*/*.o
-compile_guide/compile_guide
+compiler_guide/compile_guide
 mrn-run
 sample/
 arch/*/features.h
+compile_guide
