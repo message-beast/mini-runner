@@ -1,7 +1,6 @@
 Makefile linguist-documentation
-#*.sh linguist-documentation
 */*/*/Makefile linguist-documentation
-#*.sh linguist-detectable=false
+*.sh linguist-language=shell
 *.s linguist-language=Assembly
 **/*.s linguist-language=Assembly
 syscalls/arm/*/*.s linguist-language=Assembly
