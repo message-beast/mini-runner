@@ -4,8 +4,7 @@ sudo mkdir -p /usr/lib/mrn
 sudo mkdir -p /usr/lib/mrn/data
 sudo mkdir -p /usr/lib/mrn/backup
 sudo mkdir -p /usr/lib/mrn/bin
-#clone the repository
-git clone https://github.com/message-beast/mini-runner
+#go to installation steps
 cd mini-runner/sycalls/x86/64-bit
 make compile-close
 make compile-fstatat

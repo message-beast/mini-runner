@@ -11,6 +11,11 @@ MRN is a free software that it just turns any linux to paas and it is not a paas
 #### thiny core (intel/amd/arm either 32 bit or 64 bit)
 
 ## Manual installation
+#### clone the repository
+```bash
+    #clone the repository
+    git clone https://github.com/message-beast/mini-runner
+```
 #### x86_64
 ```bash
     #install for x86_64
