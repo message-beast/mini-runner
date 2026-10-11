@@ -1,5 +1,3 @@
-<img src="logo.png" style="border-radius:10px; width: 30%; height: auto; margin-left: 35%;">
-
 # MRN (MINI-RUNNER/minimal-resource-usage-runner)
 mrn is a free software built up on a linux kernel to manage deployments and use the linux as the platform and it involved a lot of things and mini is for resource usage not for what it does.
 
